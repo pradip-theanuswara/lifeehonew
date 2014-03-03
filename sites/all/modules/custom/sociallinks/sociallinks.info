@@ -1,0 +1,6 @@
+name = Social links
+description = "Social links on LifeEcho home page"
+package = Custom
+core = 7.x
+
+configure=admin/config/sociallinks/settings

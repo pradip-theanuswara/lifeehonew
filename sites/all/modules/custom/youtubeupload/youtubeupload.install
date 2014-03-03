@@ -1,0 +1,29 @@
+<?php
+
+/**
+* Implements hook_uninstall()
+*/
+
+function youtubeupload_uninstall() {
+
+		watchdog("youtube upload Module", "Uninstalling module and deleting fields");
+		$types = array('youtubeupload_email_id' => 'youtubeupload_email_id','youtubeupload_password_id' => 'youtubeupload_password_id');
+		
+			foreach($types as $type) 
+			{
+			youtubeupload_delete_youtubeupload($type);
+			}
+		
+		$field = field_info_field('Youtube');
+		if ($field) {
+		field_delete_field('youtubeupload');
+		}
+}
+	
+function youtubeupload_delete_youtubeupload($type) {
+
+variable_del($type);
+
+}
+
+?>

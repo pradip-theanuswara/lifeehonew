@@ -1,0 +1,5 @@
+name = Outsideusersearch
+description = "Allows User to serach outside on different criteria such as ageintrest,zip etc"
+package = Custom
+core = 7.x
+files[] = outsideusersearch.module

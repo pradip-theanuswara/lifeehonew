@@ -1,0 +1,80 @@
+<?php
+// devex_service.install
+/**
+* Implementation of hook_schema().
+*/
+function devex_service_schema() {
+  $schema['devex'] = array(
+    'description' => t('Stores information about devexs.'),
+    'fields' => array(
+      'id' => array(
+        'description' => t('The primary identifier for a devex event.'),
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'uid' => array(
+        'description' => t('The user that created the devex.'),
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'rid' => array(
+        'description' => t('The user relationship id.'),
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'created' => array(
+        'description' => t('The timestamp for when the devex was created.'),
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'modified' => array(
+        'description' => t('The timestamp for when the devex was modified.'),
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'subject' => array(
+        'description' => t('The subject of the devex'),
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'event_desc' => array(
+        'description' => t('The description of the event'),
+        'type' => 'varchar',
+        'length' => 455,
+        'not null' => TRUE,
+      ),
+       'event_start' => array(
+         'description' => t('The time for when the event was start.'),
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+       'event_end' => array(
+         'description' => t('The times for when the event was end.'),
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'devex' => array(
+        'description' => t('The devex'),
+        'type' => 'text',
+        'size' => 'medium',
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+  return $schema;
+}
+?>

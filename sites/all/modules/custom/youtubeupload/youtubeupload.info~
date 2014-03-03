@@ -1,0 +1,9 @@
+name = Youtubeupload
+description = "Allows administrator to provide email and password for Google/youtube"
+package = You tube Email Configuration
+core = 7.x
+files[] = youtubeupload.module
+files[] = youtubeupload.install
+files[] = youtubeupload.admin.inc
+configure=admin/config/YoutubeUpload/settings
+

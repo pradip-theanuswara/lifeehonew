@@ -1,0 +1,2024 @@
+<?php
+
+/*
+* Implements hook_menu.
+*/
+
+function custom_block_menu() {
+
+$items = array();
+
+	$items['community/discipleshippair/callback'] = array(
+	  'title' => 'Discipleship pair Callback',
+	  'type' => MENU_CALLBACK,
+	  'page callback' => '_discipleshippair_callback',
+	  'access arguments' => array('access content'),
+	);
+
+	$items['community/joindiscipler/%'] = array(
+	  'title' => 'Join discipler to disciplees community',
+	  'type' => MENU_CALLBACK,
+	  'page callback' => 'drupal_get_form',
+	  'page arguments' => array('_joindisciplercommunity'),
+	  'access arguments' => array('access content'),
+	);
+
+return $items;
+}
+
+/* Implements hook_block_info
+ * 
+ * user dashboard blocks
+ */
+
+function custom_block_block_info() {
+  // This example comes from node.module.
+  $blocks['userdashboard_mybio'] = array(
+    'info' => t('User Dashboard My Bio'), 
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  
+  $blocks['user_dashboard_links'] = array(
+    'info' => t('User Dashboard Links'), 
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  
+  $blocks['user_dashboard_accountinfo'] = array(
+    'info' => t('User Dashboard Account Information'), 
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  
+  $blocks['admin_alerts'] = array(
+    'info' => t('Admin Dashboard Alerts'), 
+    'cache' => DRUPAL_NO_CACHE,
+  );
+
+  $blocks['community_request_button'] = array(
+    'info' => t('Community Request Button'), 
+    'cache' => DRUPAL_NO_CACHE,
+  );
+
+  $blocks['user_relationship_block'] = array(
+    'info' => t('User relationship Block'), 
+    'cache' => DRUPAL_NO_CACHE,
+  );
+
+  $blocks['startdplan_block'] = array(
+    'info' => t('Start dplan Block'), 
+    'cache' => DRUPAL_NO_CACHE,
+  );
+
+  $blocks['dplan_connectedprofile'] = array(
+    'info' => t('D-Plan Connected Profile Block'), 
+    'cache' => DRUPAL_NO_CACHE,
+  );
+
+  $blocks['discipleship_pairs'] = array(
+    'info' => t('Discipleship pair Block'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+
+  $blocks['shared_video_alert'] = array(
+    'info' => t('Shared Video Alert'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+
+  $blocks['social_links_bottom'] = array(
+    'info' => t('Social Links Bottom Right'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+
+  return $blocks;
+}
+
+/* 
+ * Implements hook_block_view
+ *
+ */
+
+function custom_block_block_view($delta = '') {
+
+  global $user;
+  $uid = '';
+  $fbuid = '';
+  $marital_status = '';
+  $user_link_based_on_relation = '';
+  $contact_data = '';
+  $pre_contact_name = '';
+  $pre_contact_id = '';
+  $node_details = '';
+ // if((arg(0) == 'user') && (is_numeric(arg(1))) || (arg(0) == 'userdplan') && arg(2) == 'profile') {
+     // $uid = arg(1);
+  //}
+ // else {
+      $uid = $user->uid;
+  //} // if check end
+
+ $fbuid = get_facebookid_from_userid($uid);
+  
+ $user_info = user_load($uid);
+ $fb_info = fbconnect_user_profile($user);
+ $userimage = get_user_avatar($fbuid,'large',113,113);
+ $block = array();
+ 
+  switch ($delta) {
+ // Case 'userdashboard_mybio' to display user facebook cover image or community profile image.  
+      case 'userdashboard_mybio':
+      $cover_image = base_path().path_to_theme().'/images/big.png';
+      $block['subject'] = t('User Dashboard My Bio');
+      if((arg(0) == 'node') && (arg(1) <> '108')) { // here 108 is the node id of community roster page.
+        $nid = arg(1);
+	$node_info = node_load($nid);
+
+		      if(isset($node_info->field_image_upload['und'])) {
+		      $cover_image =  file_create_url($node_info->field_image_upload['und'][0]['uri']);
+		      }
+		      else {
+		      $cover_image = base_path().path_to_theme().'/images/big.png';
+		      $block['content'] =  '<div class="no_cover"></div>';
+		      } // IF ISSET END
+          $block['content'] =  '<div><img src="'.$cover_image.'" width="968px" height="178px" alt=" "/></div>';
+      } // If arg(0) node check END
+
+
+
+      else if((arg(0) == 'node') && (arg(1) == '108')) { // here 108 is the node id of community roster page.
+	$node_details = get_logged_user_joined_community_ID(); // get community id created by logged user
+	$nid = explode('/',$node_details[0]);
+	$node_info = node_load($nid[0]);
+
+		      if(isset($node_info->field_image_upload['und'])) {
+		      $cover_image =  file_create_url($node_info->field_image_upload['und'][0]['uri']);
+		      }
+		      else {
+		      $cover_image = base_path().path_to_theme().'/images/big.png';
+		      $block['content'] =  '<div class="no_cover"></div>';
+		      } // IF ISSET END
+          $block['content'] =  '<div><img src="'.$cover_image.'" width="968px" height="178px" alt=" "/></div>';
+      }
+
+      else if((arg(0) == 'community' && arg(1) == 'dashboard') || (arg(0) == 'post' && arg(1) == 'community')) {
+          $query =   db_select('node', 'n')
+                         ->fields('n',array('nid'))
+                         ->condition('uid', $uid )
+                         ->condition('type','community_lifeecho')
+                         ->orderBy('created', 'DESC')//ORDER BY created
+                         ->range(0,1); //LIMIT to 1 record
+          $result = $query->execute();
+          $row_count = $result->rowCount(); // CHECK USER HAVE COMMUNITY
+
+          while($record = $result->fetchAssoc()) {
+          $nid = $record['nid'];
+          $node_info = node_load($nid);
+              if(isset($node_info->field_image_upload['und'])) {
+              $cover_image =  file_create_url($node_info->field_image_upload['und'][0]['uri']);
+              }
+	      else {
+              $cover_image = base_path().path_to_theme().'/images/big.png';
+              $block['content'] =  '<div class="no_cover"></div>';
+              } // if isset END.
+          } // While loop END.
+          $block['content'] =  '<div><img src="'.$cover_image.'" width="968px" height="178px" alt=" "/></div>';
+	} // else if arg(0) community/dashboard check end .
+
+
+     else if(arg(0) == 'user' || arg(0) == 'discipleship-101' || (arg(0) == 'userlist' && arg(1) == 'matches') || arg(0) == 'searches' || arg(0) == 'joincommunity') {
+//$block['content'] =  '<script src="'.base_path().'misc/jquery.js"></script>';
+ $block['content'] =  '<div id="fb_cover_image"></div><div id="thumb-image" class="thumb-image"><a href="'.base_path().'user" >'.$userimage.'</a></div><div class="name">'.ucwords($user_info->name).'</div>';
+$block['content'] .= '<script src="'.base_path().drupal_get_path('module', 'custom_block') . '/custom_block.js'.'"></script>';
+ if($user->uid != 0 && $fbuid != '') {
+	$block['content']   .= '<script>$k(document).ready(function(e)
+	{
+    
+$k("#fb_cover_image").fbGetcover("'.$fbuid.'");
+
+
+	}); </script>';
+}    
+          } // Elseif arg(0) == 'user' check END
+          
+      break;
+      
+      case 'user_dashboard_links':
+          $nid = '';
+          $row_count = 0;
+          $block['subject'] = t('User Dashboard Links');
+          $block['content'] = '<div class="user_dashboard_links">';
+          if(arg(0) == 'user') {
+              $query =   db_select('node', 'n')
+                         ->fields('n',array('nid'))
+                         ->condition('uid', $uid )
+                         ->condition('type','community_lifeecho')
+                         ->orderBy('created', 'DESC')//ORDER BY created
+                         ->range(0,1); //LIMIT to 1 record
+                         $result = $query->execute();
+                         $row_count = $result->rowCount();
+	  $nid = $result->fetchField(0);
+          if($row_count > 0) {
+            $block['content'] .= l(t('Community Admin Dashboard'),'community/dashboard');
+          }
+          }
+          else {
+          
+          $block['content'] .= l(t('User Dashboard'),'user');
+          }
+          $block['content'] .= '</div>';
+      break;
+      
+      case 'user_dashboard_accountinfo':
+
+           $uid = arg(1);
+ $fbuid = get_facebookid_from_userid($uid);
+
+ $user_info = user_load($uid);
+ $fb_info = fbconnect_user_profile($user);
+ $userimage = get_user_avatar($fbuid,'large',113,113);
+
+
+          $location_info = $facebook_profile_link = '';
+          $block['subject'] = t('User Dashboard Account Information');
+          $block['content'] = '<div class="add1">'.get_testimonyvideoby_userID().'</div>
+                  <div class="addfacebook">
+                    <div class="discimg">'.l($userimage,'user/'.$user_info->uid, array('html'=>TRUE)).'</div>';
+$username = explode(' ',$user_info->name);
+$lenofName  = strlen($username[0]);	 	
+	if($lenofName>8){	 	
+	$showstring = substr($username[0],0,8);	 	
+	$showname = $showstring;	 	
+	}else{	 	
+	$showname = $username[0];	 	
+	}
+                            $block['content'] .= '<div class="discchat2">
+                                   '.$showname.'...'.'
+                                </div>';
+if(isset($user_info->fbuid)) {
+$facebook_profile_link = url('http://www.facebook.com/profile.php?id='.$user_info->fbuid);
+}
+          $block['content'] .= '<a target="_blank" href="'.$facebook_profile_link.'"><img src="'.base_path().drupal_get_path('theme','lifeecho').'/images/facebook.PNG" alt="Facebook User Link" /></a></div>';
+          if(isset($user_info->field_age['und'])) {
+          $user_age = $user_info->field_age['und'][0]['value'];
+          $user_age = explode('-',$user_age);
+          $curYear = date('Y');
+          $user_age = $curYear - $user_age[0];
+          } else { $user_age = ''; }
+          $block['content'] .='<div class="addaddress">
+                                Age: '.$user_age.'<br />
+                                Occupation: ';
+
+         if(isset($user_info->field_occupation['und'][0]['value'])) {
+         $block['content'] .= $user_info->field_occupation['und'][0]['value'];
+         }
+        
+         if(isset($user_info->field_marital_status['und'][0]['value'])) {
+         if($user_info->field_marital_status['und'][0]['value'] == 1) {
+          $marital_status = 'Single';
+         }
+         else {
+          $marital_status = 'Married';
+         }
+         }
+if(isset($user_info->field_user_city['und'][0]['value'])) {
+$location_info = $user_info->field_user_city['und'][0]['value'];
+}
+         $block['content'] .='<br />Location: '.$location_info;
+
+$block['content'] .='<br />
+                                Relationship: '.$marital_status.'';
+                                $block['content'] .='<br />'.
+                                t('Member Since:').format_date($user_info->created,'custom','m-d-Y').'
+                                </div>';
+$block['content'] .= '<div id="aboutus_container"><b>'.t('ABOUT ME').':</b>';
+if (isset($user_info->field_what_do_you_want_to_tell_o['und'][0]['value'])) {
+$block['content'] .= $user_info->field_what_do_you_want_to_tell_o['und'][0]['value'];
+}
+$block['content'] .= '</div>';
+$block['content'] .= '<div id="statement_container"><b>'.t('STATEMENT OF FAITH').':</b>';
+if(isset($user_info->field_what_is_your_personal_stat['und'][0]['value'])) {
+$block['content'] .= $user_info->field_what_is_your_personal_stat['und'][0]['value'];
+}
+$block['content'] .= '</div>';
+
+if(isset($user_info->field_what_is_your_preferred['und'][0]['tid'])) {
+$block['content'] .= '<div id="preferred_contact"><b>'.t("PREFERED CONTACT: ").'</b>';
+$pre_contact_id = $user_info->field_what_is_your_preferred['und'][0]['tid'];
+$query = db_select('taxonomy_term_data','ttd')
+->fields('ttd',array('name'))
+->condition('tid',$pre_contact_id);
+$result = $query->execute();
+$pre_contact_name = $result->fetchField(0);
+// term name selection based on term id
+if($pre_contact_id == '111') { // Email
+$contact_data = $user_info->mail;
+}
+else if($pre_contact_id == '112') { // txt/sms
+if(isset($user_info->field_text_sms['und'][0]['number'])) {
+$contact_data = $user_info->field_text_sms['und'][0]['number'];
+}
+}
+else if($pre_contact_id == '113') { // Phone
+if(isset($user_info->field_phone_call_data['und'][0]['number'])) {
+$contact_data = $user_info->field_phone_call_data['und'][0]['number'];
+}
+}
+else if($pre_contact_id == '114') { // Facebook Message
+if(isset($user_info->field_facebook_message['und'][0]['value'])) {
+$contact_data = $user_info->field_facebook_message['und'][0]['value'];
+}
+}
+else if($pre_contact_id == '115') { // Skype Message
+if(isset($user_info->field_skype_message['und'][0]['value'])) {
+$contact_data = $user_info->field_skype_message['und'][0]['value'];
+}
+}
+
+if($pre_contact_id == '114') {
+$block['content'] .= $contact_data.' '.'<a target="_blank" href="http://www.facebook.com/messages/new"><img src="'.base_path().drupal_get_path('theme','lifeecho').'/images/chat.PNG" alt="Facebook User Link" /></a>';
+}
+else if($pre_contact_id == '115') {
+$block['content'] .= $contact_data.' [ Skype ID ]';
+// '<img src="'.base_path().drupal_get_path('theme','lifeecho').'/images/skype_icon.png" alt="Skype" />'
+}
+else if($pre_contact_id == '111') {
+$block['content'] .= '<a href="mailto:'.$contact_data.'?Subject=LifeEcho" target="_top">'.$contact_data.'</a>';
+}
+else {
+$block['content'] .= $contact_data;
+}
+$block['content'] .= '</div>';
+} // if isset PREFERED CONTACT End.
+
+break;
+      
+      case 'admin_alerts':
+	  $nid = '';
+          $gids = array();
+	  $cmpre_value = '';
+	  $community_name_og_accept = '';
+	  $community_nodeid_og_accept = '';
+	  $community_name_og_accept = '';
+	  $community_authorid_og_accept = '';
+          $community_authorid = '';
+	  $node_auth_id = '';
+	  $community_name_og_mdelete = '';
+	  $community_authorid_og_mdelete = '';
+          $community_nodeid_og_mdelete = '';
+// query to get details of created community
+
+          $query =   db_select('node', 'n')
+                         ->fields('n',array('nid','uid'))
+                         ->condition('uid', $uid )
+                         ->condition('type','community_lifeecho')
+                         ->orderBy('created', 'DESC') // ORDER BY created
+                         ->range(0,1); //LIMIT to 1 record
+          $result = $query->execute();
+               while($record = $result->fetchAssoc()) {
+                 $nid = $record['nid'];
+		 $node_auth_id = $record['uid'];  
+               }
+
+// query to get all joined communties
+
+ $get_communities =   db_select('og_membership', 'og')
+                         ->fields('og',array('gid'))
+                         ->condition('og.etid', $uid )
+			 ->condition('og.entity_type','user')
+			 ->condition('og.state',1);
+$result_get_communities = $get_communities->execute();
+while($record_get_communities = $result_get_communities->fetchAssoc()) {
+                 $gids[] = $record_get_communities['gid'];
+               }
+
+          $block['subject'] = t('Alerts');
+
+$query =   db_select('lifeecho_alerts', 'la')
+                      ->fields('la',array('alertid','alertto','alertfrom','alerttype','alerttext','alerttime','request_type','request_community'))
+                      ->condition('accept_status', 0 )
+		      ->condition('alertstatus', 0 );
+
+                        if(arg(0) == 'node') {
+			$query->condition('alerttype','og');
+			$query->condition('alertto', $nid) ;
+			}
+
+			if(arg(0) == 'user') {
+			$query->condition('alerttype',array('first-video-alert','dship-share-video','general-alert','ur','ur-decline','ur-leave','ur-accept','og-accept','og-decline','ur-invalid-request'),'IN');
+			$query->condition('alertto', $user->uid) ;
+			}
+
+			if(arg(0) == 'community' && arg(1) == 'dashboard') {
+			$query->condition('alerttype',array('og','dplan','dship-video','dship-message','og-mdelete'),'IN');
+
+			if(count($gids) > 0) { $query->condition('alertto',$gids,'IN'); }
+
+			}
+
+                        $query->orderBy('alerttime', 'DESC'); //ORDER BY created
+                        $result = $query->execute();
+			//print $query->__toString();
+			$row_count = $result->rowCount();
+//die;
+if($row_count > 0) {
+ $block['content'] = '<div class="clear"></div><div class="Alerts clearfix">';
+
+	global $user;
+	if($user->uid != 0) {
+	if($user->created == $user->login) { // First time login check
+       // $block['content'] .= '<li>'.t('Welcome to your new LifeEcho page').'</li>';
+	}
+	}
+               while($record = $result->fetchAssoc()) {
+
+                 $alert_to = $record['alertto']; // group id
+ 		 $alert_from = $record['alertfrom']; // user id
+		 $alert_type = $record['alerttype']; // Alert type
+		 $alert_id = $record['alertid']; // Alert Id
+		 $alert_time = date('d M Y h:i a', $record['alerttime']); // Alert Time
+		 $request_type = $record['request_type']; // type discipler-1,disciple-2,accountability-3
+		 $request_community = $record['request_community']; // to which community id discipler-disciple relation occured
+
+	if($alert_type == 'og') {
+			$user_info = user_load($alert_from); // get user information from user ID
+			/* Get community name by community id */
+			$community_query =   db_select('node', 'n')
+				            ->fields('n',array('title','uid'))
+				            ->condition('nid',$alert_to);
+			$community_result =  $community_query->execute();
+
+			while($community_record = $community_result->fetchAssoc()) {
+			     $community_name = $community_record['title'];
+			     $community_authorid = $community_record['uid'];
+			}
+
+	    if($community_authorid == $user->uid) { // check alert is for logged user
+	    $block['content'] .= '<li class="request_wrapper"><div class="uralert_text">';
+		if(isset($user_info->name)) {
+		$block['content'] .= $user_info->name;
+		}
+		$block['content'] .= ' has a request to join "'.$community_name.'"';
+		$block['content'] .= ' - '.'<span class="alerttime">'.$alert_time.'</span></div><div class="uralert_buttons">';
+		$block['content'] .= l( t('Accept'),'accept/'.$alert_from.'/community/'.$alert_to,array('attributes' => array('class' => 'accept_btn')));
+
+		$block['content'] .= l( t('Decline'),'decline/'.$alert_from.'/community/'.$alert_to,array('attributes' => array('class' => 'decline_btn','id' => 'request_decline_btn')));
+
+		$block['content'] .= l( t('Remove'),'remove/'.$alert_from.'/community/'.$alert_to,array('attributes' => array('class' => 'remove_btn','id' => 'request_decline_btn'))).'</br></br></br></li>';
+
+		} // END check alert is for logged user 
+		else { 
+		$block['subject'] = '';
+		}
+	    }
+
+else if($alert_type == 'first-video-alert') {
+$block['content'] .= '<li>'.$record['alerttext'].'<span class="alerttime">'.$alert_time.'</span>';
+$block['content'] .= l(t('Remove'),'removealertvideo/'.$alert_id,array('attributes' => array('class' => 'relationship_accept')));
+$block['content'] .= '</li>';
+}
+
+
+
+else if($alert_type == 'general-alert') {
+$block['content'] .= '<li>'.$record['alerttext'].'<span class="alerttime">'.$alert_time.'</span>';
+$block['content'] .= l(t('Remove'),'removealert/'.$alert_id,array('attributes' => array('class' => 'relationship_accept')));
+$block['content'] .= '</li>';
+}
+
+else if($alert_type == 'dship-share-video') {
+			 $query = db_select('node','n')
+			 ->fields('n',array('title'))
+			 ->condition('n.nid',$record['alertfrom']);
+			 $result_1 = $query->execute();
+			 $video_title = $result_1->fetchField(0);
+
+$block['content'] .= '<li>'.t('Admin has shared a video: ').l($video_title,'discipleship-101').'<span class="alerttime">'.$alert_time.'</span>';
+$block['content'] .= l(t('Remove'),'removealert/'.$alert_id,array('attributes' => array('class' => 'relationship_accept')));
+$block['content'] .= '</li>';
+}
+
+
+	elseif($alert_type == 'ur') {
+			if($alert_to == arg(1)) {
+//echo "request_type:".$request_type.'</br>';
+//echo "alert to is".$alert_to.'</br>';
+//echo "community id is".$request_community;
+$res = array();
+$a3 = get_allcommunities_forauser($alert_to);
+$a4 = get_allcommunities_forauser($alert_from);
+if(count($a3) > 0 && count($a4) > 0) {
+$res = array_intersect($a3['nids'],$a4['nids']);
+}
+if($request_type == 1 && count($res) == 0) { // Check request is type of 'discipler'.
+$dpair_status = user_has_community_discipler_role($request_community,$alert_to);
+//print $dpair_status;
+if($dpair_status <> 0) {  // before displaying any alert for 'discipler' type , need to change user as 'discipler' from community roster page.
+					$relationship_query = db_select('user_relationships','ur')
+					->fields('ur',array('rid','rtid','requester_id'))
+					->condition('requestee_id',$alert_to);
+					$relationship_result = $relationship_query->execute();
+			while($relationship_record = $relationship_result->fetchAssoc()) {
+			$rid = $relationship_record['rid'];
+			$rtid = $relationship_record['rtid'];
+			$requester_id = $relationship_record['requester_id'];         
+			
+			if($rtid == 1) {
+			$rel_txt = t('has offered to Disciple you.');
+			}
+			elseif($rtid == 2)
+			{
+			$rel_txt = t('has invited you to Disciple him');
+			}
+			else {
+			$rel_txt = t('has invited you to connect for Accountability');
+			}
+			$user_query = db_select('users','u')
+			->fields('u',array('name'))
+			->condition('u.uid',$requester_id);
+			$result_4 = $user_query->execute();
+			$username = $result_4->fetchField(0);
+
+			$block['content'] .= '<li class="request_wrapper"><div class="uralert_text2">'.$username." ".$rel_txt."  ".l(t('See Ind'),'user/'.$requester_id).' - '.'<span class="alerttime">'.$alert_time.'</span>'."</div><div class='uralert_buttons'>".l(t('Accept'),'userrelationship/'.$rid.'/approve',array('attributes' => array('class' => 'relationship_accept')));
+
+			$block['content'] .= l(t('Decline'),'userrelationship/'.$rid.'/decline',array('attributes' => array('class' => 'relationship_decline')));
+			$block['content'] .= '</div>';
+
+			} // while loop END.
+ 	} // if $dpair_status check END.
+else {
+$block['content'] .= '';
+} // else $dpair_status check END.
+
+} // if $request_type check END.
+
+else {
+
+$relationship_query = db_select('user_relationships','ur')
+					->fields('ur',array('rid','rtid','requester_id'))
+					->condition('requestee_id',$alert_to)
+					->condition('approved',0);
+					$relationship_result = $relationship_query->execute();
+			while($relationship_record = $relationship_result->fetchAssoc()) {
+			$rid = $relationship_record['rid'];
+			$rtid = $relationship_record['rtid'];
+			$requester_id = $relationship_record['requester_id'];         
+			
+			if($rtid == 1) {
+			$rel_txt = t('has offered to Disciple you.');
+			}
+			elseif($rtid == 2)
+			{
+			$rel_txt = t('has invited you to Disciple him.');
+			}
+			else {
+			$rel_txt = t('has invited you to connect for Accountability.');
+			}
+			$user_query = db_select('users','u')
+			->fields('u',array('name'))
+			->condition('u.uid',$requester_id);
+			$result_4 = $user_query->execute();
+			$username = $result_4->fetchField(0);
+
+			$block['content'] .= '<li class="request_wrapper"><div class="uralert_text2">'.$username." ".$rel_txt."  ".l(t('See Ind'),'user/'.$requester_id).' - '.'<span class="alerttime">'.$alert_time.'</span>'."</div><div class='uralert_buttons'>".l(t('Accept'),'userrelationship/'.$rid.'/approve',array('attributes' => array('class' => 'relationship_accept')));
+
+			$block['content'] .= l(t('Decline'),'userrelationship/'.$rid.'/decline',array('attributes' => array('class' => 'relationship_decline')));
+			$block['content'] .= '</div>';
+}
+
+			} // ELSE $request_type check END.
+
+			} // same user page check.
+ } // $alert_type == 'ur' check end.
+
+else if($alert_type == 'ur-decline') {
+
+			$user_query = db_select('users','u')
+			->fields('u',array('name'))
+			->condition('u.uid',$alert_from);
+			$result_3 = $user_query->execute();
+			$username = $result_3->fetchField(0);
+
+				if($alert_to == arg(1)) { // logged user check
+				$block['content'] .= '<li class="request_wrapper"><div class="uralert_text">'.$username.' '.t('has declined your invitation to ').$record['alerttext'].t(' him').' - '.'<span class="alerttime">'.$alert_time.'</span></div>';
+			$block['content'] .= '<div class="uralert_buttons">'.l(t('Remove'),'removealert/'.$alert_id,array('attributes' => array('class' => 'relationship_accept')));
+$block['content'] .= '</div></li>';
+				}
+
+			// // Declined Invite - [John Smith](links to profile) has declined your invitation to [disciple, be discipled by, connect in accountability with] him
+
+}
+
+else if($alert_type == 'ur-leave') {
+
+			$user_query = db_select('users','u')
+			->fields('u',array('name'))
+			->condition('u.uid',$alert_from);
+			$result_3 = $user_query->execute();
+			$username = $result_3->fetchField(0);
+
+				if($alert_to == arg(1)) { // logged user check
+				$block['content'] .= '<li class="request_wrapper"><div class="uralert_text">'.$username.' '.t('has left the Accountability/Discipler/Disciplee - Discipleship with you.').'<span class="alerttime">'.$alert_time.'</span></div>';
+			$block['content'] .= '<div class="uralert_buttons">'.l(t('Remove'),'removealert/'.$alert_id,array('attributes' => array('class' => 'relationship_accept')));
+$block['content'] .= '</div></li>';
+				}
+
+			// // Declined Invite - [John Smith](links to profile) has declined your invitation to [disciple, be discipled by, connect in accountability with] him
+
+}
+
+else if($alert_type == 'dplan') {
+// check dplan alert have 'hide' status for logged user & check user is member of community.
+if(get_dplanalertstatus($alert_id,$user->uid) == 0 && check_user_isa_member($user->uid,$alert_to) <> 0) {
+	$block['content'] .= '<li class="request_wrapper"><div class="uralert_text">'.$record['alerttext'].' - '.'<span class="alerttime">'.$alert_time.'</span></div>';
+	$block['content'] .= '<div class="uralert_buttons">'.l(t('Remove'),'removedplanalert/'.$alert_id,array('attributes' => array('class' => 'relationship_accept')));
+	$block['content'] .= '</div></li>';
+}
+}
+else if($alert_type == 'dship-video') {
+// check video alert have 'hide' status for logged user & check user is member of community.
+if(get_dplanalertstatus($alert_id,$user->uid) == 0 && check_user_isa_member($user->uid,$alert_to) <> 0) {
+			// get posted video info
+			 $query = db_select('node','n')
+			 ->fields('n',array('title'))
+			 ->condition('n.nid',$record['alertfrom']);
+			 $result_1 = $query->execute();
+			 $video_title = $result_1->fetchField(0);
+
+			// get posted community info
+			 $query = db_select('node','n')
+			 ->fields('n',array('title'))
+			 ->condition('n.nid',$record['alertto']);
+			 $result_2 = $query->execute();
+			 $community_title = $result_2->fetchField(0);
+
+			 $block['content'] .= '<li class="request_wrapper"><div class="uralert_text">'.'The '. l($community_title,'node/'.$record['alertto']) .' Admin has posted a video: '.l($video_title,'discipleship-101').' - '.'<span class="alerttime">'.$alert_time.'</span></div>';
+$block['content'] .= '<div class="uralert_buttons">'.l(t('Remove'),'removedplanalert/'.$alert_id,array('attributes' => array('class' => 'relationship_accept')));
+$block['content'] .= '</div></li>';
+}
+}
+
+else if($alert_type == 'dship-message') {
+
+// check alert message have 'hide' status for logged user & check user is member of community.
+
+if(get_dplanalertstatus($alert_id,$user->uid) == 0 && check_user_isa_member($user->uid,$alert_to) <> 0) {
+			// get posted message info
+			 $query = db_select('node','n')
+			 ->fields('n',array('title'))
+			 ->condition('n.nid',$record['alertfrom']);
+			 $result_5 = $query->execute();
+			 $message_title = $result_5->fetchField(0);
+
+			// get posted community info
+			 $query = db_select('node','n')
+			 ->fields('n',array('title'))
+			 ->condition('n.nid',$record['alertto']);
+			 $result_6 = $query->execute();
+			 $community_title = $result_6->fetchField(0);
+
+			 $block['content'] .= '<li class="request_wrapper"><div class="uralert_text">'.'The '. l($community_title,'node/'.$record['alertto']) .' Admin has posted a message: '.l($message_title,'discipleship-101').' - '.'<span class="alerttime">'.$alert_time.'</span></div>';
+$block['content'] .= '<div class="uralert_buttons">'.l(t('Remove'),'removedplanalert/'.$alert_id,array('attributes' => array('class' => 'relationship_accept')));
+$block['content'] .= '</div></li>';
+}
+
+}
+
+else if($alert_type == 'ur-accept') {
+
+$user_query_accept = db_select('users','u')
+			->fields('u',array('name'))
+			->condition('u.uid',$alert_from);
+			$result_7 = $user_query_accept->execute();
+			$username_accept = $result_7->fetchField(0);
+
+	if($alert_to == arg(1)) { // logged user check
+$user_link_based_on_relation = check_allready_relation($user->uid,$alert_from); // check already a relation
+		$block['content'] .= '<li class="request_wrapper"><div class="uralert_text"><a href="'.$user_link_based_on_relation.'">'.$username_accept.'</a>'.t(' has accepted your invitation to ').$record['alerttext'].t(' with him').' - <span class="alerttime">'.$alert_time.'</span></div>';
+		$block['content'] .= '<div class="uralert_buttons">'.l(t('Remove'),'removealert/'.$alert_id,array('attributes' => array('class' => 'relationship_accept')));
+$block['content'] .= '</div></li>';
+        } // if end
+}
+
+else if($alert_type == 'og-accept') {		
+			/* Get community name by community id */
+		$community_query_og_accept =   db_select('node', 'n')
+				            ->fields('n',array('title','uid','nid'))
+				            ->condition('nid',$alert_from);
+			$community_result_og_accept =  $community_query_og_accept->execute();
+
+		while($community_record_og_accept = $community_result_og_accept->fetchAssoc()) {
+			     $community_name_og_accept = $community_record_og_accept['title'];
+			     $community_authorid_og_accept = $community_record_og_accept['uid'];
+                             $community_nodeid_og_accept = $community_record_og_accept['nid'];
+		} // while end
+
+if($alert_to == $user->uid) { // check alert is for logged user
+
+		$block['content'] .= '<li class="request_wrapper"><div class="ogalert_text">'.t('Your request to join the ').l($community_name_og_accept,'node/'.$community_nodeid_og_accept).t(' Community was accepted!').' - '.'<span class="alerttime">'.$alert_time.'</span></div>';
+// Your request to join the Mudcats Community(link to comm. profile) was accepted!
+$block['content'] .= '<div class="ogalert_buttons">'.l(t('Remove'),'removealert/'.$alert_id,array('attributes' => array('class' => 'relationship_accept')));
+$block['content'] .= '</div></li>';
+
+}
+
+}  // og-accept end */
+
+else if($alert_type == 'og-decline') {
+
+		/* Get community name by community id */
+		$community_query_og_accept =   db_select('node', 'n')
+				            ->fields('n',array('title','uid','nid'))
+				            ->condition('nid',$alert_from);
+			$community_result_og_accept =  $community_query_og_accept->execute();
+
+		while($community_record_og_accept = $community_result_og_accept->fetchAssoc()) {
+			     $community_name_og_accept = $community_record_og_accept['title'];
+			     $community_authorid_og_accept = $community_record_og_accept['uid'];
+                             $community_nodeid_og_accept = $community_record_og_accept['nid'];
+		} // while end
+
+	    if($alert_to == $user->uid) { // check alert is for logged user
+		$block['content'] .= '<li class="request_wrapper"><div class="ogalert_text">'.t('Your request to join the ').l($community_name_og_accept,'node/'.$community_nodeid_og_accept).t(' Community was declined').' - '.'<span class="alerttime">'.$alert_time.'</span></div>';
+// Your request to join the Mudcats Community(link to comm. profile) was accepted!
+$block['content'] .= '<div class="ogalert_buttons">'.l(t('Remove'),'removealert/'.$alert_id,array('attributes' => array('class' => 'relationship_accept')));
+$block['content'] .= '</div></li>';
+	    }
+
+} // else if og-decline end
+
+else if($alert_type == 'ur-invalid-request') {
+	if($alert_to == arg(1)) {
+
+			$user_query = db_select('users','u')
+			->fields('u',array('name'))
+			->condition('u.uid',$alert_from);
+			$result_4 = $user_query->execute();
+			$username = $result_4->fetchField(0);
+			$rel_txt = t('Your D-pair request with ').$username .t(' can\'t be considered as both users should be part of a community to D-pair');
+$block['content'] .= '<li class="request_wrapper"><div class="uralert_text2">'.$rel_txt.'<span class="alerttime">'.$alert_time.'</span>'."</div>";
+$block['content'] .= '<div class="ogalert_buttons">'.l(t('Remove'),'removealert/'.$alert_id,array('attributes' => array('class' => 'relationship_accept')));
+$block['content'] .= '</div></li>';
+
+	}
+} // else if ur-invalid-request END.
+
+else if($alert_type == 'og-mdelete') {
+
+		/* Get community name by community id */
+		$community_query_og_mdelete =   db_select('node', 'n')
+				            ->fields('n',array('title','uid','nid'))
+				            ->condition('nid',$alert_to);
+			$community_result_og_mdelete =  $community_query_og_mdelete->execute();
+
+		while($community_record_og_mdelete = $community_result_og_mdelete->fetchAssoc()) {
+			     $community_name_og_mdelete = $community_record_og_mdelete['title'];
+			     $community_authorid_og_mdelete = $community_record_og_mdelete['uid'];
+                             $community_nodeid_og_mdelete = $community_record_og_mdelete['nid'];
+		} // while end
+
+$user_query_og_mdelete = db_select('users','u')
+			->fields('u',array('name'))
+			->condition('u.uid',$alert_from);
+			$result_og_mdelete = $user_query_og_mdelete->execute();
+			$username_og_mdelete = $result_og_mdelete->fetchField(0);
+
+if($community_authorid_og_mdelete == $user->uid) { // logged user check
+		$block['content'] .= '<li class="request_wrapper"><div class="ogalert_text">'.l($username_og_mdelete,'user/'.$alert_from).' '.t('has left the Community').' '.l($community_name_og_mdelete,'node/'.$community_nodeid_og_mdelete).' - '.'<span class="alerttime">'.$alert_time.'</span></div>';
+
+$block['content'] .= '<div class="ogalert_buttons">'.l(t('Remove'),'removealert/'.$alert_id,array('attributes' => array('class' => 'relationship_accept')));
+$block['content'] .= '</div></li>';
+}
+
+} // else if og-mdelete end
+
+}  // while loop end
+
+$block['content'] .= '</div>';
+
+} // row count if check end
+
+else {
+     // echo "anil";
+//if($_SESSION['messages']['status'][0]) {
+//	$block['content'] = '<h3>'.t('Welcome to your new LifeEcho Dashboard!').'</h3>';
+//        $block['content'] .= '<h4>'.t('Please watch the video below for some tips').'</h4>';
+//        $block['content'] .= "<iframe width='400' height='260' src='http://www.youtube.com/embed/uPMXrepHNwI?feature=player_embedded;rel=0;autoplay=1' frameborder='0' allowfullscreen></iframe>";
+//}
+$block['content'] .= '<div class="noalerts clearfix">';
+	global $user;
+	if($user->uid != 0) {
+	if($user->created == $user->login) { // First time login check
+            //welcome message here if needed
+                $block['content'] .= '<li>'.t('There are no new Alerts..').'</li>';
+	}
+	else {
+	  // $block['content'] .= 'anil'.arg(1);
+        $block['content'] .= '<li>'.t('There are no new Alerts..').'</li>';
+	}
+	}
+	$block['content'] .= '</div>';
+}	  
+
+$block['content'] .= '<div class="clear"></div>';
+
+      break;
+
+case 'shared_video_alert':
+
+$block['subject'] = t('LifeEcho Admin Alerts');
+/*
+$query =   db_select('lifeecho_alerts', 'la')
+        ->fields('la',array('alertid','alertto','alertfrom','alerttime','alerttype','alerttext'))
+        ->fields('fsp',array('field_share_post_with_all_lifeec_value'))                    
+        ->condition('accept_status', 0 )
+        ->condition('alertstatus', 0 );
+    $query->leftJoin('node','n','la.alertfrom = n.nid');
+    $query->leftJoin('field_data_field_share_post_with_all_lifeec','fsp','fsp.entity_id = n.nid');
+$query->condition('la.alerttype',array('dship-share-video','general-alert'),'IN');
+$query->orderBy('la.alerttime', 'DESC'); //ORDER BY created
+                        $result = $query->execute();
+			//print $query->__toString();
+			$row_count = $result->rowCount();
+//print $row_count;
+if($row_count > 0) {
+ $block['content'] = '<div class="clear"></div><div class="Alerts clearfix">';
+               while($record = $result->fetchAssoc()) {
+                 $alert_to = $record['alertto']; // group id
+ 		 $alert_from = $record['alertfrom']; // user id
+		 $alert_id = $record['alertid']; // Alert Id
+                 $alert_time = date('d M Y H:i:s', $record['alerttime']); // Alert Time
+		 $alert_type = $record['alerttype'];
+// get posted video info
+if($alert_type == 'dship-share-video') {
+			 $query = db_select('node','n')
+			 ->fields('n',array('title'))
+			 ->condition('n.nid',$record['alertfrom']);
+			 $result_1 = $query->execute();
+			 $video_title = $result_1->fetchField(0);
+
+$block['content'] .= '<li>'.t('Admin has shared a video: ').l($video_title,'discipleship-101').'<span class="alerttime">'.$alert_time.'</span>';
+$block['content'] .= l(t('Remove'),'removealert/'.$alert_id,array('attributes' => array('class' => 'relationship_accept')));
+$block['content'] .= '</li>';
+}
+else if($alert_type == 'general-alert') {
+$block['content'] .= '<li>'.$record['alerttext'].'<span class="alerttime">'.$alert_time.'</span>';
+$block['content'] .= l(t('Remove'),'removealert/'.$alert_id,array('attributes' => array('class' => 'relationship_accept')));
+$block['content'] .= '</li>';
+} }
+$block['content'] .= '</div>';
+}
+else {
+	$block['content'] = '<div class="noalerts clearfix">';
+	$block['content'] .= '<li>'.t('There are no new Alerts..').'</li>';
+	$block['content'] .= '</div>';
+}
+*/
+break;
+
+     case 'community_request_button':
+	$block['subject'] = 'Community Request Button';
+	if(arg(0) == 'node' && is_numeric(arg(1)) ) {
+$nid = arg(1);
+	$query =   db_select('node', 'n')
+		   ->fields('n',array('uid'))
+		   ->condition('nid',$nid);
+	$result =  $query->execute();
+	$node_uid = $result->fetchField(0);
+          if($user->uid != 0) {
+          if(function_exists('og_get_user_roles')) {
+          $roles = og_get_user_roles('node', $nid, $user->uid);
+          }
+
+          if ((array_key_exists(1, $roles) && $node_uid != $user->uid)) { // check user is a member Array ( [1] => non-member )  Array ( [2] => member )
+          $block['content'] = '<div class="community_subscribe_btn">';
+
+              $block['content'] .= '<a class="subscribe_btn" href="'.url('jointest/'. $nid.'/community').'" alt="Join Button">'.t('Request to Join Community').'</a>';
+              $block['content'] .= '<span>'.t('( Request will be sent to the community admin for approval , You will be notified via dashboard alerts on approval )').'</span></div>';
+}
+elseif((array_key_exists(2, $roles) && $node_uid != $user->uid)) {
+          $block['content'] = '<div class="community_unsubscribe_btn">
+              <a href="'.url('group/node/'.$nid.'/unsubscribe').'" alt="Join Button">'.t('Leave Community').'</a>';
+              $block['content'] .= '<span>'.t('( Request will be sent to the community admin for approval , You will be notified via dashboard alerts on approval )').'</span></div>'; 
+}
+else { $block['content'] = '';
+}
+}
+
+ }
+break;
+
+case 'user_relationship_block':
+$block['subject'] = 'User relationship Block';
+
+/*
+* check already a relation b/w the requester and requestee
+*/
+$query = db_select('user_relationships','ur')
+->fields('ur', array('requestee_id','approved','rid'))
+->condition('ur.requester_id',$user->uid)
+->condition('ur.requestee_id',arg(1))
+->range(0,1); //LIMIT to 1 record;
+$result = $query->execute();
+$row_count = $result->rowCount();
+if($row_count == 0) { // reciprocal relation check
+$query = db_select('user_relationships','ur')
+->fields('ur', array('requester_id','approved','rid'))
+->condition('ur.requestee_id',$user->uid)
+->condition('ur.requester_id',arg(1))
+->range(0,1); //LIMIT to 1 record;
+$result = $query->execute();
+$row_count = $result->rowCount();
+}
+
+$requestee=array();
+if($row_count != 0)
+{
+while($record = $result->fetchAssoc()) {
+
+if(isset($record['requester_id'])) {
+$a= $record['requester_id'];
+}
+elseif(isset($record['requestee_id'])) {
+
+$a= $record['requestee_id'];
+}
+$b = $record['approved'];
+$c = $record['rid'];
+$requestee[$a] = $b;
+} // while loop end
+}
+
+if(count($requestee) >= 1)
+{
+if(array_key_exists(arg(1),$requestee)) {
+$status = $requestee[arg(1)];
+}
+	if ( array_key_exists(arg(1),$requestee)) { // thre is a relation
+	
+		if($status == 1) { // approved
+
+$block['content'] = l(t('Leave user relationship'),'userrelationship/'.$c.'/remove',array('attributes' => array('class' => 'button leaveuserrelation')));
+		}
+		else { // pending approval
+
+		if(arg(1) == $user->uid ) {  // same user profile
+		$block['content'] = " ";
+		}
+		else { // other user profile
+
+$query_seeindividual = db_select('user_relationships','ur')
+->fields('ur', array('requestee_id','requester_id','approved'))
+->condition('ur.rid',$c);
+
+$result_seeindividual = $query_seeindividual->execute();
+
+while($record_seeindividual = $result_seeindividual->fetchAssoc()) {
+	$requestee_id_seeindividual = $record_seeindividual['requestee_id'];
+	$requester_id_seeindividual = $record_seeindividual['requester_id'];
+	$approved_status = $record_seeindividual['approved'];
+} // while loop end
+
+/*print "requestee_id".$requestee_id_seeindividual.'</br>';
+print "requester_id".$requester_id_seeindividual.'</br>';
+print "user id is".$user->uid;
+print "arg of one is".arg(1);*/
+
+if(($requester_id_seeindividual == arg(1)) && ($requestee_id_seeindividual == $user->uid)) {
+$block['content'] = l(t('Accept D-pair Request'),'userrelationship/'.$c.'/approve',array('attributes' => array('class' => 'button')));
+}
+
+if($approved_status == 0) {
+ $block['content'] = "<div class='clean-gray'>".t('Your D-Pair Request is awaiting acceptance')."</div>";
+}
+
+		} // end other user profile.
+		} // end pending approval.
+
+	}
+	else { // not relation
+		if(arg(1) == $user->uid ) {  // same user profile
+		$block['content'] =  '';
+		}
+		else { // other user profile
+		$block['content'] =  drupal_get_form('userrelationship_form');
+		}
+	}
+
+} // count end
+else {
+		if(arg(1) == $user->uid ) {  // same user profile
+		$block['content'] =  '';
+		}
+		else { // other user profile
+		$block['content'] =  drupal_get_form('userrelationship_form');
+		}
+}
+
+break;
+
+case 'startdplan_block':
+
+$block['subject'] = 'Start dplan Block';
+$block['content'] = '<div id="startdplan_content">';
+$block['content'] .= '<p>'.t('Discipleship is more than simply having coffee, small group or a Bible study once a week.When Jesus invited the disciples to "come and follow me" they began a journey where they shared life together in a tight knit community, day in and day out. There are many components of a discipleship relationship.  For the sake of simplicity, we will use 5 different components to help build a thorough and effective relationship focused on Christ centered growth.  The 5 components we will use to building your discipleship plan are:').'</p>';
+$block['content'] .= '<ul>';
+$block['content'] .= '<li>'.t('1. Bible Study:  This would include memorization, reading the Bible and study of the Bible.').'</li>';
+$block['content'] .= '<li>'.t('2. Life on Life:  Jesus shared life with His followers.  Life on Life events include (but are not limited to) serving, ministering, working out, shopping, camping, etc...').'</li>';
+$block['content'] .= '<li>'.t('3. Breaking Bread:  Get to know your disciple, their family and friends around the dinner table.').'</li>';
+$block['content'] .= '<li>'.t('4. Prayer: Prayer invites the power of God into your relationship.  The greatest question you can ask is, "How can I pray for you?"').'</li>';
+$block['content'] .= '<li>'.t('5. Encouraging Word: Make time to speak life, belief and love into your disciple through encouraging words.  This can be as simple as a text, email, or phone call.').'</li></ul></p>';
+if(arg(1) != '') {
+$dplan_userid = arg(1);
+}
+$block['content'] .= '<div id="startplan_btn">';
+$block['content'] .= l(t('START YOUR D-PLAN'),'dplan/'.arg(1),array('attributes' => array('class' => 'button')));
+$block['content'] .= '</div>';
+$block['content'] .= '</div>';
+break;
+
+case 'dplan_connectedprofile':
+$uid = arg(1);
+$fbuid = get_facebookid_from_userid($uid);
+
+ $user_info = user_load($uid);
+ $fb_info = fbconnect_user_profile($user);
+ $userimage = get_user_avatar($fbuid,'large',113,113);
+$contact_data = '';
+//print '<pre>';
+//print_r($user_info);
+          $block['subject'] = t('D-Plan connected profile');
+          $block['content'] = '<div class="add1"></div>
+                  <div class="addfacebook">
+                    <div class="discimg">
+                                   <a href="'.  base_path() .'user" >'.$userimage.'</a></div>';
+          $username = explode(' ',$user_info->name);
+          $block['content'] .= '<div class="discchat2">
+                                   '.$username[0].'...</div>
+                                 <a href="'.url('dplan/'.$uid).'"><img src="'.base_path().drupal_get_path('theme','lifeecho').'/images/calender.png" alt="" /></a>
+                                </div>';
+          if(isset($user_info->field_age['und'])) {
+          $user_age = $user_info->field_age['und'][0]['value'];
+          $user_age = explode('-',$user_age);
+          $curYear = date('Y');
+          $user_age = $curYear - $user_age[0];
+          } else { $user_age = ''; }
+          $block['content'] .='<div class="addaddress"><b>'.t('ABOUT ME: ').'</b>';
+
+if (isset($user_info->field_what_do_you_want_to_tell_o['und'][0]['value'])) {
+drupal_add_js(drupal_get_path('theme', 'lifeecho') . '/js/jquery-ui.js');
+drupal_add_css(drupal_get_path('theme', 'lifeecho') . '/css/jquery-ui.css');
+$block['content'] .= substr($user_info->field_what_do_you_want_to_tell_o['und'][0]['value'],0,170);
+$block['content'] .= '<span id="showdialog">'.t('Read more').'</span><div id="terms_dialog" style="display:none">'.$user_info->field_what_do_you_want_to_tell_o['und'][0]['value'].'</div>';
+}
+
+$block['content'] .='</div>';
+$block['content'] .= '<div id="statement_container"><b>'.t("STATEMENT OF FAITH: ").'</b>';
+if(isset($user_info->field_what_is_your_personal_stat['und'][0]['value'])) {
+$block['content'] .= $user_info->field_what_is_your_personal_stat['und'][0]['value'];
+}
+$block['content'] .= '</div>';
+
+if(isset($user_info->field_what_is_your_preferred['und'][0]['tid'])) {
+$block['content'] .= '<div id="preferred_contact">'.t("PREFERED CONTACT: ");
+$pre_contact_id = $user_info->field_what_is_your_preferred['und'][0]['tid'];
+$query = db_select('taxonomy_term_data','ttd')
+->fields('ttd',array('name'))
+->condition('tid',$pre_contact_id);
+$result = $query->execute();
+$pre_contact_name = $result->fetchField(0);
+// term name selection based on term id
+if($pre_contact_id == '111') { // Email
+$contact_data = $user_info->mail;
+}
+else if($pre_contact_id == '112') { // txt/sms
+if(isset($user_info->field_text_sms['und'][0]['number'])) {
+$contact_data = $user_info->field_text_sms['und'][0]['number'];
+}
+}
+else if($pre_contact_id == '113') { // Phone
+if(isset($user_info->field_phone_call_data['und'][0]['number'])) {
+$contact_data = $user_info->field_phone_call_data['und'][0]['number'];
+}
+}
+else if($pre_contact_id == '114') { // Facebook Message
+if(isset($user_info->field_facebook_message['und'][0]['value'])) {
+$contact_data = $user_info->field_facebook_message['und'][0]['value'];
+}
+}
+else if($pre_contact_id == '115') { // Skype Message
+if(isset($user_info->field_skype_message['und'][0]['value'])) {
+$contact_data = $user_info->field_skype_message['und'][0]['value'];
+}
+}
+
+if($pre_contact_id == '114') {
+$block['content'] .= $contact_data.' '.'<a target="_blank" href="http://www.facebook.com/messages/new"><img src="'.base_path().drupal_get_path('theme','lifeecho').'/images/chat.PNG" alt="Facebook User Link" /></a>';
+}
+else if($pre_contact_id == '115') {
+$block['content'] .= $contact_data.' [ Skype ID ]';
+// '<img src="'.base_path().drupal_get_path('theme','lifeecho').'/images/skype_icon.png" alt="Skype" />'
+}
+else if($pre_contact_id == '111') {
+$block['content'] .= '<a href="mailto:'.$contact_data.'?Subject=LifeEcho" target="_top">'.$contact_data.'</a>';
+}
+else {
+$block['content'] .= $contact_data;
+}
+$block['content'] .= '</div>';
+} // if isset PREFERED CONTACT End.
+
+break;
+
+case 'discipleship_pairs':
+
+if((arg(2) <> 'edit') && (arg(1) <> 'add' && arg(2) <> 'community-lifeecho')) {
+
+$block['subject'] = 'Discipleship Pairs';
+$list = get_discipleship_pair_contents();
+$block['content'] = $list;
+
+}
+else {
+$block['subject'] = '';
+$block['content'] = '';
+}
+
+break;
+
+case 'social_links_bottom':
+
+$block['subject'] = 'Social Media Links Block';
+$block['content'] = '<div class="social_links">';
+$block['content'] .= '<span><a target="_blank" href="'.variable_get('sociallinks_fburl').'"><img src="'.base_path().drupal_get_path('theme','lifeecho').'/images/facebookIcon.png" alt="Facebook" /></a></span>';
+$block['content'] .= '<span><a target="_blank" href="https://twitter.com/'.variable_get('sociallinks_twitterurl').'"><img src="'.base_path().drupal_get_path('theme','lifeecho').'/images/twitterIcon.png" alt="Twitter" /></a></span>';
+$block['content'] .= '<span><a target="_blank" href="'.variable_get('sociallinks_bloggerurl').'"><img src="'.base_path().drupal_get_path('theme','lifeecho').'/images/bloggerIcon.png" alt="Blogger" /></a></span>';
+
+$block['content'] .= '</div>';
+break;
+
+}
+  return $block;
+}
+
+/*
+ * Funtion to get user avatar from fbid 
+ * arguments size : Supported types: small, normal, large, square
+ * fbuid : your facebook user uid
+ * sample url  https://developers.facebook.com/tools/explorer/?method=GET&path=233215235
+ */
+
+function get_user_avatar($fbuid,$size,$width,$height) {
+    return '<img src="http://graph.facebook.com/'.$fbuid.'/picture?type='.$size.'&width='.$width.'&height='.$height.'" />';
+}
+
+function get_user_coverimage($fbuid) {
+    $url = 'http://graph.facebook.com/'.$fbuid.'?fields=cover';
+    $json = file_get_contents($url);
+    $data = json_decode($json, TRUE);
+    if(isset($data['cover']['source'])) {
+    return $data['cover']['source'];
+    }
+    else {
+        return '';
+    }
+}
+
+function get_facebookid_from_userid($uid) {
+    
+$query = db_select('fbconnect_users', 'fbu')
+  ->fields('fbu', array('fbuid'))
+  ->condition('fbu.uid', $uid);
+  $result = $query->execute();
+  $results = $result->fetchAssoc();
+  return $results['fbuid'];
+  
+}
+
+/*
+* User relationship form on user profile page.
+*/
+
+function userrelationship_form() {
+global $user;
+$role_string = '';
+$user_id = arg(1);
+$user_info = user_load($user_id);
+
+$array1 = array();
+$array2 = array();
+
+$array1 = get_user_answer_howtouselifeecho($user->uid); // logined user type detection
+$array2 = get_user_answer_howtouselifeecho(arg(1)); // landing page user type detection
+
+$options = array();
+
+$a = array('108-109' => 1);
+$b = array('109-108' => 1);
+$c = array('110-110' => 1);
+
+$role_count = count($array1);
+if(empty($array1[0]))
+$array1[0] = 0;
+if(empty($array1[1]))
+$array1[1] = 0;
+if(empty($array1[2]))
+$array1[2] = 0;
+if(empty($array2[0]))
+$array2[0] = 0;
+if(empty($array2[1]))
+$array2[1] = 0;
+if(empty($array2[2]))
+$array2[2] = 0;
+
+switch($role_count) {
+case 1:
+$role_string = array(
+'0' => $array1[0].'-'.$array2[0],
+'1' => $array1[0].'-'.$array2[1], 
+'2' => $array1[0].'-'.$array2[2]
+);
+break;
+case 2:
+$role_string = array(
+'0' => $array1[0].'-'.$array2[0],
+'1' => $array1[0].'-'.$array2[1], 
+'2' => $array1[0].'-'.$array2[2],
+'3' => $array1[1].'-'.$array2[0],
+'4' =>$array1[1].'-'.$array2[1],
+'5' =>$array1[1].'-'.$array2[2]
+);
+break;
+case 3:
+$role_string = array(
+'0' => $array1[0].'-'.$array2[0],
+'1' => $array1[0].'-'.$array2[1], 
+'2' => $array1[0].'-'.$array2[2],
+'3' => $array1[1].'-'.$array2[0],
+'4' =>$array1[1].'-'.$array2[1],
+'5' =>$array1[1].'-'.$array2[2],
+'6' =>$array1[2].'-'.$array2[0],
+'7' => $array1[2].'-'.$array2[1],
+'8' =>$array1[2].'-'.$array2[2]
+);
+break;
+}
+/*$uids = $user->uid;
+  $query_approve = db_select('lifeecho_og_discipler', 'logds')
+  ->fields('logds', array('gid'))
+  ->condition('logds.uid',$uids);
+  $approve_result = $query_approve->execute();
+$ct = $approve_result->rowCount();
+if($ct>=1) {
+if(count($role_string) > 0 && $user->uid <> 0) {
+
+	if (in_array('108-109', $role_string , true)) {
+	$options[1] = t('Offer to Disciple '.$user_info->name);
+	}
+
+	if (in_array('109-108', $role_string , true)) {
+	$options[2] = t('Invite '.$user_info->name.' to Disciple You');
+	}
+
+	if (in_array('110-110', $role_string , true)) {
+	$options[3] = t('Invite '.$user_info->name.' to Accountability');
+	}
+
+} // count($role_string) user uid check END.
+}
+else {
+    if (in_array('109-108', $role_string , true)) {
+	$options[2] = t('Invite '.$user_info->name.' to Disciple You');
+	}
+
+	if (in_array('110-110', $role_string , true)) {
+	$options[3] = t('Invite '.$user_info->name.' to Accountability');
+	}
+} */
+if(count($role_string) > 0 && $user->uid <> 0) {
+
+	if (in_array('108-109', $role_string , true)) {
+	$options[1] = t('Offer to Disciple '.$user_info->name);
+	}
+
+	if (in_array('109-108', $role_string , true)) {
+	$options[2] = t('Invite '.$user_info->name.' to Disciple You');
+	}
+
+	if (in_array('110-110', $role_string , true)) {
+	$options[3] = t('Invite '.$user_info->name.' to Accountability');
+	}
+
+} // count($role_string) user uid check END.
+
+if(count($options) != 0 ) {
+
+	if(count($options) == 1 ) {
+$default_key = array_keys($options);
+	$form['invite_select_opt'] = array(
+	    '#type' => 'radios',
+	    '#title' => t(''),
+	    '#options' => $options,
+	    '#default_value' => $default_key[0],
+	  );
+
+	}
+	else {
+
+	$form['invite_select_opt'] = array(
+	    '#type' => 'radios',
+	    '#title' => t(''),
+	    '#options' => $options,
+ 	    '#required' => TRUE,
+	  );
+
+	}
+
+$form['requestee_id'] = array('#type' => 'hidden', '#value' => $user_id);
+$form['requester_id'] = array('#type' => 'hidden', '#value' => $user->uid);
+$form['submit'] = array('#type' => 'submit', '#value' => t('Invite'));
+return $form;
+}
+else {
+	if($user->uid <> 0) { // check for logged user
+	drupal_set_message(t('You cannot form a D-Pair with this user as the user falls in a different discipleship group'),'status');
+	}
+}
+
+}
+
+function userrelationship_form_submit($form, &$form_state) {
+$res = array();
+$a3 = array();
+$a4 = array();
+$key_value = '';
+$res = array();
+
+$rtid = $form_state['values']['invite_select_opt'];
+ $requester_id = $form_state['values']['requester_id'];
+//echo "<br/>";
+$requestee_id = $form_state['values']['requestee_id'];
+$rtid=1; //getting rtid 2 here But given 1 for getting into below if loop.
+//echo $rtid;
+if($rtid == 1) {
+//echo get_logged_user_community_ID()."/"; // created
+//echo count(get_logged_user_joined_community_ID())."/"; // joined
+//print lifeecho_og_users_roles(); // user roles
+//die;
+if(lifeecho_og_users_roles() == 0) {
+
+$message = t("You must ").l(t('join'),'joincommunity')."/".l(t('start'),'node/add/community-lifeecho').t(" a community and be approved as a discipler by a community administrator before you can offer to disciple someone.");
+drupal_set_message($message,'warning');
+drupal_goto('user/'.$requestee_id);
+
+}
+
+}
+
+//"You must join/start a community and be approved as a discipler by a community administrator before you can offer to disciple someone."
+
+$existing = user_relationships_load(array('requester_id' => $requester_id, 'requestee_id' => $requestee_id, 'rtid' => $rtid), array('count' => TRUE));
+$a3 = get_allcommunities_forauser($requestee_id);
+$a4 = get_allcommunities_forauser($requester_id);
+if(count($a3) > 0 && count($a4) > 0) {
+$res = array_intersect($a3['nids'],$a4['nids']);
+}
+$key_value = array_keys($res);
+if($existing == 0) {
+
+if($rtid == 1) { // request is type of 'discipler'
+
+if(count($res) == 0) {
+// redirect user to a comunity request form.
+drupal_goto('community/joindiscipler/'.$requestee_id);
+}
+
+} // rtid check end
+
+if(count($res) > 0) {
+$community_id = $res[$key_value[0]];
+}
+else {
+$community_id = 0;
+}
+// For a new entry, get a new id.
+
+$rid = db_next_id(db_query('SELECT MAX(rid) FROM {user_relationships}')->fetchField());
+
+db_insert('user_relationships')
+            ->fields(array(
+			'rid' => $rid,
+			'requester_id' => $requester_id,
+			'requestee_id' => $requestee_id,
+			'rtid' => $rtid,
+			'approved' => 0,
+			'created' => REQUEST_TIME,
+			'changed' => REQUEST_TIME,
+			'flags' => 0,
+))
+            ->execute();
+
+db_insert('lifeecho_alerts')
+            ->fields(array(
+            'alerttype' => 'ur',
+            'alertto' => $requestee_id, // id of the user
+            'alertfrom' => $requester_id, // user id
+	    'alerttime' => REQUEST_TIME,
+	    'accept_status' => 0,    // need to accept user relationship request
+	    'request_type' => $rtid,
+            'request_community' => $community_id,
+            ))
+            ->execute();
+
+$requestee_info = user_load($requestee_id);
+$requester_info = user_load($requester_id);
+
+drupal_set_message(t('Your request has been sent to '.$requestee_info->name.'.'),'status');
+$form_state['redirect'] = 'user/'.$requestee_id.'';
+}
+else {
+drupal_set_message(t('User relationship already exist'),'status');
+drupal_goto('user/'.$requester_id);
+}
+
+}
+
+function _joindisciplercommunity() {
+$uid = arg(2);
+$userinfo = user_load($uid);
+$getallcommunity = get_allcommunities_forauser($uid);
+for($i=0;$i<count($getallcommunity['nids']);$i++) {
+$key = $getallcommunity['nids'][$i];
+$options[$key] = $getallcommunity['titles'][$i];
+}
+
+/*print '<pre>';
+print_r($options);
+print '</pre>';*/
+
+$form = array();
+$form['community_select_opt'] = array(
+    '#type' => 'radios',
+    '#title' => t('To connect with "'.$userinfo->name.'" you need to join aleast a community from following list'),
+    '#options' => $options,
+  );
+$form['requestee_id'] = array('#type' => 'hidden', '#value' => $uid);
+$form['submit'] = array('#type' => 'submit', '#value' => t('Join'));
+
+return $form;
+
+}
+
+function _joindisciplercommunity_submit($form, &$form_state) {
+global $user;
+$community_select = $form_state['values']['community_select_opt'];
+$requestee_id = $form_state['values']['requestee_id'];
+
+// For a new entry, get a new id.
+
+$rid = db_next_id(db_query('SELECT MAX(rid) FROM {user_relationships}')->fetchField());
+
+// insert D-pair request to relationship table.
+
+db_insert('user_relationships')
+            ->fields(array(
+			'rid' => $rid,
+			'requester_id' => $user->uid,
+			'requestee_id' => $requestee_id,
+			'rtid' => 1,
+			'approved' => 0,
+			'created' => REQUEST_TIME,
+			'changed' => REQUEST_TIME,
+			'flags' => 0,
+))
+            ->execute();
+
+// insert D-pair request to alert table.
+
+db_insert('lifeecho_alerts')
+            ->fields(array(
+            'alerttype' => 'ur',
+            'alertto' => $requestee_id, // id of the user
+            'alertfrom' => $user->uid, // user id
+	    'alerttime' => REQUEST_TIME,
+	    'accept_status' => 0,    // need to accept user relationship request
+	    'request_type' => 1,
+	    'request_community' => $community_select,
+            ))
+            ->execute();
+
+$requestee_info = user_load($requestee_id);
+$requester_info = user_load($user->uid);
+drupal_set_message(t('Your request has been sent to '.$requestee_info->name.'.'),'status');
+og_subscribe_discipler_disple_relation($community_select,$requestee_id);
+
+}
+
+
+/*
+* Get answer for How to use lifeecho
+*/
+
+function get_user_answer_howtouselifeecho($uid) {
+$type_array = array();
+$query = db_select('field_data_field_how_do_want_to_use_lif','hdwl')
+	->fields('hdwl',array('field_how_do_want_to_use_lif_tid'))
+	->condition('hdwl.entity_id', $uid)
+	->condition('hdwl.entity_type' , 'user');
+
+  $result = $query->execute();
+  while($record = $result->fetchAssoc()) {
+  $type_array[] =  $record['field_how_do_want_to_use_lif_tid'];
+  }
+return $type_array;
+}
+
+/* D-PLAN form */
+
+function dplan_form() {
+$default_note = $default_prayer = $default_verse = '';
+global $user;
+$query = db_select('dplan_diary','dd');
+$query->fields('dd',array('notes','prayer','verse'));
+$query->condition('uid',$user->uid);
+$result = $query->execute();
+$form = array('');
+while($record = $result->fetchAssoc()) {
+$default_note = $record['notes'];
+$default_prayer = $record['prayer'];
+$default_verse = $record['verse'];
+}
+print $record['notes'];
+ $form['dplan_notes'] = array(
+     '#type' => 'textarea',
+     '#title' => t('NOTES'),
+     '#cols' => 5,
+     '#rows' => 3,
+     '#default_value' => $default_note,
+    '#resizable' => FALSE
+  );
+
+ $form['dplan_prayer'] = array(
+    '#type' => 'textarea',
+    '#title' => t('PRAYER'),
+    '#cols' => 5,
+    '#rows' => 3,
+'#default_value' => $default_prayer,
+    '#resizable' => FALSE
+  );
+
+ $form['dplan_verse'] = array(
+    '#type' => 'textarea',
+    '#title' => t('VERSE'),
+    '#cols' => 5,
+    '#rows' => 3,
+'#default_value' => $default_verse,
+    '#resizable' => FALSE
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Update',
+  );
+return $form;
+}
+
+function dplan_form_submit($form,&$form_state) {
+$dplan_notes = $dplan_prayer = $dplan_verse = '';
+global $user;
+$query = db_select('dplan_diary','dd');
+$query->fields('dd',array('notes','prayer','verse'));
+$query->condition('uid',$user->uid);
+$result = $query->execute();
+$row_count = $result->rowCount();
+$dplan_notes = $form_state['input']['dplan_notes'];
+$dplan_prayer = $form_state['input']['dplan_prayer'];
+$dplan_verse = $form_state['input']['dplan_verse'];
+if($row_count == 0) {
+db_insert('dplan_diary')
+->fields(array(
+  'uid' => $user->uid,
+  'notes' => $dplan_notes,
+  'prayer' => $dplan_prayer,
+  'verse' => $dplan_verse,
+  'created' => REQUEST_TIME,
+  'updated' => REQUEST_TIME
+))
+->execute();
+}
+else {
+db_update('dplan_diary')
+->fields(array('notes' => $dplan_notes ,'prayer' => $dplan_prayer , 'verse' => $dplan_verse , 'updated' => REQUEST_TIME ))
+->execute();
+}
+drupal_goto('dplan/'.arg(1));
+}
+
+/*
+* Function to check already a relation b/w the requester and requestee
+*/
+
+function check_allready_relation($requester_id,$requestee_id) {
+
+global $base_url;
+$query = db_select('user_relationships','ur')
+->fields('ur', array('requestee_id','approved','rid'))
+->condition('ur.requester_id',$requester_id)
+->condition('ur.requestee_id',$requestee_id)
+->range(0,1); //LIMIT to 1 record;
+$result = $query->execute();
+$row_count = $result->rowCount();
+if($row_count == 0) { // reciprocal relation check
+$query = db_select('user_relationships','ur')
+->fields('ur', array('requester_id','approved','rid'))
+->condition('ur.requestee_id',$requester_id)
+->condition('ur.requester_id',$requestee_id)
+->range(0,1); //LIMIT to 1 record;
+$result = $query->execute();
+$row_count = $result->rowCount();
+}
+
+if($row_count == 1) {
+$url = url('startdplan/'.$requestee_id);
+}
+else {
+$url = url('user/' . $requestee_id);
+}
+return $url;
+}
+
+
+/*
+* Functiion to check already a relation b/w the requester and requestee
+*/
+
+function get_relationid_from_usersid($requester_id,$requestee_id) {
+
+global $base_url;
+$query = db_select('user_relationships','ur')
+->fields('ur', array('rid'))
+->condition('ur.requester_id',$requester_id)
+->condition('ur.requestee_id',$requestee_id)
+->range(0,1); //LIMIT to 1 record;
+$result = $query->execute();
+$row_count = $result->rowCount();
+if($row_count == 0) { // reciprocal relation check
+$query = db_select('user_relationships','ur')
+->fields('ur', array('rid'))
+->condition('ur.requestee_id',$requester_id)
+->condition('ur.requester_id',$requestee_id)
+->range(0,1); //LIMIT to 1 record;
+$result = $query->execute();
+}
+$rid = $result->fetchField(0);
+return $rid;
+}
+
+/*
+* Get D-plan status from relationship id.
+*/
+
+function get_dplan_status($rid) {
+
+$query = db_select('dplan_status','dplan')
+->fields('dplan',array('status'))
+->condition('dplan.rid',$rid);
+$result = $query->execute();
+$status = $result->fetchField(0);
+return $status;
+
+}
+
+/* 
+*  Function to remove alert from "lifeecho_alerts" table
+*/
+
+function lifeecho_remove_alert($alertid) {
+
+$query = db_delete('lifeecho_alerts')
+->condition('alertid',$alertid)
+->execute();
+drupal_set_message(t('Alert has been removed'));
+$redirect_url = $_SERVER['HTTP_REFERER'];
+drupal_goto(''.$redirect_url.'');
+
+}
+
+function lifeecho_remove_alert_video($alertid) {
+
+$num_updated = db_update('lifeecho_alerts') // Table name no longer needs {}
+  ->fields(array(
+    'alertstatus' => 1,
+    'accept_status' => 1,
+  ))
+  ->condition('alertid', $alertid, '=')
+   ->condition('alerttype','first-video-alert', '=')
+  ->execute();
+drupal_set_message(t('Alert has been removed'));
+$redirect_url = $_SERVER['HTTP_REFERER'];
+drupal_goto(''.$redirect_url.'');
+
+
+
+}
+
+
+/* 
+*  Function to remove 'dplan' alert from "lifeecho_alerts" table.
+*/
+
+function lifeecho_remove_dplanalert($alertid) {
+global $user;
+$query = db_insert('lifeecho_alert_stats')
+	 ->fields(array(
+                  'uid' => $user->uid,
+                  'aid' => $alertid
+		))
+	 ->execute();
+
+drupal_set_message(t('Alert has been removed'));
+$redirect_url = $_SERVER['HTTP_REFERER'];
+drupal_goto(''.$redirect_url.'');
+
+}
+
+/*
+* get dplan alert status - check whether user hide alert from his dashboard.
+*/
+
+function get_dplanalertstatus($alertid,$uid) {
+
+$query = db_select('lifeecho_alert_stats','las')
+->fields('las',array('status'))
+->condition('las.aid',$alertid)
+->condition('las.uid',$uid);
+$result = $query->execute();
+$rowcount = $result->rowCount();
+
+return $rowcount;
+
+}
+
+
+/*
+* we need to findout logged user is a community 
+* admin for any community that he joined
+*/
+
+function lifeecho_og_users_roles() {
+global $user;
+$querys = db_select('lifeecho_og_discipler','lod')
+->fields('lod',array('uid'))
+->condition('lod.uid',$user->uid)
+->condition('lod.rid',4);
+$results = $querys->execute();
+return $results->rowCount();
+}
+
+/*
+* Function to get testimonial video
+*/
+
+function get_testimonyvideoby_userID() {
+$time_to = '';
+$userid = arg(1);
+$query_1 = db_select('field_data_field_do_you_have_time_to_record','dhtr')
+->fields('dhtr',array('field_do_you_have_time_to_record_tid'))
+->condition('dhtr.entity_id',$userid);
+$result_1 = $query_1->execute();
+if($result_1->rowCount() > 0) {
+$time_to = $result_1->fetchField(0);
+if($time_to == 116 ) {
+$query_2 = db_select('field_data_field_youtube_record_response','dfy')
+->fields('dfy',array('field_youtube_record_response_value'))
+->condition('dfy.entity_id',$userid);
+$result = $query_2->execute();
+}
+else if($time_to == 117 ) {
+$query = db_select('field_data_field_youtube_upload_response','dyu')
+->fields('dyu',array('field_youtube_upload_response_value'))
+->condition('dyu.entity_id',$userid);
+$result = $query->execute();
+}
+else {
+$result = '';
+}
+if($result <> '') { // testimony video recorded.
+	if($result->rowCount() > 0) {
+	return '<iframe class="youtube-player" type="text/html" width="200" height="200" src="http://www.youtube.com/embed/'.$result->fetchField(0).'?rel=0;autoplay=1;wmode=transparent" allowfullscreen frameborder="0">
+	</iframe>';
+	}
+} // testimony video recorded END
+
+else { // not recorded so take write testimony field.
+	$query_2 = db_select('field_data_field_write_testimony','fwt')
+	->fields('fwt',array('field_write_testimony_value'))
+	->condition('fwt.entity_id',$userid);
+	$result_2 = $query_2->execute();
+        $testimony_content = $result_2->fetchField(0);
+	if($result_2->rowCount() > 0) {
+	drupal_add_js(drupal_get_path('theme', 'lifeecho') . '/js/jquery-ui.js');
+        drupal_add_css(drupal_get_path('theme', 'lifeecho') . '/css/jquery-ui.css');
+	return '<div id="testimony_container"><p>'.substr($testimony_content,0,100).'</p></div><span id="showdialog">'.t('Read more').'</span><div id="terms_dialog" style="display:none">'.$testimony_content.'</div>';
+	}
+	else {
+	return '';
+	}
+} // not recorded END
+
+}
+else {
+return '';
+}
+
+}
+
+/*
+* we need to implement ajax pagination on discipleship pair block on community page.
+*/
+
+function  get_discipleship_pair_contents() {
+$html =  '<script src="'.base_path().'misc/jquery.js"></script>';
+$html .= '<script src="'.base_path().drupal_get_path('module', 'custom_block') . '/custom_block.js'.'"></script>';
+
+if(arg(1) != 'add' && arg(2) != 'community-lifeecho') {
+$requester_username = '';
+$requester_username_res = '';
+$requester_fbuid = '';
+$requestee_fbuid = '';
+$requestee_username = '';
+$requestee_username_res = '';
+$last_relation_id = '';
+$html .= '<div id="discipleship_pairs">';
+$gid = arg(1);
+$start = 0;
+$end = 5;
+$limit = 3; // adjust limit here
+
+$result = db_query("SELECT distinct a.requester_id as user_relationships_requester_id,a.requestee_id as user_relationships_requestee_id,a.rid as relationid FROM user_relationships a JOIN user_relationships b join og_membership as ogm ON a.requestee_id = b.requester_id AND a.requester_id = b.requestee_id AND a.requestee_id  < b.requestee_id where ogm.gid = '$gid' AND ogm.etid =  a.requestee_id AND ogm.state = '1' AND a.approved = '1' AND (select state as activated from og_membership where og_membership.etid =  a.requester_id AND og_membership.state='1' AND og_membership.gid='$gid')=1 ORDER BY a.rid ASC limit $limit");
+
+$result_count = db_query("SELECT distinct a.requester_id as user_relationships_requester_id,a.requestee_id as user_relationships_requestee_id,a.rid as relationid FROM user_relationships a JOIN user_relationships b join og_membership as ogm ON a.requestee_id = b.requester_id AND a.requester_id = b.requestee_id AND a.requestee_id  < b.requestee_id where ogm.gid = '$gid' AND ogm.etid =  a.requestee_id AND ogm.state = '1' AND a.approved = '1' AND (select state as activated from og_membership where og_membership.etid =  a.requester_id AND og_membership.state='1' AND og_membership.gid='$gid')=1");
+
+$rowcount = $result->rowCount();
+$rowcount_1 = $result_count->rowCount(); // total rowcount without pagination.
+
+if($rowcount != 0) {
+
+	while($record = $result->fetchAssoc()) {
+
+		$requester_username_res = db_query("SELECT name FROM users WHERE uid  = :uid ", array(':uid' => $record['user_relationships_requester_id']));
+		$requester_username = $requester_username_res->fetchField(0);
+		$requester_username = explode( ' ',$requester_username) ;
+		$requester_fbuid = get_facebookid_from_userid($record['user_relationships_requester_id']);
+		$html .= '<div id="discipleship_pair_group">';
+                $html .= '<div id="requester_div">';
+		$html .= '<span>';
+		$html .= get_user_avatar($requester_fbuid,'small','45','45');
+		$html .= '</span>';
+		$html .= '<span class="user_link"><a href="'.url('user/'.$record['user_relationships_requester_id']).'">'.$requester_username[0].'...'.'</a></span>';
+		$html .= '</div>'; // end requester_div
+		$html .= '<div id="cross_arrow">';
+		$html .= '</div>'; // end cross_arrow
+		$html .= '<div id="requestee_div">';
+		$requestee_username_res = db_query("SELECT name FROM users WHERE uid = :uid ", array(':uid' => $record['user_relationships_requestee_id']));
+		$requestee_username = $requestee_username_res->fetchField(0);
+		$requestee_username = explode( ' ',$requestee_username) ;
+		$requestee_fbuid = get_facebookid_from_userid($record['user_relationships_requestee_id']);
+		$html .= '<span>';
+		$html .= get_user_avatar($requestee_fbuid,'small','45','45');
+		$html .= '</span>';
+		$html .= '<span class="user_link"><a href="'.url('user/'.$record['user_relationships_requestee_id']).'">'.$requestee_username[0].'...'.'</a></span>';
+		$html .= '</div>'; // end requestee_div
+
+		//$html .= '</div>'; 
+		$last_relation_id = $record['relationid'];
+$html .= '</div>';
+	} //END While
+$html .= '<input type="hidden" name="comid" id="comid" value="'.$gid.'" />';
+ $html .= '<input type="hidden" name="totalcount" id="totalcount" value="'.$rowcount_1.'" />';
+ $html .= '<input type="hidden" name="limit" id="limit" value="'.$limit.'" />';
+ $html .= '<input type="hidden" name="limit_max" id="limit_max" value="'.$limit.'" />';
+if($rowcount_1 <> $rowcount) {
+ $html .= '<div id="facebook_style">';
+ $html .= '<a class="load_more" id="'.$last_relation_id.'" href="#" >'.t('See More').'</a>';
+ $html .= '</div>'; // end facebook_style
+}
+} // End if $rowcount
+
+else {
+$html .= '';
+} // END else $rowcount
+
+ $html .= '</div>';  // end discipleship_pairs
+
+} // END if arg(1)
+
+return $html;
+}
+
+function _discipleshippair_callback() {
+$limit = 3; // adjust limit here
+if(isset($_POST['gid']) && is_numeric($_POST['gid']))
+$gid = $_POST['gid'];
+
+if(isset($_POST['lastmsg']) && is_numeric($_POST['lastmsg']))
+$lastmsg = $_POST['lastmsg'];
+
+if(isset($_POST['ends']) && is_numeric($_POST['ends']))
+$ends = $_POST['ends'];
+
+// get totalcount from ajax call
+if(isset($_POST['totalcount']) && is_numeric($_POST['totalcount']))
+$totalcount = $_POST['totalcount'];
+
+if(arg(1) != 'add' && arg(2) != 'community-lifeecho') {
+
+$requester_username = '';
+$requester_username_res = '';
+$requester_fbuid = '';
+$requestee_fbuid = '';
+$requestee_username = '';
+$requestee_username_res = '';
+$start = 0;
+$end = 5;
+$result = db_query("SELECT distinct a.requester_id as user_relationships_requester_id,a.requestee_id as user_relationships_requestee_id,a.rid as relationid FROM user_relationships a JOIN user_relationships b join og_membership as ogm ON a.requestee_id = b.requester_id AND a.requester_id = b.requestee_id AND a.requestee_id  < b.requestee_id where ogm.gid = '$gid' AND ogm.etid =  a.requestee_id AND ogm.state = '1' AND a.approved = '1' AND a.rid>'$lastmsg' order by a.rid ASC limit $limit");
+
+$rowcount = $result->rowCount();
+
+	while($record = $result->fetchAssoc()) {
+		$requester_username_res = db_query("SELECT name FROM users WHERE uid  = :uid ", array(':uid' => $record['user_relationships_requester_id']));
+		$requester_username = $requester_username_res->fetchField(0);
+		$requester_username = explode( ' ',$requester_username) ;
+		$requester_fbuid = get_facebookid_from_userid($record['user_relationships_requester_id']);
+
+		$html .= '<div id="discipleship_pair_group">';
+		$html .= '<div id="requester_div">';
+		$html .= '<span>';
+		$html .= get_user_avatar($requester_fbuid,'small','45','45');
+		$html .= '</span>';
+		$html .= '<span class="user_link"><a href="'.url('user/'.$record['user_relationships_requester_id']).'">'.$requester_username[0].'</a></span>';
+		$html .= '</div>'; //END requester_div
+
+		$html .= '<div id="cross_arrow">';
+		$html .= '</div>';  // END cross_arrow
+
+
+		$html .= '<div id="requestee_div">';
+		$requestee_username_res = db_query("SELECT name FROM users WHERE uid = :uid ", array(':uid' => $record['user_relationships_requestee_id']));
+		$requestee_username = $requestee_username_res->fetchField(0);
+		$requestee_username = explode( ' ',$requestee_username);
+		$requestee_fbuid = get_facebookid_from_userid($record['user_relationships_requestee_id']);
+		$html .= '<span>';
+		$html .= get_user_avatar($requestee_fbuid,'small','45','45');
+		$html .= '</span>';
+		$html .= '<span class="user_link"><a href="'.url('user/'.$record['user_relationships_requestee_id']).'">'.$requestee_username[0].'...</a></span>';
+		$html .= '</div>'; // END requestee_div
+
+		$html .= '</div>'; // END discipleship_pair_group
+
+		$last_relation_id = $record['relationid'];
+
+		$html .= '</div>'; // discipleship_pair_group end
+
+} //END While
+ $html .= '<input type="hidden" name="limit_max" id="limit_max" value="'.$limit.'" />';
+// total count is taken from ajax call not from query.
+if(($totalcount % 2) == 0) { // check totalcount is odd or even
+ if($totalcount > $ends) { // condition is >
+$html .= '<div id="facebook_style">';
+ $html .= '<a class="load_more" id="'.$last_relation_id.'" href="#" ><span class="test">'.t('See More').'</span></a>';
+ $html .= '</div>';
+}  // End if $rowcount
+}
+else {
+ if($totalcount > $ends) { // condition is >
+$html .= '<div id="facebook_style">';
+ $html .= '<a class="load_more" id="'.$last_relation_id.'" href="#" ><span class="test">'.t('See More').'</span></a>';
+ $html .= '</div>';
+}  // End if $rowcount
+}
+ 
+} // END if arg(1)
+
+die($html);
+}
+
+/*
+*
+* Function to get related user ids from one user id- By Anu
+ */
+
+function get_userRelation_relationships($userid) {
+
+    $query = db_select('user_relationships','ur')
+	     ->fields('ur', array('requestee_id','approved'))
+	     ->condition('ur.requester_id',$userid)
+	     ->condition('ur.approved',1);
+    $result = $query->execute();
+   $rowcount = $result->rowCount();
+   if($rowcount !=0){
+   $i=0;
+   while($record = $result->fetchAssoc()) {
+        $Resdata[$i] = $record['requestee_id'];
+        $i++;
+    }
+    return $Resdata;
+   }
+return 0;
+}

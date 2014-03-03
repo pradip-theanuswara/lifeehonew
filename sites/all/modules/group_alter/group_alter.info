@@ -1,0 +1,16 @@
+name = Group Alter
+description = "To alter og related functionalities"
+package = "Custom"
+; Information added by drupal.org packaging script on 2013-02-10
+version = "7.x-1.0"
+core = "7.x"
+project = "drupal"
+datestamp = "1360499327"
+
+dependencies[] = og
+dependencies[] = options
+dependencies[] = list
+dependencies[] = text
+dependencies[] = entity
+dependencies[] = entityreference
+

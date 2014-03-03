@@ -1,0 +1,140 @@
+<?php
+/**
+* Implementation of hook_menu().
+*/
+
+
+function Youtubeupload_menu() {
+	
+	$items['admin/config/YoutubeUpload'] = array(
+	'title' => 'Youtube Email configuration',
+	'description' => 'Adjust node annotation options.',
+	'position' => 'right',
+	'weight' => -5,
+	'page callback' => 'system_admin_menu_block_page',
+	'access arguments' => array('administer site configuration'),
+	'file' => 'system.admin.inc',
+	'file path' => drupal_get_path('module', 'system'),
+	);
+	
+	
+	$items['admin/config/YoutubeUpload/settings'] = array(
+	'title' => 'Youtube Upload settings',
+	'description' => 'youtube upload settings',
+	'page callback' => 'drupal_get_form',
+	'page arguments' => array('youtubeupload_admin_settings'),
+	'access arguments' => array('administer site configuration'),
+	'type' => MENU_NORMAL_ITEM,
+	'file' => 'youtubeupload.admin.inc',
+	);
+	
+	return $items;
+	}
+
+/*
+* youtube upload module
+*
+*/
+	
+	
+	function Youtubeupload_block_info() {
+  $blocks = array();
+
+  $blocks['youtube_upload'] = array(
+    'info' => t('Upload a video to youtube.'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+
+  return $blocks;
+}
+
+
+/*
+* block view
+*
+*/
+
+function Youtubeupload_block_view($block_name = 'youtube_upload') {
+  if ($block_name == 'youtube_upload') {
+    $list = Youtubeupload_youtube_upload();
+  // $theme_args = array('items' => $list, 'type' => 'ol');
+    //$content = theme('item_list', $theme_args);
+
+   $block = array(
+   'content' => $list,
+   );
+
+    return $block;
+  }
+}
+
+
+/**
+* Implementation of Youtube upload by using Zend Library .
+*/
+	
+	
+	function Youtubeupload_youtube_upload() 
+	
+	{
+	
+	global $user;
+     
+	  $sdk_path = DRUPAL_ROOT . '/Zend/Loader.php';
+      $library = array('loaded' => file_exists($sdk_path));
+    //  if ($library['loaded']) {
+	//  echo $sdk_path;
+        require $sdk_path;
+     // }
+	//}
+
+	
+
+
+ $authError = $yt = '';
+ $username = variable_get('youtubeupload_email_id');
+ $pass = variable_get('youtubeupload_password_id');
+ $devkey =	variable_get('youtubeupload_developer_id');
+
+Zend_Loader::loadClass('Zend_Gdata_ClientLogin');
+Zend_Loader::loadClass('Zend_Gdata_YouTube');
+$service ='youtube'; 
+
+// Create an authenticated HTTP client 
+try {
+$client = Zend_Gdata_ClientLogin::getHttpClient($username,$pass,$service); 
+$yt = new Zend_Gdata_YouTube($client, '12', '12', $devkey);
+}
+catch (Exception $e)
+{
+
+$authError = $e->getMessage();
+
+}
+
+        $video_random_title = 'Lifeecho_'.$user->name.' '.format_date(REQUEST_TIME,'custom', 'Y-m-d g:h:i');
+	$video = new Zend_Gdata_YouTube_VideoEntry();	
+        $video->setVideoTitle($video_random_title);
+	$video->setVideoDescription(t('LifeEcho is a social media platform designed to connect and equip discipleship relationships. Jesus stated, in the Great Commission, "Go therefore and make disciples of all nations, baptizing them in the name of the Father and the Son and the Holy Spirit teaching them to observe all that I commanded you." Matthew 28:19-20. LifeEcho provides you the tools to harness the power of your story (2 Cor 1:4) by using technology to connect, encourage and equip discipleship relationships within the context of Biblical community. Christ centered discipleship ensures that your life echoes throughout eternity.'));
+	$video->setVideoPrivate();
+	$video->setVideoCategory('Nonprofit');
+	$video->SetVideoTags('lifeecho,social network,christian bible community,online bible study,discipleship training centre,bible study,online bible,believer');
+	$handler_url	= 'http://gdata.youtube.com/action/GetUploadToken';
+	$token_array	= $yt->getFormUploadToken($video, $handler_url);
+	$token		= $token_array['token'];
+	$post_url	= $token_array['url'];
+        global $base_url;
+	$next_url 	= $base_url.'?q=/youtube-upload';
+	
+	
+	$form = '<form action="'. $post_url .'?nexturl='. $next_url . 
+        '" method="post" enctype="multipart/form-data" name="youtube-upvd">'. 
+        '<input title="choose a video file to upload" name="file" type="file"/>'. 
+        '<input name="token" type="hidden" value="'. $token .'"/ >'. 
+        '<div style=margin-top:12px;><input value="Upload Video File" type="submit" title="Submit video after choose the video file" /> <input title=close this page type=button onclick=winclose(); value=Close /></div>'. 
+        '</form>';
+		
+	return $form;	
+	
+	}	
+?>

@@ -1,0 +1,2001 @@
+<?php /*
+
+/* Implements hook_init
+ * 
+ * To initailize by adding javascript and css files.
+ */
+
+function custom_alter_menu() {
+    
+  $items['custom/login'] = array(
+    'page callback' => 'custom_alter_facebook_login',
+    'title' => 'Custom Login',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+  
+  $items['custom/logout'] = array(
+    'page callback' => 'custom_alter_facebook_logout',
+    'title' => 'Custom Logout',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  ); 
+  
+  $items['community/dashboard'] = array(
+    'title' => 'Community Admin Dashboard',
+    'page callback' => 'get_admin_community_dashboard',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+  
+    $items['userlist/matches'] = array(
+    'title' => 'User Matches Page',
+    'page callback' => 'get_user_matches',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['userrelationship/%/remove'] = array(
+    'title' => 'Remove userrelationship',
+    'page callback' => 'remove_userrelationship',
+    'access callback' => 'user_is_logged_in',
+    'page arguments' => array(1),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['userrelationship/%/decline'] = array(
+    'title' => 'Decline userrelationship',
+    'page callback' => 'decline_userrelationship',
+    'access callback' => 'user_is_logged_in',
+    'page arguments' => array(1),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['userrelationship/%/approve'] = array(
+    'title' => 'Approve userrelationship',
+    'page callback' => 'approve_userrelationship',
+    'access callback' => 'user_is_logged_in',
+    'page arguments' => array(1),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['startdplan/%'] = array(
+    'title' => 'Start Your Dplan',
+    'page callback' => 'get_startdplan_page',
+    'access callback' => 'user_is_logged_in',
+    'page arguments' => array(1),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['starteddplan/%'] = array(
+    'title' => 'Start Your Dplan',
+    'page callback' => 'get_starteddplan_page',
+    'access callback' => 'user_is_logged_in',
+    'page arguments' => array(1),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['dplan/%'] = array(
+    'title' => 'Dplan Action Page',
+    'page callback' => 'get_dplan_page',
+    'access callback' => 'user_is_logged_in',
+    'page arguments' => array(1),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['userdplan/%/profile'] = array(
+    'title' => 'Dplan Connected Profile',
+    'page callback' => 'get_userdplan_page',
+    'access callback' => 'user_is_logged_in',
+    'page arguments' => array(1),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['removealert/%'] = array(
+    'title' => 'Remove LifeEcho alert',
+    'page callback' => 'lifeecho_remove_alert',
+    'access callback' => 'user_is_logged_in',
+    'page arguments' => array(1),
+    'type' => MENU_CALLBACK,
+  );
+
+
+ $items['removealertvideo/%'] = array(
+    'title' => 'Remove LifeEcho alert video',
+    'page callback' => 'lifeecho_remove_alert_video',
+    'access callback' => 'user_is_logged_in',
+    'page arguments' => array(1),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['removedplanalert/%'] = array(
+    'title' => 'Remove LifeEcho dplan alert',
+    'page callback' => 'lifeecho_remove_dplanalert',
+    'access callback' => 'user_is_logged_in',
+    'page arguments' => array(1),
+    'type' => MENU_CALLBACK,
+  );
+
+
+    return $items;
+}
+
+/**
+ * Implements hook_menu_alter().
+ *
+ * We want to change the menu-items on the login form.
+ */
+
+function custom_alter_menu_alter(&$items) {
+   $items['user/register']['access callback'] = FALSE;
+   $items['user/password']['access callback'] = FALSE;
+}
+
+function custom_alter_init() {
+    drupal_add_js(drupal_get_path('module', 'custom_alter') .'/custom_alter.js','file');
+    drupal_add_css(drupal_get_path('module', 'custom_alter') .'/custom_alter.css','file');
+}
+ 
+/* Implements hook_form_alter
+ * 
+ * To alter attributes of a form in lifecho
+ */
+
+function custom_alter_form_alter(&$form, &$form_state, $form_id) {
+
+// we want to alter the default form for "community_content" content type
+
+/*if($form_id == 'community_content_node_form') {
+	//VIEW DISCIPLESHIP 101 PAGE
+	$form['body']['und'][0]['value']['#title'] = '';
+	$form['actions']['submit']['#value'] = t('Post Message');
+	$form['body']['und'][0]['value']['#attributes']['class'][0] = 'community-content-body';
+	$form['body']['und'][0]['value']['#attributes']['#cols'] = 20;
+}*/
+	// we want to alter the default form for Community Video (Machine name: community_video)
+
+global $user;
+
+	if($form_id == 'community_video_node_form') {
+        $form['field_youtube_record_response']['#access'] = TRUE; // set access to TRUE for field 'field_youtube_record_response'
+
+	$uid = $user->uid;
+
+	// query to get details of created community
+
+		  $query =   db_select('node', 'n')
+		                 ->fields('n',array('nid','uid'))
+		                 ->condition('uid', $uid )
+		                 ->condition('type','community_lifeecho')
+		                 ->orderBy('created', 'DESC') // ORDER BY created
+		                 ->range(0,1); //LIMIT to 1 record
+		  $result = $query->execute();
+		       while($record = $result->fetchAssoc()) {
+		         $nid = $record['nid'];
+		       }
+
+	if(isset($nid)) {
+	$form['og_group_ref']['und'][0]['default']['#default_value'] = array(''.$nid.'');
+	}
+
+	$form['actions']['submit']['#value'] = t('Post Video');
+
+        $form['field_video']['#access'] = TRUE; // SET access for field 'field_video'
+
+	} // END form ID - community_video_node_form
+
+
+
+// we want to alter the default form for Community Message (Machine name: community_content)
+if($form_id == 'community_content_node_form') {
+$uid = $user->uid;
+
+// query to get details of created community
+
+          $query =   db_select('node', 'n')
+                         ->fields('n',array('nid','uid'))
+                         ->condition('uid', $uid )
+                         ->condition('type','community_lifeecho')
+                         ->orderBy('created', 'DESC') // ORDER BY created
+                         ->range(0,1); //LIMIT to 1 record
+          $result = $query->execute();
+               while($record = $result->fetchAssoc()) {
+                 $nid = $record['nid'];
+               }
+
+if(isset($nid)) {
+$form['og_group_ref']['und'][0]['default']['#default_value'] = array(''.$nid.'');
+}
+
+$form['body']['#access'] = TRUE; // SET access for field 'body'
+
+} // END form ID - community_content_node_form
+ 
+
+// we want to alter the default form for "user_profile"
+
+ if($form_id == 'user_profile_form') {
+
+// set access permission for all the fields prsent in user edit proifle page.
+// sometimes fields are not displaying in profile page , so we manually added access grants.
+
+$form['field_select_one_of_followin']['#access'] = TRUE;
+$form['field_how_closely_do_belief']['#access'] = TRUE;
+$form['field_lifeecho_statement_of_fait']['#access'] = TRUE;
+$form['field_how_would_you_describe']['#access'] = TRUE;
+$form['field_where_have_seen_christ']['#access'] = TRUE;
+$form['field_where_do_face_current_']['#access'] = TRUE;
+$form['field_what_are_hobbies_and_']['#access'] = TRUE;
+$form['field_do_you_attend_a_church_']['#access'] = TRUE;
+$form['field_if_what_church_']['#access'] = TRUE;
+$form['field_list_christian_organ']['#access'] = TRUE;
+$form['field_what_is_your_personal_stat']['#access'] = TRUE;
+$form['field_what_do_you_want_to_tell_o']['#access'] = TRUE;
+$form['field_marital_status']['#access'] = TRUE;
+$form['field_children']['#access'] = TRUE;
+$form['field_occupation']['#access'] = TRUE;
+$form['field_age']['#access'] = TRUE;
+$form['field_email_adrs']['#access'] = TRUE;
+$form['field_user_city']['#access'] = TRUE;
+$form['field_user_state']['#access'] = TRUE;
+$form['field_user_zip_code']['#access'] = TRUE;
+$form['field_how_do_want_to_use_lif']['#access'] = TRUE;
+$form['field_what_is_your_preferred']['#access'] = TRUE;
+$form['field_text_sms']['#access'] = TRUE;
+$form['field_phone_call_data']['#access'] = TRUE;
+$form['field_facebook_message']['#access'] = TRUE;
+$form['field_skype_message']['#access'] = TRUE;
+$form['field_do_you_have_time_to_record']['#access'] = TRUE;
+$form['field_write_testimony']['#access'] = TRUE;
+$form['field_last_step_please_accept_th']['#access'] = TRUE;
+$form['field_youtube_upload_response']['#access'] = TRUE; // field used for youtube upload functionality
+$form['field_youtube_record_response']['#access'] = TRUE; // field used for youtube record functionality
+
+	if(check_miniprofile_status() == FALSE ) { // check for firsttime profile edit
+	$form['field_last_step_please_accept_th']['und']['#default_value'][0] = 0;
+	}
+
+ if(isset($form['field_last_step_please_accept_th'])) {
+ $form['field_last_step_please_accept_th']['und']['#title'] = 'Last step, please accept the <span class="termsdialog_link" id="showdialog">'.t('Terms and Conditions').'</span>';
+ }
+
+ if(isset($form['field_select_one_of_followin'])) {
+ $form['field_select_one_of_followin']['#attributes']['class'][1] = 'field-name-field-select-one-of-followin clear-left';
+ }
+
+ if(isset($form['field_how_closely_do_belief'])) {
+ $form['field_how_closely_do_belief']['#attributes']['class'][1] = 'field-name-field-select-one-of-followin clear-left';
+ }
+
+     // Remove _none option from user profile field "do you attend a church
+     unset($form['field_do_you_attend_a_church_']['und']['#options']['_none']);
+     // Remove _none option from user profile field "what is your preferred contact medium"
+     unset($form['field_what_is_your_preferred']['und']['#options']['_none']);
+
+     //$form['field_last_step_please_accept_th']['und']['#default_value'][0] = 0;
+     $form['field_last_step_please_accept_th']['und']['#entity']->field_last_step_please_accept_th['und'][0]['value'] = 0;
+     // User profile button text override
+     $form['actions']['submit']['#value'] = t('Complete your LifeEcho Profile!');
+     
+     // user profile confirm passsword validation override
+
+   //  if($user->uid != 1) { // check for admin user
+
+     unset($form['account']['current_pass']);
+     unset($form['account']['current_pass_required_values']);
+     $form['#validate'] = array_diff($form['#validate'], array('user_validate_current_pass'));
+
+  //   }
+
+     // change title of field 'field_how_closely_do_belief'
+     
+     unset($form['field_how_closely_do_belief']['und']['#title']);
+     
+     // change field 'field_lifeecho_statement_of_fait' as disabled
+     $form['field_lifeecho_statement_of_fait']['und']['0']['value']['#attributes']['disabled'] = TRUE;
+     
+     // ser default value for field 'field_lifeecho_statement_of_fait'
+     
+     $form['field_lifeecho_statement_of_fait']['und']['0']['value']['#default_value'] = '';
+
+     // custom redirect for user profile form
+     $form['#submit'][] = 'user_profile_form_submit_redirect';
+
+     $form['field_youtube_upload_response']['#attributes']['style'] = 'display:none';
+     $form['field_youtube_record_response']['#attributes']['style'] = 'display:none';
+
+// Remove 'none' option from do you have time to record field.
+
+unset($form['field_do_you_have_time_to_record']['und']['#options']['_none']);
+
+$form['field_where_do_face_current_']['und']['#title'] = t('Where do you face current struggles? (INFO IS NOT PRIVATE. These selections are not publicly displayed; however, they are used in specific searches. Share only what you are comfortable with.)');
+
+$form['field_where_have_seen_christ'] ['und']['#title'] = t('Where have you seen Christ-Centered Victory? (INFO IS NOT PRIVATE. These selections are not publicly displayed; however, they are used in specific searches. Share only what you are comfortable with.)');
+
+ } // END form ID - user_profile_form
+
+
+
+ // we want to alter the default form for "community creation , node - community_lifeecho"
+ if($form_id == 'community_lifeecho_node_form') {
+
+    drupal_add_js(drupal_get_path('theme', 'lifeecho') .'/js/jquery-ui.js', 'file');
+    drupal_add_css(drupal_get_path('theme', 'lifeecho') .'/css/jquery-ui.css', 'file');
+// Disable ajax upload for file field
+
+    $form['actions']['submit']['#value'] = 'Complete';
+      unset($form['field_address']['und'][0]['value']['#title']);
+      unset($form['field_city']['und'][0]['value']['#title']);
+      unset($form['field_state']['und']['#title']);
+      unset($form['field_zip']['und'][0]['value']['#title']);
+      unset($form['field_website']['und'][0]['value']['#title']);
+      unset($form['field_phone_number']['und'][0]['#title']);
+      unset($form['field_email_address']['und'][0]['email']['#title']);
+      $form['field_thumbnail_upload']['und'][0]['#title'] = '';
+      unset($form['field_what_is_the_name_of_your_o']['und'][0]['value']['#title']);
+      unset($form['field_phone_number']['und'][0]['value']['#title']);
+      
+     $form['#validate'][] = "custom_lifeecho_community_field_validation";
+      
+      // we need to alter the option 'none' text
+      $form['field_state']['und']['#options']['_none'] = 'State';
+
+	// we want to empty the 'none' text in create community page.
+
+	$form['field_state']['und']['#options']['_none'] = '';
+
+ /* create community billing related fields */
+
+	$first = variable_get('community_price_one');
+ 	$second = variable_get('community_price_two');
+ 	$third = variable_get('community_price_three');
+	$fourth = variable_get('community_price_four');
+	$fifth = variable_get('community_price_five');
+
+if($user->uid <> 1) { // check for admin role
+
+	$form['amount_options'] = array(
+	'#type' => 'radios',
+	'#title' => t('Billing Info'),
+	'#required' => TRUE,
+	'#options' => array($first=>'$'.$first.'/year Small Groups',$second=>'$'.$second.'/year <500 in weekly attendance',$third=>'$'.$third.'/year between 500-1000 in weekly attendance',$fourth=>'$'.$fourth.'/year between 1000-2000 in weekly atttendance',$fifth => '$'.$fifth.'/year >2000 in weekly attendance'),
+     );
+
+}
+
+if(arg(2) <> 'edit') { // check for community edit page.
+
+	if($user->uid != 1) {
+
+	 $form['credit_card_number'] = array(
+	  '#type' => 'creditfield_cardnumber',
+	  '#title' => 'Credit Card Number',
+	  '#maxlength' => 16,
+	  '#submit' =>TRUE,
+	);
+	    
+	$form['expiration_date'] = array(
+	  '#type' => 'creditfield_date',
+	  '#title' => 'Expiration Date',
+	);
+
+	$form['credit_card_cvv'] = array(
+	  '#type' => 'creditfield_cvv',
+	  '#title' => 'CVV Code',
+	  '#maxlength' => 4,
+	  '#description' => 'Enter the 3 or 4 digit security code imprinted on the reverse side of the card.',
+	);
+
+	} // End admin user check uid != 1
+}
+else {
+
+// set billing info as ordered price , otherwise when editing community it shows error message as
+// billinginfo required.
+/*if($user->uid == 1) {
+$uid = arg(1);
+}
+else {
+$uid = $user->uid;
+}
+
+print "uid".$uid; */
+
+if($user->uid <> 1) { // check for admin role
+
+      $order_price = '';
+      $query_order_price  =   db_select('lifeecho_orders', 'lo')
+                 ->fields('lo',array('order_price'))
+                 ->condition('order_customer_id', $user->uid );
+      $result =  $query_order_price->execute();
+      $order_price = $result->fetchField(0);
+      // print "order price".$order_price;
+      $form['amount_options']['#default_value'] = $order_price;
+
+}
+
+// we need to remove all billing related fields from community edit page.
+	$form['credit_card_number']['#required'] = FALSE;
+	$form['credit_card_cvv']['#required'] = FALSE;
+	//$form['amount_options']['#required'] = FALSE;
+	$form['expiration_date']['#required'] = FALSE;
+
+	$form['credit_card_number']['#access'] = FALSE;
+	$form['credit_card_cvv']['#access'] = FALSE;
+	//$form['amount_options']['#access'] = FALSE;
+	$form['expiration_date']['#access'] = FALSE;
+	$form['credit_card_number']['#access'] = 0;
+	$form['credit_card_cvv']['#access'] = 0;
+
+	hide($form['credit_card_number']);
+	unset($form['credit_card_number']);
+	hide($form['credit_card_cvv']);
+	unset($form['credit_card_cvv']);
+}
+
+  } // END form ID - community_lifeecho_node_form.
+
+
+       // we want to alter the default form for "node deletion".
+
+	if($form_id == 'node_delete_confirm') {
+
+	if($form['#node']->type == 'community_video') {
+	$form['actions']['cancel']['#href'] = 'discipleship-101';
+	$form['#submit'][] = 'delete_path_submit';
+        $form['description']['#markup'] = 'Do you really want to delete Video?';
+	}
+
+        if($form['#node']->type == 'community_content') {
+	$form['actions']['cancel']['#href'] = 'discipleship-101';
+	$form['#submit'][] = 'delete_path_submit';
+        $form['description']['#markup'] = 'Do you really want to delete the Community Message?';
+        }
+
+	if($form['#node']->type == 'community_lifeecho') {
+	$form['description']['#markup'] = 'Do you really want to delete your Community?';
+        $form['#submit'][] = 'delete_community_submit';
+	}
+	$form['actions']['submit']['#value'] = 'Yes';
+	$form['actions']['cancel']['#prefix'] = '<div class="cancel_button">';
+	$form['actions']['cancel']['#suffix'] = '</div>';
+	$form['actions']['submit']['#prefix'] = '<div class="submit_button">';
+	$form['actions']['submit']['#suffix'] = '</div>';
+	} // END form ID - node_delete_confirm
+
+ // we want to alter the default form for "userrelationship form" on user profile page .
+ // you can see a form with invite button .
+
+if($form_id == 'userrelationship_form') {
+//$form['#validate'][] = "custom_userrelationship_field_validation";
+} // END form ID - userrelationship_form
+
+// remove --select a value-- text from field field_user_state.
+$form['field_user_state']['und']['#options']['_none'] = '';
+
+// leave community form modification
+if($form_id == 'og_ui_confirm_unsubscribe') {
+// we need to hide description of leave community form.
+$form['description']['#markup'] = '';
+}
+
+/*print '<pre>';
+print_r($form);
+print '</pre>';*/
+
+}
+
+/*
+* Custom functions for delete form redirection.
+*/
+
+function delete_path_submit() {
+ drupal_goto('discipleship-101');
+}
+
+function delete_community_submit() {
+ drupal_goto('user');
+}
+
+/* Implements of hook__preprocess_page
+ * 
+ * we want to change primary tab and secondary tab from user profile pages.
+ */
+
+function custom_alter_preprocess_page(&$vars, $hook) {
+
+   global $user;
+   $query =   db_select('node', 'n')
+                         ->fields('n',array('nid'))
+                         ->condition('uid', $user->uid )
+                         ->condition('type','community_lifeecho')
+                         ->orderBy('created', 'DESC')//ORDER BY created
+                         ->range(0,1); //LIMIT to 1 record
+          $result = $query->execute();
+          $row_count = $result->rowCount();
+          while($record = $result->fetchAssoc()) {
+          $nid = $record['nid'];  
+          }
+
+    if($row_count > 0) {
+    $vars['page']['userprofilesidebar']['menu_menu-community-admin-dashboard-m']['2797']['#href'] = 'node/'.$nid;
+    $vars['page']['userprofilenavigation']['menu_menu-user-communtity-menu']['2794']['#href'] = 'node/'.$nid;
+    }
+    else {
+    $vars['page']['userprofilesidebar']['menu_menu-community-admin-dashboard-m']['2797']['#href'] = ''; 
+    $vars['page']['userprofilenavigation']['menu_menu-user-communtity-menu']['2794']['#href'] = '';
+    }
+
+if(isset($vars['page']['content']['system_main']['nodes'])) {
+$node_id = arg(1);
+if($node_id != '' && arg(0) == 'node')
+$node_type = $vars['page']['content']['system_main']['nodes'][$node_id]['#node']->type;
+
+// check og user roles
+if((function_exists('og_get_user_roles')) && ($node_id != '')) {
+global $user;
+$roles = og_get_user_roles('node', $node_id, $user->uid); // 3 - community admin , 2 - member
+}
+
+if(($node_type == 'community_lifeecho') && (get_logged_user_community_ID() != $node_id) && (array_key_exists('3', $roles) == FALSE)) {
+
+// remove invite item from menu
+unset($vars['page']['userprofilesidebar']['menu_menu-community-admin-dashboard-m'][2755]);
+// remove post message/video item from menu
+unset($vars['page']['userprofilesidebar']['menu_menu-community-admin-dashboard-m'][2756]);
+// remove roster page item from menu
+unset($vars['page']['userprofilesidebar']['menu_menu-community-admin-dashboard-m'][2757]);
+}
+}
+
+if((arg(0) == 'discipleship-101')) { // check for discipleship 101 page
+
+$adminrole = user_has_community_adminrole(); // check user has admin role in any community
+
+    if($adminrole == 0 && get_logged_user_community_ID() == NULL) {
+
+	// remove community item from menu.
+	unset($vars['page']['userprofilesidebar']['menu_menu-community-admin-dashboard-m']['2797']);
+
+	// remove invite item from menu.
+	unset($vars['page']['userprofilesidebar']['menu_menu-community-admin-dashboard-m'][2755]);
+
+	// remove post message/video item from menu.
+	unset($vars['page']['userprofilesidebar']['menu_menu-community-admin-dashboard-m'][2756]);
+
+	// remove roster page item from menu.
+	unset($vars['page']['userprofilesidebar']['menu_menu-community-admin-dashboard-m'][2757]);
+
+    }
+} // END IF discipleship-101
+
+
+if(get_logged_user_community_ID() == NULL) {
+// remove community item from menu
+unset($vars['page']['userprofilesidebar']['menu_menu-community-admin-dashboard-m']['2797']);
+}
+
+if((arg(0) == 'community' && arg(1) == 'dashboard') && (get_logged_user_community_ID() == NULL)) {
+// remove community item from menu
+unset($vars['page']['userprofilesidebar']['menu_menu-community-admin-dashboard-m']['2797']);
+// remove invite item from menu
+unset($vars['page']['userprofilesidebar']['menu_menu-community-admin-dashboard-m'][2755]);
+// remove post message/video item from menu
+unset($vars['page']['userprofilesidebar']['menu_menu-community-admin-dashboard-m'][2756]);
+// remove roster page item from menu
+unset($vars['page']['userprofilesidebar']['menu_menu-community-admin-dashboard-m'][2757]);
+}
+
+  global $user;
+
+  // Removes the primary tab
+  if($hook == 'page' && arg(0)=='user' && $user->uid!=1) {
+    unset($vars['tabs']['#primary']);
+  }
+
+  // Removes the secondary tab
+  if($hook == 'page' && arg(0)=='user' && arg(2)== 'edit' && $user->uid!=1) {
+   unset($vars['tabs']['#secondary']);
+  }
+
+  if($hook == 'page' && arg(0)=='node' && arg(2)=='delete' && $user->uid!=1) {
+    unset($vars['tabs']['#primary']);
+    unset($vars['tabs']['#secondary']);
+  }
+  
+    // Do we have a node?
+  if (isset($vars['node'])) {
+
+    // Ref suggestions cuz it's stupid long.
+    $suggests = &$vars['theme_hook_suggestions'];
+
+    // Get path arguments.
+    $args = arg();
+    // Remove first argument of "node".
+    unset($args[0]);
+
+    // Set type.
+    $type = "page__type_{$vars['node']->type}";
+
+    // Bring it all together.
+    $suggests = array_merge(
+      $suggests,
+      array($type),
+      theme_get_suggestions($args, $type)
+    );
+  }
+
+
+/*if($hook == 'page' && arg(0) == 'community' && arg(1) == 'joindiscipler' && is_numeric(arg(2))) {
+print '<pre>';
+print_r($vars);
+print '</pre>';
+}*/
+  
+}
+
+
+/* function custom_alter_css_alter(&$css) {
+print '<pre>';
+print_r($css);
+print '</pre>';
+} */
+
+/*
+ * 
+ * Implemntation of hook_node_presave
+ * we want to limit community node creation to 1 for a user
+ */
+
+function custom_alter_node_presave($node) {
+
+
+  if($node->type == 'community_lifeecho')
+  {
+ 
+  global $user;
+  $query = db_select('node', 'n')
+  ->fields('n', array('nid'))
+  ->condition('n.type', 'community_lifeecho')
+  ->condition('n.uid',$user->uid);
+  $query->addExpression('COUNT(n.nid)', 'ncount');
+  $result = $query->execute();
+  $results = $result->fetchAssoc();
+  $node_count = $results['ncount'];
+  if($node_count == 1 && arg(1) == 'add') {
+      drupal_set_message(t('Only one Community per member is allowed'), 'error');
+      drupal_goto('node/add/community-lifeecho');
+  }
+  }
+}
+
+ function test_form_validate($form, &$form_state) {
+  if ($form_state['values']['name'] == '') {
+    form_set_error('name', t('You must select a name for this group of settings.'));
+  }
+}
+
+/**
+ * Implemntation of hook_jcarousel_skin_info().
+ * 
+ * we used this function to add custom skin to views jcarousel.
+ */
+
+function custom_alter_jcarousel_skin_info() {
+  $skins = array();
+  
+   $skins['usersidebar'] = array(
+    'title' => t('User Sidebar'),
+    'file' => 'skins/user_sidebar/jcarousel-sidebar.css',
+  );
+
+  return $skins;
+}
+
+// custom function to return first time login condition
+
+function is_first_time_login($account) {
+  return ($account->created == $account->login);
+}
+
+/* Implemntation of hook_user_login
+ * 
+ *  we want to check first time login
+ */
+function custom_alter_user_login(&$edit, $account) {
+
+global $user;
+
+// check whether user accpted terms and conditions by tick checkbox on create profile
+
+$user_info = user_load($user->uid);
+if(isset($user_info->field_last_step_please_accept_th['und'][0]['value'])) {
+$accept_status = $user_info->field_last_step_please_accept_th['und'][0]['value'];
+}
+else { $accept_status = 0; }
+    if (is_first_time_login($account) || $accept_status != 1) {
+    drupal_goto('user/'.$account->uid.'/edit');
+    }
+  
+}
+
+/*
+ * Custom facebook login function
+ */
+function custom_alter_facebook_login() {
+
+   // echo $_SERVER['HTTP_REFERER'];
+     $client = facebook_client();
+     $fbuid = $client->getUser();
+     if ($fbuid == 0) {
+     global $base_url;
+     $params['scope'] = 'email'; // to set facebook app permissions
+     $params['redirect_uri'] = $base_url.'/fbconnect/register/create';
+     $url = $client->getLoginUrl($params);
+     $new_url = explode('&',$url);
+     $new_urls = explode('=',$new_url[2]);
+     $_SESSION['fb_283375108456054_state'] = $new_urls[1];
+     drupal_goto($url);
+    }
+     else {
+     drupal_goto('fbconnect/register/create');
+     }
+}
+
+/*
+ * Custom facebook logout function
+ */
+
+function custom_alter_facebook_logout() {
+     global $base_url;
+     $access_token = '';
+     cache_clear_all('*', 'cache_page', TRUE);
+     session_start();
+     $client = facebook_client(); // create facebook client object.
+     $fbuid = $client->getUser(); // get user facebook id
+     @$access_token =  $client->getAccessToken(); // get access token for facebook
+     $url = $client->getLogoutUrl(array('next' => $base_url,'access_token' => $access_token));
+     $client->destroySession(); // destroy facebook session.
+
+     if(isset($_SESSION)) {
+     session_destroy();
+     }
+
+     if(isset($_COOKIE)) {
+     unset($_COOKIE); 
+     }
+
+     drupal_goto($url);
+}
+
+/*
+ * Custom function to redirect after user profile form submission
+ * 
+ */
+
+function user_profile_form_submit_redirect($form,$form_state) {
+global $user;
+// we need to store an update status on table `lifeecho_login_stats` - 
+// mini profile feature condition check
+
+
+$query_alert=db_select('lifeecho_alerts', 'la')
+                      ->fields('la',array('alertto','alerttype'))
+                       ->condition('alertto',$user->uid)
+                      ->condition('alerttype','first-video-alert');
+
+                        $result_alert = $query_alert->execute();
+			//print $query->__toString();
+			$row_count_alert =  $result_alert->rowCount();
+
+   if($row_count_alert==0)
+   {
+       $post_alert_ins="Welcome to your new LifeEcho Dashboard!.<br />Please watch the video below for some tips.<iframe width='280' height='260' src='http://www.youtube.com/embed/uPMXrepHNwI?feature=player_embedded;rel=0;autoplay=1' frameborder='0'></iframe>";
+
+$query_alert_ins = db_insert('lifeecho_alerts');
+$query_alert_ins->fields(array(
+'alerttext' => $post_alert_ins,
+'alerttype' => 'first-video-alert',
+'alertto' => $user->uid,
+'alertfrom' => 1,
+'alerttime' => REQUEST_TIME,
+'alertstatus' => 0,
+'accept_status' => 0
+));
+$result_alert_ins = $query_alert_ins->execute();
+
+   }
+
+
+
+$getcount = db_select('lifeecho_login_stats','lls')
+->fields('lls',array('uid'))
+->condition('lls.uid',$user->uid);
+$count_result = $getcount->execute();
+$count_value = $count_result->rowCount();
+
+
+
+
+if($count_value == 0) {
+
+
+
+
+
+
+
+$query = db_insert('lifeecho_login_stats')
+	 ->fields(array (
+			'uid' => $user->uid,
+			'profile_edit_status' => 1,
+			'changedtime' => REQUEST_TIME,
+			));
+$query->execute();
+
+}
+
+// field_youtube_record_value
+    drupal_goto('user');
+}
+
+/**
+ * Implementation of hook_js_alter().
+ * 
+ * Swap out jQuery-ui to fix the media library issue from user profile page.
+ */
+
+function custom_alter_js_alter(&$javascript) {
+    if(arg(0) == 'user' && arg(2) == 'edit') { // check page is user edit profile page
+    unset($javascript['sites/all/themes/lifeecho/js/jquery-ui.js']);
+    }
+}
+
+function get_admin_community_dashboard() {
+    $content = 'test';
+    return $content;
+}
+
+function get_user_matches() {
+    $content = '';
+    return $content;  
+}
+
+/* 
+* Custom function to remove user relationship
+*/
+
+function remove_userrelationship($rid) {
+
+// get requester id and requestee id
+
+  $query = db_select('user_relationships', 'ur')
+  ->fields('ur', array('requester_id','requestee_id','rtid'))
+  ->condition('ur.rid',$rid);
+  $ur_result = $query->execute();
+ while($ur_record = $ur_result->fetchAssoc()) {
+	$requester_id = $ur_record['requester_id'];
+	$requestee_id = $ur_record['requestee_id'];
+	$relation_id = $ur_record['rtid'];
+ }
+
+//print "requester id is".$requester_id;
+//print "requestee id is".$requestee_id;
+
+// delete request from user relationship table
+//echo "rid-".$rid;
+//echo "rtid-".$relation_id;
+//echo "requestre_id : ".$requester_id;
+//echo "requestee_id : ".$requestee_id;
+//die;
+db_delete('user_relationships')
+->condition('rid', $rid)
+->execute();
+
+// also delete reciprocal row
+
+db_delete('user_relationships')
+->condition('requester_id', $requestee_id)
+->condition('requestee_id', $requester_id)
+//->condition('rtid', $relation_id)
+->execute();
+
+// delete alerts from custom alerts table
+
+db_delete('lifeecho_alerts')
+->condition('alertto', $requestee_id)
+->condition('alertfrom', $requester_id)
+->execute();
+
+if($relation_id == 1) {
+$alerttext = t('disciple');
+}
+else if($relation_id == 2) {
+$alerttext = t('be discipled by');
+}
+else if($relation_id == 3) {
+$alerttext = t('connect in accountability with');
+}
+
+// Store leave d-pair alert to table
+
+$query = db_insert('lifeecho_alerts')
+->fields(array(
+'alerttext' => $alerttext,
+'alertto' => $requestee_id,
+'alertfrom' => $requester_id,
+'alerttime' => REQUEST_TIME,
+'alerttype' => 'ur-leave'
+))
+->execute();
+
+drupal_set_message(t('User D-Pair successfully removed'),'status');
+drupal_goto('user');
+}
+
+
+function decline_userrelationship($rid) {
+
+// get requester id and requestee id
+
+  $query = db_select('user_relationships', 'ur')
+  ->fields('ur', array('requester_id','requestee_id','rtid'))
+  ->condition('ur.rid',$rid);
+  $ur_result = $query->execute();
+ while($ur_record = $ur_result->fetchAssoc()) {
+	$requester_id = $ur_record['requester_id'];
+	$requestee_id = $ur_record['requestee_id'];
+	$relation_id = $ur_record['rtid'];
+ }
+
+//print "requester id is".$requester_id;
+//print "requestee id is".$requestee_id;
+
+// delete request from user relationship table
+
+db_delete('user_relationships')
+->condition('rid', $rid)
+->execute();
+
+// also delete reciprocal row
+
+db_delete('user_relationships')
+->condition('requester_id', $requestee_id)
+->condition('requestee_id', $requester_id)
+->condition('rtid', $relation_id)
+->execute();
+
+// delete alerts from custom alerts table
+
+db_delete('lifeecho_alerts')
+->condition('alertto', $requestee_id)
+->condition('alertfrom', $requester_id)
+->execute();
+
+if($relation_id == 1) {
+$alerttext = t('disciple');
+}
+else if($relation_id == 2) {
+$alerttext = t('be discipled by');
+}
+else if($relation_id == 3) {
+$alerttext = t('connect in accountability with');
+}
+
+// Store leave d-pair alert to table
+
+$query = db_insert('lifeecho_alerts')
+->fields(array(
+'alerttext' => $alerttext,
+'alertto' => $requester_id,
+'alertfrom' => $requestee_id,
+'alerttime' => REQUEST_TIME,
+'alerttype' => 'ur-decline'
+))
+->execute();
+
+drupal_set_message(t('User D-Pair successfully declined'),'status');
+drupal_goto('user');
+
+}
+
+
+/* 
+* Custom function to approve user relationship
+*/
+
+function approve_userrelationship($rid) {
+
+global $user;
+$a3 = '';
+$a4 = '';
+$res = array();
+$no_community_user_info = '';
+$no_community_username1 = '';
+$no_community_username2 = '';
+// get requester id and requestee id
+
+  $query = db_select('user_relationships', 'ur')
+  ->fields('ur', array('requester_id','requestee_id','rtid'))
+  ->condition('ur.rid',$rid);
+  $ur_result = $query->execute();
+ while($ur_record = $ur_result->fetchAssoc()) {
+	$requester_id = $ur_record['requester_id'];
+	$requestee_id = $ur_record['requestee_id'];
+	$relation_id = $ur_record['rtid']; 
+ }
+
+// check requstee and requester have a common community.
+
+$a3 = get_allcommunities_forauser($requester_id);
+$a4 = get_allcommunities_forauser($requestee_id);
+
+if(count($a3) == 0 || count($a4) == 0) {
+
+if((count($a4) == 0) && (count($a3) <> 0)) { // requestee have no community.
+$no_community_username1 = $user->name;
+drupal_set_message(t('User "'.$no_community_username1.'" is not a part of any community'),'warning');
+}
+
+if(count($a3) == 0 && count($a4) <> 0) { // requester have no community.
+$no_community_user_info = user_load($requester_id);
+$no_community_username2 = $no_community_user_info->name;
+drupal_set_message(t('User "'.$no_community_username2.'" is not a part of any community'),'warning');
+}
+
+if(count($a3) == 0 && count($a4) == 0) { // both ( requester & requestee ) have no community.
+$no_community_username1 = $user->name;
+$no_community_user_info = user_load($requester_id);
+$no_community_username2 = $no_community_user_info->name;
+drupal_set_message(t('User '.$no_community_username1.' & User '.$no_community_username2.' is not part of any community'),'warning');
+}
+
+// delete alerts from custom alerts table.
+
+db_delete('lifeecho_alerts')
+->condition('alertto', $requestee_id)
+->condition('alertfrom', $requester_id)
+->condition('alerttype','ur')
+->execute();
+
+// delete user relation request.
+
+db_delete('user_relationships')
+->condition('rid', $rid, '=')
+->execute();
+
+// Store invalid d-pair request alert to table.
+
+
+db_insert('lifeecho_alerts')
+->fields(array(
+'alerttext' => 0,
+'alerttype' => 'ur-invalid-request',
+'alertto' => $requester_id,
+'alertfrom' => $requestee_id,
+'alerttime' => REQUEST_TIME,
+))
+->execute();
+
+drupal_goto('user/'.$requestee_id);
+
+}
+
+// update userrelations request as approved
+
+switch ($relation_id) {
+    case 1:
+        $relation_id = 2;
+        break;
+    case 2:
+       $relation_id = 1;
+        break;
+    case 3:
+        $relation_id=3;
+        break;
+}
+
+db_update('user_relationships')
+->fields(array(
+'approved' => 1,
+))
+->condition('rid', $rid, '=')
+->execute();
+
+// For a new entry, get a new id.
+
+/* reciprocal relation - results in two rows for a reciprocated relationship:  */
+
+$rid = db_next_id(db_query('SELECT MAX(rid) FROM {user_relationships}')->fetchField());
+
+db_insert('user_relationships')
+            ->fields(array(
+			'rid' => $rid,
+			'requester_id' => $requestee_id,
+			'requestee_id' => $requester_id,
+			'rtid' => $relation_id,
+			'approved' => 1,
+			'created' => REQUEST_TIME,
+			'changed' => REQUEST_TIME,
+			'flags' => 0,
+))
+            ->execute();
+
+// delete alerts from custom alerts table
+
+db_delete('lifeecho_alerts')
+->condition('alertto', $requestee_id)
+->condition('alertfrom', $requester_id)
+->execute();
+
+if($relation_id == 1) {
+$alerttext = t('disciple');
+}
+else if($relation_id == 2) {
+$alerttext = t('be discipled by');
+}
+else if($relation_id == 3) {
+$alerttext = t('connect in accountability with');
+}
+
+// Store accept d-pair alert to table
+
+db_insert('lifeecho_alerts')
+->fields(array(
+'alerttext' => $alerttext,
+'alerttype' => 'ur-accept',
+'alertto' => $requester_id,
+'alertfrom' => $requestee_id,
+'alerttime' => REQUEST_TIME,
+))
+->execute();
+
+drupal_set_message(t('User D-Pair successfully approved'),'status');
+drupal_goto('user');
+}
+/*
+* Implements hook_node_insert
+*
+* we need to pass all billing info to the payment gateway url
+*/
+function custom_alter_node_insert($node) {
+
+
+
+
+ if($node->type == 'community_lifeecho')
+  {
+  global $user;
+  $uid = $user->uid;
+  $month = '';
+  $year = '';
+  $months = '';
+
+if($node->expiration_date['month'] != '') {
+$month = $node->expiration_date['month'];
+}
+if($node->expiration_date['year'] != '') {
+$year = $node->expiration_date['year'];
+}
+
+$months='0'.$month;
+if(isset($_POST['amount_options']))
+$amount = $_POST['amount_options'];
+
+$trans_userID = variable_get('Bancard_user_id');
+$trans_password = variable_get('Bancard_password_id');
+if($month>=10)
+$data = "username=$trans_userID&password=$trans_password&type=sale&ccnumber="."$node->credit_card_number&ccexp=$month$year&cvv="."$node->credit_card_cvv&amount=$amount";
+else 
+$data = "username=$trans_userID&password=$trans_password&type=sale&ccnumber="."$node->credit_card_number&ccexp=$months$year&cvv="."$node->credit_card_cvv&amount=$amount";
+
+$options = array(
+                'method' => 'POST',
+                'data' => $data,
+                'timeout' => 15,
+                'headers' => array('Content-Type' => 'application/x-www-form-urlencoded'),
+        );
+$result = drupal_http_request('https://secure.tnbcigateway.com/api/transact.php?', $options); // developer url , username : demo , password : password
+/* 1 = Transaction Approved	
+   2 = Transaction Declined	
+   3 = Error in transaction data or system error */
+
+//$result = drupal_http_request('https://secure.tnbcigateway.com/r/wwy29?', $options); // client url
+$delimiters = Array("&","=");
+
+if(isset($result->data) || count($result->data) > 0) {
+$res = multiexplode($delimiters,$result->data);
+
+$response =  $res[0][1];
+$transaction = $res[3][1];
+$qid = db_insert('lifeecho_orders') 
+->fields(array(
+  'order_customer_id' => $user->uid,
+  'order_response_code' => $response,
+  'order_transaction_id' => $transaction,
+  'order_price' => $amount,
+  'order_reply_date' => REQUEST_TIME,
+ ));
+$qid->execute();
+}
+else {
+ 
+node_delete($node->nid);
+drupal_set_message("Community creation failed");
+drupal_goto('node/add/community-lifeecho');
+
+}
+
+// we need to findout lat and long from community zipcode.
+
+if(isset($node->field_zip['und'][0]['value'])) {
+$zip = $node->field_zip['und'][0]['value'];
+}
+else {
+$zip = '';
+}
+
+$nid = $node->nid;
+
+$query = array(
+    'address' => $zip,
+    'sensor' => 'false', // Required by TOS.
+  );
+
+/*  $url = url('http://maps.googleapis.com/maps/api/geocode/json', array(
+    'query' => $query,
+    'external' => TRUE,
+  ));
+
+  $http_reply = drupal_http_request($url);
+  $data = json_decode($http_reply->data);
+
+  $status_code = $data->status;
+  if ($status_code != 'OK') {
+    watchdog('location', 'Google geocoding returned status code: %status_code for the query url: %url', array('%status_code' => $data->status, '%url' => $url));
+    return NULL;
+  }
+
+  $location = $data->results[0]->geometry->location;*/
+//anusanker	 	
+//select value from db related to that zip code and select lat long .	 	
+
+
+	$query = db_select('zip_code','z');	 	
+	          $query->fields('z',array('lat','lon'));	 	
+	          $query->condition('z.zip_code',$zip);	 	
+		  $result = $query->execute();	 	
+	$row_count = $result->rowCount();	 	
+	$communityrecord = $result->fetchAssoc();	 	
+
+		 	
+//anusanker ends
+
+  $final = array('lat' => $communityrecord['lat'], 'lon' => $communityrecord['lon']);
+
+$dbid = db_insert('community_proximity')
+->fields(array(
+  'com_lat' => $final['lat'],
+  'com_lng' => $final['lon'],
+  'nid' => $nid,
+ ))
+
+->execute();
+
+}
+
+if($node->type == 'community_content') {
+
+// The Mudcat Admin has posted a message: â€œEvangelism Training #1â€?
+
+db_insert('lifeecho_alerts')
+->fields(array(
+'alerttype' => 'dship-message',
+'alertto' => $node->og_group_ref['und'][0]['target_id'],
+'alertfrom' => $node->nid,
+'alerttime' => REQUEST_TIME,
+))
+->execute();
+
+drupal_set_message(t("Community message added successfully"));
+drupal_goto('node/add/community-content');
+
+}
+
+if($node->type == 'community_video') {
+
+// The Mudcat Admin has posted a video: â€œEvangelism Training #1â€?
+
+db_insert('lifeecho_alerts')
+->fields(array(
+'alerttype' => 'dship-video',
+'alertto' => $node->og_group_ref['und'][0]['target_id'],
+'alertfrom' => $node->nid,
+'alerttime' => REQUEST_TIME,
+))
+->execute();
+
+}
+
+                        // print_r($results);
+
+                        
+                 
+}
+
+/*
+* implements _views_query_alter.
+* If you edit any views condition from backend you need to change the code for that views also .
+*/
+
+function custom_alter_views_query_alter(&$view, &$query) {
+
+global $user;
+$uid = $user->uid;
+
+$nodes = get_allcommunities_forauser(); // get all communities associated with a user ( created/joined)
+
+if ($view->name == 'discipler_user_dashboard_left_sidebar') {
+ //echo "<pre>";
+ //print_r($query);
+ //   echo $view->name;
+
+         $query->where[1]['conditions'][2]['operator'] = '=';
+	$query->where[1]['conditions'][2]['value'] = $uid;
+}
+
+
+
+
+if ($view->name == 'disciplee_user_dashboard_left_sidebar') {
+ //echo "<pre>";
+ //print_r($query);
+ //   echo $view->name;
+
+         $query->where[1]['conditions'][2]['operator'] = '=';
+	$query->where[1]['conditions'][2]['value'] = $uid;
+}
+
+// alter views related with inside user match block.
+
+// include all members from logged user joined/created.
+if ($view->name == 'user_matches_discipler' || $view->name == 'user_matches_accountability' || $view->name == 'user_matches_disciplee') {
+	
+        $query->where[1]['conditions'][3]['operator'] = 'in';
+	$query->where[1]['conditions'][3]['value'] = $nodes;
+$query->where[1]['conditions'][5]['value'] = $uid;
+	  }
+
+// exclude all members from logged user joined/created.
+
+if($view->name == 'matches_outside_of_your_community' || $view->name == 'matches_outside_of_your_community_discipler' || $view->name == 'matches_outside_of_your_community_displee') {
+
+$query->where[1]['conditions'][1]['operator'] = 'not in';
+$query->where[1]['conditions'][1]['value'] = $nodes;
+$query->where[1]['conditions'][4]['value'] = $uid;
+
+}
+
+// alter views related with available user types on community profile page.
+
+if($view->name == 'available_disciplees' || $view->name == 'available_disciplers' || $view->name == 'available_accountability') {
+
+$nid = arg(1);
+$nodeauthorid = '';
+$getnodeauthorid_row_count = 0;
+$getnodeauthorid_query =   db_select('node', 'n')
+                         ->fields('n',array('uid'))
+                         ->condition('nid', $nid )
+                         ->condition('type','community_lifeecho');
+          $getnodeauthorid_result = $getnodeauthorid_query->execute();
+          $getnodeauthorid_row_count = $getnodeauthorid_result->rowCount();
+
+	if($getnodeauthorid_row_count > 0) {
+	  $nodeauthorid = $getnodeauthorid_result->fetchField(0);
+	}
+
+}
+
+// Available disciplees block on lifeecho-community node page.
+
+if($view->name == 'available_disciplees') {
+   $query_custom =   db_select('node', 'n');
+                         $query_custom->fields('n',array('nid'));
+                         $query_custom->condition('uid', $nodeauthorid );
+                         $query_custom->condition('type','community_lifeecho');
+                         $query_custom->orderBy('created', 'DESC'); //ORDER BY created
+                         $query_custom->range(0,1); //LIMIT to 1 record
+          $result = $query_custom->execute();
+          $row_count = $result->rowCount();
+          while($record = $result->fetchAssoc()) {
+          $nid = $record['nid']; 
+          }
+	
+	if($row_count > 0) {
+	$query->where[1]['conditions'][3]['value'] = $nid;
+	}
+}
+
+// Available disciplers block on lifeecho-community node page.
+
+if($view->name == 'available_disciplers') {
+ $query_custom =   db_select('node', 'n');
+                         $query_custom->fields('n',array('nid'));
+                         $query_custom->condition('uid', $nodeauthorid );
+                         $query_custom->condition('type','community_lifeecho');
+                         $query_custom->orderBy('created', 'DESC'); //ORDER BY created
+                         $query_custom->range(0,1); //LIMIT to 1 record
+          $result = $query_custom->execute();
+          $row_count = $result->rowCount();
+          while($record = $result->fetchAssoc()) {
+          $nid = $record['nid']; 
+          }
+	
+        if($row_count > 0) {
+
+    //   print "<pre>";
+//print_r($query);
+unset($fields['users.uid']);
+	 $query->where[1]['conditions'][3]['value'] = $nid;
+$query->where[1]['conditions'][4]['value'] = $nid;
+          //
+//$fields =& $query->getGroupBy();
+        // $query->groupBy='users.uid';
+   // $query->groupBy("users.uid");
+
+	}
+}
+
+// Available accountability block on lifeecho-community node page.
+
+if($view->name == 'available_accountability') {
+
+$query_custom =   db_select('node', 'n');
+                         $query_custom->fields('n',array('nid'));
+                         $query_custom->condition('uid', $nodeauthorid );
+                         $query_custom->condition('type','community_lifeecho');
+                         $query_custom->orderBy('created', 'DESC'); //ORDER BY created
+                         $query_custom->range(0,1); //LIMIT to 1 record
+          $result = $query_custom->execute();
+          $row_count = $result->rowCount();
+          while($record = $result->fetchAssoc()) {
+          $nid = $record['nid']; 
+          }
+	
+	if($row_count > 0) {
+	  $query->where[1]['conditions'][4]['value'] = $nid;
+	}
+
+}
+
+}
+
+/*
+* Implemets hook_query_alter.
+*/
+
+function custom_alter_query_alter(QueryAlterableInterface $query) {
+global $user; 
+ if(isset($query->alterMetaData)){
+   if(isset($query->alterMetaData['view'])) {
+   // alter views related with outside matches on community profile page.
+    if($query->alterMetaData['view']->name == "matches_outside_of_your_community" || $query->alterMetaData['view']->name == "matches_outside_of_your_community_discipler" || $query->alterMetaData['view']->name == "matches_outside_of_your_community_displee") {
+     //Get a list of all 'group by' in the query
+     $fields =& $query->getGroupBy();
+	//unset($fields['uid']);
+	unset($fields['users_name']);
+	unset($fields['field_data_field_what_do_you_want_to_tell_o_user_entity_type']);
+	unset($fields['field_data_field_what_do_you_want_to_tell_o_field_what_do_yo']);
+	unset($fields['og_membership_users_created']);
+unset($fields['scoretable_score']);
+     $query->groupBy("users.uid");
+    }
+
+   }
+  }
+
+}
+
+function get_startdplan_page($uid) {
+global $user;
+// get relationship id from users ids
+$rid = get_relationid_from_usersid($uid,$user->uid);
+// get dplan status from relation id
+$dplan_status = get_dplan_status($rid);
+
+if($dplan_status == 0) {
+// get relationship id from users ids
+$rid = get_relationid_from_usersid($user->uid,$uid);
+// get dplan status from relation id
+$dplan_status = get_dplan_status($rid);
+}
+
+if($dplan_status == 1) { // case : D-Plan exists
+drupal_goto('userdplan/'.$uid.'/profile');
+}
+else { // case : D-Plan Not exists
+drupal_goto('starteddplan/'.$uid);
+}
+$content = " ";
+return $content;
+}
+
+function get_dplan_page($uid) {
+global $user;
+// get relationship id from users ids
+$rid_case1 = get_relationid_from_usersid($uid,$user->uid);
+$rid_case2 = get_relationid_from_usersid($user->uid,$uid);
+$query = db_insert('dplan_status')
+->fields(array(
+'rid' => $rid_case1,
+'status' => 1,
+'created' => REQUEST_TIME,
+'changed' => REQUEST_TIME
+));
+$query = db_insert('dplan_status')
+->fields(array(
+'rid' => $rid_case2,
+'status' => 1,
+'created' => REQUEST_TIME,
+'changed' => REQUEST_TIME
+));
+$query->execute();
+$user_info = user_load($uid);
+$fbuid = get_facebookid_from_userid($uid);
+$userimage = get_user_avatar($fbuid,'small',50,50);
+$content = '<div id="dplan_container" class="clearfix">';
+$content .= '<div id="dplan_user"><a href="'.url('user/'.$uid).'">'.$userimage.'</a><span><a href="'.url('user/'.$uid).'">'.$user_info->name.'</a></span></div>';
+$content .= render(drupal_get_form('dplan_form'));
+$content .= '</div>';
+$content .= '<div class="dplancal clearfix">';
+$content .= '<input type="hidden" value="'.$uid.'" id="dplan_with">'; //uid of dplaned user
+$content .= '<div class="dplandropevent clearfix"><h4>Drag & Drop</h4>';
+$dragg_event_block=module_invoke('views', 'block_view', 'default_event_view-block');
+$content .= render($dragg_event_block['content']);
+$content .= '</div>';
+$ical_import_block = module_invoke('fullcal', 'block_view', 'ical_import');
+$block = module_invoke('fullcal','block_view','dplan_calendar');
+$content .= '<div class="cal_import">'.render($ical_import_block).'</div>';
+$content .= render($block['content']);
+$content .= '</div>';
+return $content;
+}
+
+function get_starteddplan_page($uid) {
+$content = ' ';
+return $content;
+}
+
+/* 
+* Not using this function - refer "page--userdplan" template for functionality.
+*/
+
+function get_userdplan_page($uid) {
+$content = ' ';
+return $content;
+}
+
+/*
+* we need to alert all users about community deletion
+*/
+
+/*function custom_alter_node_delete($node) {
+if($node->type == 'community_lifeecho' ) {
+
+}
+}*/
+
+function multiexplode($delimiters,$string) {
+    $ary = explode($delimiters[0],$string);
+    array_shift($delimiters);
+    if($delimiters != NULL) {
+        foreach($ary as $key => $val) {
+             $ary[$key] = multiexplode($delimiters, $val);
+        }
+    }
+    return  $ary;
+}
+
+/*
+* Implements hook_user_update().
+*/
+
+function custom_alter_user_update(&$edit, $account, $category) {
+
+//alerttyep ='first-video-alert'
+
+$user_id = arg(1);
+
+
+
+
+
+
+
+if(isset($account->field_user_zip_code['und'][0]['value'])) {
+$zip = $account->field_user_zip_code['und'][0]['value'];
+}
+else {
+$zip = '';
+}
+
+$uid = $account->uid;
+/*$query = array(
+    'address' => $zip,
+    'sensor' => 'false', // Required by TOS.
+  );
+
+  $url = url('http://maps.googleapis.com/maps/api/geocode/json', array(
+    'query' => $query,
+    'external' => TRUE,
+  ));
+
+  $http_reply = drupal_http_request($url);
+  $data = json_decode($http_reply->data);
+
+  $status_code = $data->status;
+  if ($status_code != 'OK') {
+    watchdog('location', 'Google geocoding returned status code: %status_code for the query url: %url', array('%status_code' => $data->status, '%url' => $url));
+    return NULL;
+  }
+
+  $location = $data->results[0]->geometry->location;
+
+  $final = array('lat' => $location->lat, 'lon' => $location->lng);*/
+//anusanker profile update	 	
+
+	//select value from db related to that zip code and select lat long .	 	
+		 	
+		 	
+	$query = db_select('zip_code','z');	 	
+	          $query->fields('z',array('lat','lon'));	 	
+	          $query->condition('z.zip_code',$zip);	 	
+		  $result = $query->execute();	 	
+	$row_count = $result->rowCount();	 	
+	$profilerecord = $result->fetchAssoc();	 	
+		 	
+
+	//if ($row_count == '0') { 	 	
+	//    form_set_error('clientsidevalidation-user-profile-form-errors', 'Invalid zip code');	 	
+	//	drupal_goto('user/'.$account->uid.'/edit');exit;	 	
+	 // }	 	
+	//$location = $data->results[0]->geometry->location;	 	
+		 	
+	//anusanker ends
+
+$dbid = db_update('users')
+->fields(array(
+  'lat' => $profilerecord['lat'],
+  'lng' => $profilerecord['lon'],
+ ))
+->condition('uid',$account->uid)
+->execute();
+
+}
+
+// check logged user has community
+
+function logged_user_has_community() {
+   global $user;
+   $query =   db_select('node', 'n')
+                         ->fields('n',array('nid'))
+                         ->condition('uid', $user->uid )
+                         ->condition('type','community_lifeecho')
+                         ->orderBy('created', 'DESC')//ORDER BY created
+                         ->range(0,1); //LIMIT to 1 record
+          $result = $query->execute();
+          $row_count = $result->rowCount();
+	  return $row_count;
+}
+
+// get community id created by logged user
+
+function get_logged_user_community_ID() {
+   global $user;
+   $query =   db_select('node', 'n')
+                         ->fields('n',array('nid'))
+                         ->condition('uid', $user->uid )
+                         ->condition('type','community_lifeecho')
+                         ->orderBy('created', 'DESC')//ORDER BY created
+                         ->range(0,1); //LIMIT to 1 record
+          $result = $query->execute();
+          $row_count = $result->rowCount();
+if($row_count > 0) {
+return $result->fetchField(0);
+}
+else {
+return '';
+}
+}
+
+/*
+* Custom function for field validation message change.
+*/
+
+function custom_userrelationship_field_validation(&$form, &$form_state) {
+
+// we need to alter messages for user relationship form.
+
+    $errors = drupal_get_messages(); // (dpm()'s has to go AFTER this line--they get cleared)
+    foreach ($errors as $type => $id) {
+        foreach ($id as $message){
+            // Loop through individual messages, looking for ones to remove or replace
+            if (test_for_invalid_error_userrelationship($message)===FALSE){
+                drupal_set_message($message,$type);
+            } elseif (test_for_invalid_error($message)!==TRUE) {
+                drupal_set_message(test_for_invalid_error($message), $type);
+            }
+        }
+    }
+
+}
+
+/**
+* Implementation of hook_clientside_validation_rule_alter().
+*/
+
+/*function custom_alter_clientside_validation_rule_alter (&$js_rules, $element, $context) {
+
+  switch ($context['type']) {
+  case 'element_validate':
+  $js_rules['credit_card_cvv']['messages']['required'] = 'CVV Code field is required';
+  break;
+}
+} */
+
+function custom_lifeecho_community_field_validation(&$form, &$form_state) {
+// website address validation
+/*$website_adrs = $form_state['input']['field_website']['und'][0]['value'];
+if (!preg_match("#^www\.[a-z0-9-_.]+\.[a-z]{2,4}$#i", $website_adrs)) {
+form_set_error('field_website', t('Please enter a Valid Website Address , Eg. www.sitename.com'));
+}
+*/
+// we need to alter messages for community form.
+
+if($form_state['input']['field_accept']['und'] <> 1) {
+
+    $errors = drupal_get_messages(); // (dpm()'s has to go AFTER this line--they get cleared)
+    foreach ($errors as $type => $id) {
+        foreach ($id as $message) {
+            // Loop through individual messages, looking for ones to remove or replace
+            if (test_for_invalid_error($message)===FALSE){
+                drupal_set_message($message,$type);
+            } elseif (test_for_invalid_error($message)!==TRUE) {
+                drupal_set_message(test_for_invalid_error($message), $type);
+            }
+        }
+    }
+}
+
+}
+
+/*
+* we need to alter a message that is generated at the time of form submission
+*/
+
+function test_for_invalid_error($message) {
+
+   // alter message for field "field_accept"
+    if ($message == ' field is required.') {
+        return t('To create a Community you need to Accept our Terms and Conditions');
+    }
+
+    return FALSE;
+}
+
+function test_for_invalid_error_userrelationship($message) {
+   // alter message for field "field_accept"
+    if ($message == ' field is required.') {
+        return t('Please select a D-pair type');
+    }
+    return FALSE;
+}
+
+/*
+* get community id created by logged user
+*/
+
+function get_logged_user_joined_community_ID() {
+   $nodeinfo = array();
+   global $user;
+   $query = db_select('og_membership','og');
+          $query->fields('og',array('gid'));
+          $query->fields('n',array('title','nid'));
+           $query->leftJoin('node','n','og.gid = n.nid');
+	   $query->condition('og.etid', $user->uid ,'=');
+	   $query->condition('og.state','1','=');
+	   $query->condition('n.status','1','=');
+	   $query->condition('og.entity_type','user','=');
+	   $query->orderBy('n.title','ASC');
+   $result = $query->execute();
+$row_count = $result->rowCount();
+while($record = $result->fetchAssoc()) {
+$nodeinfo[] = $record['nid'].'/'.$record['title'];
+}
+   return $nodeinfo;
+
+}
+
+/*
+* check user is a member of a community
+*/
+
+function check_user_isa_member($uid,$gid) {
+
+   global $user;
+   $query = db_select('og_membership','og');
+          $query->fields('og',array('gid'));
+          $query->fields('n',array('title','nid'));
+           $query->leftJoin('node','n','og.gid = n.nid');
+	   $query->condition('og.etid', $uid ,'=');
+	   $query->condition('og.state','1','=');
+	   $query->condition('n.status','1','=');
+	   $query->condition('og.gid', $gid ,'=');
+	   $query->condition('og.entity_type','user','=');
+	   $query->orderBy('n.title','ASC');
+$result = $query->execute();
+$row_count = $result->rowCount();
+return $row_count;
+
+}
+
+
+/*
+* We need to get community node info from user id and community id.
+*/
+
+function get_user_joined_community_ID_by_userID($uid,$gid) {
+
+   global $user;
+   $query = db_select('og_membership','og');
+          $query->fields('og',array('gid'));
+          $query->fields('n',array('title','nid'));
+           $query->leftJoin('node','n','og.gid = n.nid');
+	   $query->condition('og.etid', $uid ,'=');
+	   $query->condition('og.state','1','=');
+	   $query->condition('n.status','1','=');
+	   $query->condition('og.gid', $gid ,'!=');
+	   $query->condition('og.entity_type','user','=');
+	   $query->orderBy('n.title','ASC');
+   $result = $query->execute();
+$row_count = $result->rowCount();
+
+if($row_count > 0) {
+$nodeinfo .= '<ul>';
+while($record = $result->fetchAssoc()) {
+$nodeinfo .= '<li>'.l($record['title'],'node/'.$record['nid']).'</li>';
+}
+$nodeinfo .= '</ul>';
+   return $nodeinfo;
+} else {
+return '';
+}
+
+}
+
+/*
+* Implements hook_node_update()
+*/
+
+function custom_alter_node_update($node) {
+global $user;
+if(($node->type == 'community_video') && ($user->uid == 1)) {
+
+// The Mudcat Admin has shared a video: â€œEvangelism Training #1â€?
+/*
+db_insert('lifeecho_alerts')
+->fields(array(
+'alerttype' => 'dship-share-video',
+'alertto' => 0,
+'alertfrom' => $node->nid,
+'alerttime' => REQUEST_TIME,
+))
+->execute();
+*/
+if($user->uid==1)
+$from=1;
+else
+         $from = $node->nid;
+
+        $time = REQUEST_TIME;
+   $result_alert = db_query("call videoaharealert('$post_alert',$time,$from)");
+
+       // $result_alert = db_query('Call videoaharealert()');
+
+
+}
+
+}
+
+
+/*
+* check Mini profile form submitted by a user or not.
+*/
+
+function check_miniprofile_status() {
+global $user;
+$query = db_select('lifeecho_login_stats','lls')
+	 ->fields('lls',array('profile_edit_status'))
+	 ->condition('lls.uid',$user->uid);
+$result = $query->execute();
+return $result->fetchField(0);
+}
+
+
+/**
+ * Implements hook_og_membership_delete().
+*/
+
+function custom_alter_og_membership_delete($og_membership) {
+
+// insert an alert at the time a member unsubscribe from a community.
+
+db_insert('lifeecho_alerts')
+->fields(array(
+'alertto' => $og_membership->gid,
+'alertfrom' => $og_membership->etid,
+'alerttype' => 'og-mdelete',
+'alerttime' => REQUEST_TIME,
+))
+->execute();
+
+}
+
+/*
+* Check user has an admin role in any community
+*/
+
+function user_has_community_adminrole() {
+global $user;
+$query = db_select('og_users_roles','our')
+->fields('our',array('uid'))
+->condition('our.rid',3)
+->condition('our.uid',$user->uid);
+$result = $query->execute();
+return $result->rowCount();
+}
+
+/*
+* Check user has a discipler role in specified community
+*/
+
+function user_has_community_discipler_role($gid,$uid) {
+global $user;
+$query = db_select('lifeecho_og_discipler','lod')
+->fields('lod',array('uid'))
+->condition('lod.uid',$uid)
+->condition('lod.gid',$gid)
+->condition('lod.rid',4);
+$result = $query->execute();
+return $result->rowCount();
+}
+
+/*
+* Get all communities related with a user ( created / joined )
+*/
+
+function get_allcommunities_forauser($uid = '') {
+
+if($uid == '') {
+global $user;
+$uid = $user->uid;
+}
+
+   $nodeinfo = array();
+   $query = db_select('og_membership','og');
+          $query->fields('og',array('gid'));
+          $query->fields('n',array('title','nid'));
+           $query->leftJoin('node','n','og.gid = n.nid');
+	   $query->condition('og.etid', $uid ,'=');
+	   $query->condition('og.state','1','=');
+	   $query->condition('n.status','1','=');
+	   $query->condition('og.entity_type','user','=');
+	   $query->orderBy('n.title','ASC');
+   $result = $query->execute();
+while($record = $result->fetchAssoc()) {
+$nodeinfo['nids'][] = $record['nid'];
+$nodeinfo['titles'][] = $record['title'];
+}
+   return $nodeinfo;
+
+}

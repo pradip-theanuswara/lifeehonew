@@ -1,0 +1,143 @@
+<?php
+// devex_service.module
+/** Gets a devex object by id.
+*
+* @param int $id
+* @return object
+*/
+function devex_service_get_devex($id) {
+  return db_query("SELECT * FROM {devex} WHERE id='".$id."'")->fetchAll();
+}
+
+/** Writes a devex to the database
+*
+* @param object $devex
+* @return void
+*/
+function devex_service_write_devex($devex) {
+  $primary_key = !empty($devex['id']) ? array('id') : NULL;
+  drupal_write_record('devex', $devex, $primary_key);
+}
+
+/**
+* Deletes a devex from the database.
+*
+* @param int $id
+* @return void
+*/
+function devex_service_delete_devex($id) {
+  db_query("DELETE FROM {devex} WHERE id='".$id."'");
+}
+
+/**
+* Implementation of hook_services_services().
+*/
+function devex_service_services_resources() {
+  return array(
+    'devex' => array(
+      'retrieve' => array(
+        'help' => 'Retrieves a devex',
+        'file' => array('file' => 'inc', 'module' => 'devex_service'),
+        'callback' => '_devex_service_retrieve',
+        'access callback' => '_devex_service_access',
+        'access arguments' => array('view'),
+        'access arguments append' => TRUE,
+        'args' => array(
+          array(
+            'name' => 'id',
+            'type' => 'int',
+            'description' => 'The id of the devex to get',
+            'source' => array('path' => '0'),
+            'optional' => FALSE,
+          ),
+        ),
+      ),
+      'create' => array(
+        'help' => 'Creates a devex',
+        'file' => array('file' => 'inc', 'module' => 'devex_service'),
+        'callback' => '_devex_service_create',
+        'access callback' => '_devex_service_access',
+        'access arguments' => array('devex service create'),
+        'access arguments append' => FALSE,
+        'args' => array(
+          array(
+            'name' => 'data',
+            'type' => 'struct',
+            'description' => 'The devex object',
+            'source' => 'data',
+            'optional' => FALSE,
+          ),
+        ),
+      ),
+      'update' => array(
+        'help' => 'Updates a devex',
+        'file' => array('file' => 'inc', 'module' => 'devex_service'),
+        'callback' => '_devex_service_update',
+        'access callback' => '_devex_service_access',
+        'access arguments' => array('update'),
+        'access arguments append' => TRUE,
+        'args' => array(
+          array(
+            'name' => 'id',
+            'type' => 'int',
+            'description' => 'The id of the node to update',
+            'source' => array('path' => '0'),
+            'optional' => FALSE,
+          ),
+          array(
+            'name' => 'data',
+            'type' => 'struct',
+            'description' => 'The devex data object',
+            'source' => 'data',
+            'optional' => FALSE,
+          ),
+        ),
+      ),
+      'delete' => array(
+        'help' => 'Deletes a devex',
+        'file' => array('file' => 'inc', 'module' => 'devex_service'),
+        'callback' => '_devex_service_delete',
+        'access callback' => '_devex_service_access',
+        'access arguments' => array('delete'),
+        'access arguments append' => TRUE,
+        'args' => array(
+          array(
+            'name' => 'nid',
+            'type' => 'int',
+            'description' => 'The id of the devex to delete',
+            'source' => array('path' => '0'),
+            'optional' => FALSE,
+          ),
+        ),
+      ),
+      'index' => array(
+        'help' => 'Retrieves a listing of devexs',
+        'file' => array('file' => 'inc', 'module' => 'devex_service'),
+        'callback' => '_devex_service_index',
+        'access callback' => 'user_access',
+        'access arguments' => array('access content'),
+        'access arguments append' => FALSE,
+        'args' => array(
+          array(
+            'name' => 'page',
+            'type' => 'int',
+            'description' => '',
+            'source' => array(
+              'params' => 'page',
+            ),
+            'optional' => TRUE,
+            'default value' => 0,
+          ),
+          array(
+           'name' => 'parameters',
+           'type' => 'array',
+           'description' => '',
+           'source' => 'param',
+           'optional' => TRUE,
+           'default value' => array(),
+          ),
+        ),
+      ),
+    ),
+  );
+}

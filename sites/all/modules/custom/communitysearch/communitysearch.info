@@ -1,0 +1,5 @@
+name = Communitysearch
+description = "Allows administrator to provide email and password for Google/youtube"
+package = Custom
+core = 7.x
+files[] = communitysearch.module

@@ -1,0 +1,521 @@
+<?php
+/*
+Notes : active states of og memberships are ,
+
+active - 1 , pending - 2 , blocked - 3
+
+/* 
+ * Implements hook_menu 
+ */
+
+function group_alter_menu() {
+
+$items = array();
+   
+     $items['jointest/%/community'] = array(
+    'title' => 'Join Community',
+    'page callback' => 'custom_og_subscribetest',
+    'page arguments' => array(1),
+    'access callback' => 'user_is_logged_in',
+    'type' => MENU_CALLBACK,
+    'filename' => 'sites/all/modules/entity/entity.module',
+  );
+
+     $items['accept/%/community/%'] = array(
+    'title' => 'Access Request',
+    'page callback' => 'custom_og_accept_request',
+    'page arguments' => array(1,3),
+    'access callback' => 'user_is_logged_in',
+    'type' => MENU_CALLBACK,
+  );
+
+     $items['remove/%/community/%'] = array(
+    'title' => 'Remove Request',
+    'page callback' => 'custom_og_remove_request',
+    'page arguments' => array(1,3),
+    'access callback' => 'user_is_logged_in',
+    'type' => MENU_CALLBACK,
+  );
+
+     $items['decline/%/community/%'] = array(
+    'title' => 'Decline Request',
+    'page callback' => 'custom_og_decline_request',
+    'page arguments' => array(1,3),
+    'access callback' => 'user_is_logged_in',
+    'type' => MENU_CALLBACK,
+  );
+
+     return $items;
+}
+
+function custom_og_subscribetest($gid) {
+    $entity_type = 'node';
+    $etid = $gid;
+    $field_name = NULL;
+    $group_type= 'node';
+  global $user;
+  $entity_info = entity_get_info($entity_type);
+  if (!$entity_type || !$entity_info) {
+    // Not a valid entity type.
+    drupal_not_found();
+    return;
+  }
+  $entity = entity_load_single($entity_type, $etid);
+  if (!$entity || !og_is_group($entity_type, $entity)) {
+    // Not a valid entity, or not a group.
+    drupal_not_found();
+    return;
+  }
+
+  list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
+
+  if (empty($field_name)) {
+    $field_name = og_get_best_group_audience_field('user', $user->uid, $entity_type, $bundle);
+    if (empty($field_name)) {
+      // User entity has no group audience field.
+      drupal_not_found();
+      return;
+    }
+  }
+
+  $field = field_info_field($field_name);
+  $instance = field_info_instance('user', $field_name, 'user');
+  $account = user_load($user->uid);
+
+  if (empty($instance) || !field_access('view', $field, 'user', $account)) {
+    // Field name given is incorrect, or user doesn't have access to the field.
+ //   drupal_not_found();
+    return;
+  }
+  if (!$user->uid) {
+    // Anonymous user can't request membership.
+    $dest = drupal_get_destination();
+    if (variable_get('user_register', 1)) {
+      drupal_set_message(t('In order to join any community, you must <a href="!login">login</a>. After you have successfully done so, you will need to request membership again.', array('!login' => url("user/login", array('query' => $dest)))));
+    }
+    else {
+      drupal_set_message(t('In order to join any community, you must <a href="!login">login</a> or <a href="!register">register</a> a new account. After you have successfully done so, you will need to request membership again.', array('!register' => url("user/register", array('query' => $dest)), '!login' => url("user/login", array('query' => $dest)))));
+    }
+    drupal_goto('user');
+  }
+
+  $redirect = FALSE;
+  $message = '';
+
+  $params = array();
+  $params['@user'] = format_username($user);
+  // Show the group name only if user has access to it.
+  $params['@group'] = entity_access('view', $entity_type, $entity) ?  entity_label($entity_type, $entity) : t('Private group');
+
+  if (og_is_member($entity_type, $id, 'user', $user, array(OG_STATE_BLOCKED))) {
+    // User is blocked, access denied.
+    drupal_access_denied();
+    return;
+  }
+  if (og_is_member($entity_type, $id, 'user', $user, array(OG_STATE_PENDING))) {
+    // User is pending, return them back.
+    $message = $user->uid == $user->uid ? t('You already have a pending membership for the community @group.', $params) : t('@user already has a pending membership for the  the community @group.', $params);
+    $redirect = TRUE;
+  }
+
+  if (og_is_member($entity_type, $id, 'user', $user, array(OG_STATE_ACTIVE))) {
+    // User is already a member, return them back.
+    $message = $user->uid == $user->uid ? t('You are already a member of the community @group.', $params) : t('@user is already a member of the community @group.', $params);
+    $redirect = TRUE;
+  }
+
+  if (!$message && $field['cardinality'] != FIELD_CARDINALITY_UNLIMITED) {
+    // Check if user is already registered as active or pending in the maximum
+    // allowed values.
+    $wrapper = entity_metadata_wrapper('user', $account->uid);
+    if ($field['cardinality'] == 1) {
+      $count = $wrapper->{$field_name}->value() ? 1 : 0;
+    }
+    else {
+      $count = $wrapper->{$field_name}->count();
+    }
+    if ($count >= $field['cardinality']) {
+      $message = t('You cannot register to this community, as you have reached your maximum allowed subscriptions.');
+      $redirect = TRUE;
+    }
+  }
+
+  if ($redirect) {
+    drupal_set_message($message, 'warning');
+    $url = entity_uri($entity_type, $entity);
+    drupal_goto($url['path'], $url['options']);
+  }
+  if (og_user_access($entity_type, $id, 'subscribe', $user) || og_user_access($entity_type, $id, 'subscribe without approval', $user)) {
+
+    // Show the user a subscription confirmation.
+  $values = array('state' => og_user_access($group_type, $gid, 'subscribe without approval') ? OG_STATE_ACTIVE : OG_STATE_PENDING);
+  // Add group membership form.
+  $og_membership = og_membership_create($group_type, $gid, 'user', $account->uid, $field_name, $values);
+  $form_state['og_membership'] = $og_membership;
+  $og_membership = $form_state['og_membership'];
+
+  //og_membership_save($og_membership);
+
+  /*db_insert('og_membership')
+  	-> fields(array(
+            'type' => 'og_membership_type_default',
+            'etid' => $account->uid,
+            'entity_type' => $entity_type,
+            'gid' => $etid,
+	    'group_type' => $group_type,
+	    'state' => '2',
+	    'created' => REQUEST_TIME,
+	    'field_name' => 'og_user_node',
+            'language' => 'en',
+            ))
+   	->execute(); */
+  $og_membership->save();
+  $redirect = TRUE;
+
+drupal_set_message(t('Request will be sent to the community admin for approval, You will be notified via dashboard alerts on approval'),'status');
+  drupal_goto('node/'.$gid);
+  }
+}
+
+/*
+* organic group subscribe function for discipler- disciple relation.
+*/
+
+function og_subscribe_discipler_disple_relation($gid,$uid) {
+    $entity_type = 'node';
+    $etid = $gid;
+    $field_name = NULL;
+    $group_type= 'node';
+  global $user;
+  $entity_info = entity_get_info($entity_type);
+  if (!$entity_type || !$entity_info) {
+    // Not a valid entity type.
+    drupal_not_found();
+    return;
+  }
+  $entity = entity_load_single($entity_type, $etid);
+  if (!$entity || !og_is_group($entity_type, $entity)) {
+    // Not a valid entity, or not a group.
+    drupal_not_found();
+    return;
+  }
+
+  list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
+
+  if (empty($field_name)) {
+    $field_name = og_get_best_group_audience_field('user', $user->uid, $entity_type, $bundle);
+    if (empty($field_name)) {
+      // User entity has no group audience field.
+      drupal_not_found();
+      return;
+    }
+  }
+
+  $field = field_info_field($field_name);
+  $instance = field_info_instance('user', $field_name, 'user');
+  $account = user_load($user->uid);
+
+  if (empty($instance) || !field_access('view', $field, 'user', $account)) {
+    // Field name given is incorrect, or user doesn't have access to the field.
+ //   drupal_not_found();
+    return;
+  }
+  if (!$user->uid) {
+    // Anonymous user can't request membership.
+    $dest = drupal_get_destination();
+    if (variable_get('user_register', 1)) {
+      drupal_set_message(t('In order to join any community, you must <a href="!login">login</a>. After you have successfully done so, you will need to request membership again.', array('!login' => url("user/login", array('query' => $dest)))));
+    }
+    else {
+      drupal_set_message(t('In order to join any community, you must <a href="!login">login</a> or <a href="!register">register</a> a new account. After you have successfully done so, you will need to request membership again.', array('!register' => url("user/register", array('query' => $dest)), '!login' => url("user/login", array('query' => $dest)))));
+    }
+    drupal_goto('user');
+  }
+
+  $redirect = FALSE;
+  $message = '';
+
+  $params = array();
+  $params['@user'] = format_username($user);
+  // Show the group name only if user has access to it.
+  $params['@group'] = entity_access('view', $entity_type, $entity) ?  entity_label($entity_type, $entity) : t('Private group');
+
+  if (og_is_member($entity_type, $id, 'user', $user, array(OG_STATE_BLOCKED))) {
+    // User is blocked, access denied.
+    drupal_access_denied();
+    return;
+  }
+  if (og_is_member($entity_type, $id, 'user', $user, array(OG_STATE_PENDING))) {
+    // User is pending, return them back.
+    $message = $user->uid == $user->uid ? t('You already have a pending membership for the community @group.', $params) : t('@user already has a pending membership for the  the community @group.', $params);
+    $redirect = TRUE;
+  }
+
+  if (og_is_member($entity_type, $id, 'user', $user, array(OG_STATE_ACTIVE))) {
+    // User is already a member, return them back.
+    $message = $user->uid == $user->uid ? t('You are already a member of the community @group.', $params) : t('@user is already a member of the community @group.', $params);
+    $redirect = TRUE;
+  }
+
+  if (!$message && $field['cardinality'] != FIELD_CARDINALITY_UNLIMITED) {
+    // Check if user is already registered as active or pending in the maximum
+    // allowed values.
+    $wrapper = entity_metadata_wrapper('user', $account->uid);
+    if ($field['cardinality'] == 1) {
+      $count = $wrapper->{$field_name}->value() ? 1 : 0;
+    }
+    else {
+      $count = $wrapper->{$field_name}->count();
+    }
+    if ($count >= $field['cardinality']) {
+      $message = t('You cannot register to this community, as you have reached your maximum allowed subscriptions.');
+      $redirect = TRUE;
+    }
+  }
+
+  if ($redirect) {
+    drupal_set_message($message, 'warning');
+    $url = entity_uri($entity_type, $entity);
+    drupal_goto($url['path'], $url['options']);
+  }
+  if (og_user_access($entity_type, $id, 'subscribe', $user) || og_user_access($entity_type, $id, 'subscribe without approval', $user)) {
+
+    // Show the user a subscription confirmation.
+  $values = array('state' => og_user_access($group_type, $gid, 'subscribe without approval') ? OG_STATE_ACTIVE : OG_STATE_PENDING);
+  // Add group membership form.
+  $og_membership = og_membership_create($group_type, $gid, 'user', $account->uid, $field_name, $values);
+  $form_state['og_membership'] = $og_membership;
+  $og_membership = $form_state['og_membership'];
+
+  $og_membership->save();
+  $redirect = TRUE;
+
+drupal_set_message(t('Request will be sent to the community admin for approval, You will be notified via dashboard alerts on approval'),'status');
+  drupal_goto('user/'.$uid);
+  }
+}
+
+
+/**
+ * Implements hook_og_membership_insert().
+ */
+function group_alter_og_membership_insert($og_membership) {
+
+global $user;
+$query = db_select('node','n')
+->fields('n',array('uid'))
+->condition('n.nid',$og_membership->gid);
+$result = $query->execute();
+$node_author_id = $result->fetchField(0);
+db_insert('lifeecho_og_discipler')
+            ->fields(array(
+            'uid' => $og_membership->etid,
+            'gid' => $og_membership->gid, // community id for og , based on node is find out author
+            'rid' => 4,
+                    ))
+            ->execute();
+
+if (($og_membership->entity_type == 'user') && ($node_author_id != $user->uid)) {
+  db_insert('lifeecho_alerts')
+            ->fields(array(
+            'alerttype' => 'og',
+            'alertto' => $og_membership->gid, // community id for og , based on node is find out author
+            'alertfrom' => $og_membership->etid, // user id
+	    'alerttime' => REQUEST_TIME,
+	    'accept_status' => 0,    // need to accept join request
+
+            ))
+            ->execute();
+}
+}
+/* We want to accept community request manually */
+
+function custom_og_accept_request($uid,$gid) {
+
+$check_alert_query = '';
+$rowcount_check_alert = 0;
+
+ db_update('og_membership')
+->fields(array(
+'state' => 1,
+))
+->condition('etid', $uid , '=')
+->condition('gid', $gid , '=')
+->execute();
+
+/* delete request from lifeecho alerts table */
+db_delete('lifeecho_alerts')
+->condition('alertfrom', $uid)
+->condition('alertto', $gid)
+->execute();
+
+// Your request to join the Mudcats Community(link to comm. profile) was accepted!
+
+
+// check og-accept alert is already exist in lifeecho alerts table.
+
+$check_alert_query = db_select('lifeecho_alerts','la')
+->fields('la',array('alertid'))
+->condition('alertto',$uid)
+->condition('alertfrom',$gid)
+->condition('alerttype','og-accept')
+->execute();
+
+$rowcount_check_alert = $check_alert_query->rowCount();
+
+if($rowcount_check_alert == 0) {
+
+	db_insert('lifeecho_alerts')
+	->fields(array(
+	'alerttype' => 'og-accept',
+	'alertto' => $uid,
+	'alertfrom' => $gid,
+	'alerttime' => REQUEST_TIME,
+	))
+	->execute();
+
+} // rowcount_check_alert END.
+
+drupal_set_message(t('User Membership Approved'),'status');
+drupal_goto('community/dashboard');
+
+}
+
+/* 
+* Decline Community request.
+*/
+
+function custom_og_decline_request($uid,$gid) {
+
+/*
+echo "<script>
+var r=confirm('Do you want to remove the Request');
+if(r==true) {
+window.location = '".url('user')."';
+} 
+else {
+window.location = '".url('node')."';
+} 
+alert(x);
+</script>";
+die();
+*/
+
+/* delete request from lifeecho alerts table */
+
+db_delete('lifeecho_alerts')
+->condition('alertfrom', $uid)
+->condition('alertto', $gid)
+->execute();
+
+/* delete request from organic group table */
+
+$result = db_select('og_membership', 'om')
+ ->fields('om',array('id'))
+->condition('etid', $uid)
+->condition('gid', $gid)
+->execute();
+$id = $result->fetchField(0);
+
+db_delete('og_membership')
+->condition('etid', $uid)
+->condition('gid', $gid)
+->execute();
+
+// field_data_og_membership_request
+
+db_delete('field_data_og_membership_request')
+->condition('entity_id', $id)
+->condition('revision_id', $id)
+->execute();
+
+// og_membership
+
+// field_revision_og_membership_request
+
+db_delete('field_revision_og_membership_request')
+->condition('entity_id', $id)
+->condition('revision_id', $id)
+->execute();
+
+// store user decline community request alert to lifeecho alerts.
+
+db_insert('lifeecho_alerts')
+->fields(array(
+'alertto' => $uid,
+'alertfrom' => $gid,
+'alerttype' => 'og-decline',
+'alerttime' => REQUEST_TIME,
+))
+->execute();
+
+drupal_set_message(t('Community Membership Request has declined'),'status');
+drupal_goto('community/dashboard');
+
+}
+
+/* 
+*  Remove Community request.
+*/
+
+function custom_og_remove_request($uid,$gid) {
+
+/* delete request from lifeecho alerts table */
+
+db_delete('lifeecho_alerts')
+->condition('alertfrom', $uid)
+->condition('alertto', $gid)
+->execute();
+
+/* delete request from organic group table */
+
+$result = db_select('og_membership', 'om')
+ ->fields('om',array('id'))
+->condition('etid', $uid)
+->condition('gid', $gid)
+->execute();
+$id = $result->fetchField(0);
+
+db_delete('og_membership')
+->condition('etid', $uid)
+->condition('gid', $gid)
+->execute();
+
+// field_data_og_membership_request
+
+db_delete('field_data_og_membership_request')
+->condition('entity_id', $id)
+->condition('revision_id', $id)
+->execute();
+
+// og_membership
+
+// field_revision_og_membership_request
+
+db_delete('field_revision_og_membership_request')
+->condition('entity_id', $id)
+->condition('revision_id', $id)
+->execute();
+
+drupal_set_message(t('Community Membership Request has removed'),'status');
+drupal_goto('community/dashboard');
+
+}
+
+/**
+ * Implements hook_og_membership_delete().
+ */
+
+function group_alter_og_membership_delete($og_membership) {
+
+  if ($og_membership->entity_type != 'user')  {
+    return;
+  }
+
+  // Remove possible records in the {lifeecho_og_discipler} table.
+  db_delete('lifeecho_og_discipler')
+    ->condition('uid', $og_membership->etid)
+    ->condition('gid', $og_membership->gid)
+    ->execute();
+
+}

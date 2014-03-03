@@ -1,0 +1,443 @@
+<?php
+/* 
+*Implements hook_menu
+*/
+function community_roster_menu() {
+  $items = array();
+	global $user;
+	// Test items
+	$items['community/roster_page'] = array(
+   	  'title' => 'community members roster page',
+	  'type' => MENU_CALLBACK,
+	  'page callback' => 'community_members',
+	  'access arguments' => array('access content')
+	); 	 
+	  
+	$items['community/roster_page/callback'] = array(
+	  'title' => 'Test Pager Callback',
+	  'type' => MENU_CALLBACK,
+	  'page callback' => '_community_members_callback',
+	  'access arguments' => array('access content'),
+	);
+	$items['community/change_role'] = array(
+   	  'title' => 'community members role change',
+	  'type' => MENU_CALLBACK,
+	  'page callback' => 'change_role',
+	  'access arguments' => array('access content')
+	); 
+
+	  return $items;
+}
+
+function community_roster_enable() {
+	//Make user goto the test pager page.
+	$link = l('Test Pager', 'community/roster_page');
+	drupal_set_message("Please visit $link to see Ajaxed paging in action.");
+}
+
+function community_members() {
+	drupal_add_js(drupal_get_path('module', 'community_roster') . '/jquery.url.js');
+	drupal_add_js(drupal_get_path('module', 'community_roster') . '/community_roster.js');
+	drupal_add_js('initializeTable();', 'inline');
+	$block = module_invoke('community_roster', 'block_view', 'roster_community_info');
+	return ('<div>'.render($block['content']).'</div><div id="table-container" class="community_list_div"></div>');
+}
+
+function _community_members_callback () {	
+	header("Content-type: text/html");
+	header("Expires: Wed, 29 Jan 1975 04:15:00 GMT");
+	header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
+	header("Cache-Control: no-cache, must-revalidate");
+	header("Pragma: no-cache");
+	
+        global $user;
+		
+	$result = db_query("SELECT count(og_users_roles.gid) as admincnt FROM og_users_roles join node on og_users_roles.gid = node.vid and node.type = 'community_lifeecho' and og_users_roles.uid=".$user->uid);
+	$count = $result->fetchField(0);	
+	$uid=$user->uid;
+	if($count>0){
+		$result = db_query("SELECT count(og_users_roles.gid) as admincnt,node.uid as parentuserid,og_users_roles.uid as childid FROM og_users_roles join node on og_users_roles.gid = node.vid and node.type = 'community_lifeecho' and og_users_roles.uid=".$user->uid);
+		$fieldvalue = $result->fetchField(1);	
+		if($fieldvalue!='')
+			$uid=$fieldvalue;
+	}
+	//die;
+	
+	$query = db_select('og_membership', 'm')
+	->groupBy('u.uid');
+				$query->join('users', 'u', 'm.etid = u.uid'); //JOIN node with users
+				$query->join('node', 'g', 'g.nid = m.gid'); //JOIN group with users
+				$query->leftJoin('fbconnect_users','fb','fb.uid = u.uid');
+				$query->leftJoin('lifeecho_og_discipler','lod','lod.uid = u.uid');
+				$query->leftjoin('og_users_roles','og','og.uid = u.uid');
+				$query = $query->condition('g.uid',$uid)
+				  	->condition('g.type','community_lifeecho')
+					
+					->condition('m.state', 1 , '=' )
+					->extend('PagerDefault') 	//Pager Extender
+					->limit(5)				//10 results per page
+					->fields ('m', array (
+					'etid',
+					'gid'
+				))
+					->fields ('u', array (
+					'uid',
+					'name'
+				))
+					->fields ('lod', array (
+					'rid'
+				))
+					->fields ('fb', array (
+					'fbuid'
+				))
+
+				->fields ('og', array (
+					'rid'
+				));
+				
+				$results = $query->execute();
+				
+				
+	$rows = array();
+if($results->rowCount() > 0) {
+$rows[] = 
+      // Row with attributes on the row and some of its cells.
+      array(
+        'data' => array(array('data' => ''.t('User Avatar').'','class' => 'headeven'),array('data' => ''.t('User Name').'','class' => 'headeven'),array('data' => ''.t('Assign as Discipler').'','class' => 'headeven'),array('data' => ''.t('Assign as Community Admin').'','class' => 'headeven'),array('data' => ''.t('Joined Communities').'','class' => 'headeven'))
+      
+    );
+}
+
+	foreach ($results as $node) {
+	$check_status = '';
+	$community_name = $node->gid;
+		$admin_ischeck=($node->og_rid==3)?'checked="checked"' : '';
+		$dicipler_ischeck=($node->rid==4)?'checked="checked"' : '';
+
+$checked_answers_query = db_select('users','u');
+$checked_answers_query->fields('u',array('name'));
+$checked_answers_query->fields('soof',array('field_select_one_of_followin_tid'));
+$checked_answers_query->fields('hcdb',array('field_how_closely_do_belief_tid'));
+
+$checked_answers_query->fields('hddb',array('field_how_do_want_to_use_lif_tid'));
+
+$checked_answers_query->leftJoin('field_data_field_select_one_of_followin','soof','soof.entity_id = u.uid');
+$checked_answers_query->leftJoin('field_data_field_how_closely_do_belief','hcdb','hcdb.entity_id = u.uid');
+$checked_answers_query->Join('field_data_field_how_do_want_to_use_lif','hddb','hddb.entity_id = u.uid');
+
+
+
+
+
+$checked_answers_query = $checked_answers_query->condition('u.uid',$node->etid);
+
+
+
+$result_checked_answers = $checked_answers_query->execute();
+
+$name='';
+$status=0;
+while($record = $result_checked_answers->fetchAssoc()) {
+
+$select_one_of_followin_value = $record['field_select_one_of_followin_tid'];
+$how_closely_do_belief_tid = $record['field_how_closely_do_belief_tid'];
+$a= $record['field_how_do_want_to_use_lif_tid'];
+
+if($a=='108'){
+	$name=$record['name'];
+	$status=1;
+	
+}
+
+//array_push($stack,$a);
+//unset($stack);
+//echo "<pre>";
+//print_r($record);
+}
+
+
+if($dicipler_ischeck=='checked="checked"')
+	$dicipler_ischeck=($node->name==$name)?'checked="checked"' : '';
+
+// disable check box option for community admin based on their answers for questions.
+// based on these questions from edit profile page "Select one of the following","How closely do your beliefs match this statement".
+if($select_one_of_followin_value == 5 || $select_one_of_followin_value == 6 || $how_closely_do_belief_tid == 8 || $how_closely_do_belief_tid == 9 || get_adminrole_bycommunity($node->gid,$node->etid)) {
+$check_status = 'disabled="disabled"';
+}
+if(get_adminrole_bycommunity($node->gid,$node->etid)){
+	$admin_ischeck='';
+}
+$id=$node->gid;
+		$rows[] = array(
+					'data' => array(
+							 '<img src="http://graph.facebook.com/'.$node->fbuid.'/picture?type=large&amp;width=75&amp;height=75">',
+						  l($node->name, 'user/'. $node->etid),
+						  '<input name="cgm_check_dicipler'.$id.'" type="checkbox" '.$dicipler_ischeck.' onclick="change_stat_first(this,'.$status.','.$a.','.$node->gid.','.$node->etid.',\'dicipler\')"'.$check_status.' class="cg_check_dicipler12" id="cg_check_dicipler'.$id.'" />'.t('Discipler').'',
+						   '<input type="checkbox" '.$admin_ischeck.' onclick="change_stat('.$node->gid.','.$node->etid.',\'admin\')"'.$check_status.' class="cg_check_admin" id="cg_check'.$node->etid.'" />'.t('Admin').'<span class="save_gif_outer"><img  class="save_gif" src="'.base_path().drupal_get_path('module', 'community_roster').'/saving.gif" /></span>',''.get_user_joined_community_ID_by_userID($node->etid,$node->gid).'')
+//  '.l(t("Joined Communities"),"node/11",array("attributes" => array("class" => "showdialog"))).'<div id="terms_dialog"></div>
+		);
+	}
+
+	$html = theme('table', 
+				array(
+					//'header' => $header,
+					'rows'=>$rows,
+					//'caption' => '',	//Optional Caption for the table
+					'sticky' => TRUE,						//Optional to indicate whether the table headers should be sticky
+			'empty' => 'No Users have join in this Community',
+//Optional empty text for the table if resultset is empty
+				)
+			);
+	
+	//Append pager: http://api.drupal.org/api/drupal/includes--pager.inc/function/theme_pager
+	$html .= theme('pager',
+				array(
+					'tags' => array()
+				)
+			);
+			
+	die ($html);
+}
+
+function change_role(){
+	
+	if (!isset($_POST['change_type']) || !isset($_POST['user_id']) || !isset($_POST['group_id']) ) {
+    die('fghjfh'.$_POST['user_id']);
+   }
+   $change_type=trim($_POST['change_type']);//change type admin or dicipler
+   if($change_type == 'admin') {
+		//check the current status
+		/* $query = db_select('og_membership','m');
+		 $query=$query
+				  //->condition('gid',$_POST['group_id'])
+  		       // ->condition('etid',$_POST['user_id'])
+			      ->fields ('m',array (
+						'state'
+					));
+				$results = $query
+				->execute();
+			$rows = array();	
+			foreach ($results as $node) {
+					$current_state=$node->state;
+		
+				}
+				
+	
+		 $current_state=($current_state != 3) ? '3' : '2';	//update the table provide admin role to the user in specific group
+		 	
+   	 $num_updated = db_update('og_membership') // Table name no longer needs {}
+ 		 ->fields(array(
+    		'state' => $current_state
+    		
+  		))
+  		->condition('gid',$_POST['group_id'])
+  		->condition('etid',$_POST['user_id'])
+  		->execute(); */
+
+//$roles = og_get_user_roles($_POST['group_id'], $_POST['user_id']);
+$query_og_roles = db_select('og_users_roles','og')
+->fields('og',array('uid'))
+->condition('og.uid',$_POST['user_id'])
+->condition('og.gid',$_POST['group_id']);
+$result = $query_og_roles->execute();
+
+$row_count = $result->rowCount();
+if($row_count == 1) {
+	$query = db_delete('og_users_roles')
+->condition('uid',$_POST['user_id'])
+->condition('gid',$_POST['group_id'])
+->condition('rid',3)
+  ->execute();
+}
+else {
+$query = db_insert('og_users_roles')
+  		->fields(array(
+			'uid' => $_POST['user_id'],
+  			'rid' => '3',
+  			'gid' => $_POST['group_id'],
+  			'group_type' => 'node'
+			))
+		->execute();
+}
+
+  		die('a1');
+   	
+   	}
+	else {
+		//role id for dicipler is 4
+		 $query = db_select('lifeecho_og_discipler','lod');
+		 $query=$query
+		       ->condition('lod.uid',$_POST['user_id'])
+			->condition('lod.gid',$_POST['group_id'])
+  		       ->condition('lod.rid',4)
+			      ->fields ('lod',array (
+						'uid'
+					));
+				$results = $query
+				->execute();
+		
+				$num=0;
+			foreach ($results as $node) {
+					$num=$node->uid;
+		
+				}
+				if($num > 0){
+					
+					
+					db_delete('lifeecho_og_discipler')
+  ->condition('rid', '4')
+    ->condition('uid', $_POST['user_id'])
+->condition('gid',$_POST['group_id'])
+  ->execute();
+		return 'remove dicipler';			
+					}
+					else{
+				
+		 $nid = db_insert('lifeecho_og_discipler') // Table name no longer needs {}
+		->fields(array(
+  			'rid' => '4',
+  			'uid' => $_POST['user_id'],
+  		'gid' => $_POST['group_id']
+			))
+		->execute();
+		
+		return 'dicipler change';
+		
+			}
+			
+			return 'none';		
+		
+		}  
+	
+	}
+
+/*
+*  Implements hook_block_info
+*/	
+function community_roster_block_info() {
+  $blocks = array();
+
+  $blocks['community_roster'] = array(
+    'info' => t('Community Roster'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+
+  $blocks['roster_community_info'] = array(
+    'info' => t('Roster page Community Information'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+
+  return $blocks;
+}
+
+
+/*
+*  Implements hook_block_view
+*/
+
+function community_roster_block_view($block_name = 'community_roster') {
+  if ($block_name == 'community_roster') {
+    $list =community_members();
+  // $theme_args = array('items' => $list, 'type' => 'ol');
+    //$content = theme('item_list', $theme_args);
+
+   $block = array(
+   'content' => $list,
+   );
+   
+    return $block;
+  }
+
+ if($block_name == 'roster_community_info') {
+global $user;
+//$uid = $user->uid;
+$result = db_query("SELECT count(og_users_roles.gid) as admincnt FROM og_users_roles join node on og_users_roles.gid = node.vid and node.type = 'community_lifeecho' and og_users_roles.uid=".$user->uid);
+	$count = $result->fetchField(0);	
+	$uid=$user->uid;
+	if($count>0){
+		$result = db_query("SELECT count(og_users_roles.gid) as admincnt,node.uid as parentuserid,og_users_roles.uid as childid FROM og_users_roles join node on og_users_roles.gid = node.vid and node.type = 'community_lifeecho' and og_users_roles.uid=".$user->uid);
+		$fieldvalue = $result->fetchField(1);	
+		if($fieldvalue!='')
+			$uid=$fieldvalue;
+	}
+$member_count = '';
+  $block['subject'] = 'Roster Community Info';
+              $query =   db_select('node', 'n')
+                         ->fields('n',array('nid'))
+                         ->condition('uid', $uid )
+                         ->condition('type','community_lifeecho')
+                         ->orderBy('created', 'DESC')//ORDER BY created
+                         ->range(0,1); //LIMIT to 1 record
+                         $result = $query->execute();
+                         $row_count = $result->rowCount();
+	  $nid = $result->fetchField(0);
+          if($row_count > 0) {
+$node_info = node_load($nid);
+$gid = $node_info->nid;
+$entity_type = 'user';
+$user_query = db_select('users','u')
+->fields('u',array('name'))
+->condition('u.uid',$node_info->uid);
+$result = $user_query->execute();
+$community_authorname = $result->fetchField(0);
+
+//Getting Active members of a group
+
+    $query = new EntityFieldQuery();
+    $member_count = $query
+      ->entityCondition('entity_type', 'og_membership')
+      // Type can be "node" or "user"
+      ->propertyCondition('entity_type', $entity_type, '=')
+      // This is the group ID
+      ->propertyCondition('gid', $gid, '=')
+      // Get only the active members
+      ->propertyCondition('state', OG_STATE_ACTIVE, '=')
+      ->count()
+      ->execute();
+if($member_count > 1 ) { $mem_str = 'Members'; } else { $mem_str = 'Member'; }
+  $block['content'] = '<div id="roster_community_info">';
+$block['content'] .= '<div id="community_logo">';
+if(isset($node_info->field_thumbnail_upload['und'][0]['filename'])) {
+  $block['content'] .= '<a href="#"><img src="'.base_path().'sites/default/files/'.$node_info->field_thumbnail_upload['und'][0]['filename'].'" /></a>';
+}
+else {
+ $block['content'] .= '<a href="#"><img src="'.base_path().drupal_get_path('theme','lifeecho').'/images/nothumbnail.jpeg" /></a>';
+}
+$block['content'] .= '</div>';
+$result = db_query("SELECT distinct COUNT(a.requester_id) AS ct 
+FROM user_relationships a JOIN user_relationships b join og_membership as ogm ON a.requestee_id = b.requester_id AND a.requester_id = b.requestee_id AND a.requestee_id  < b.requestee_id where ogm.gid = '$gid' AND ogm.etid =  a.requestee_id AND ogm.state = '1' AND a.approved = '1' AND b.approved='1' AND (select state as activated from og_membership where og_membership.etid = a.requester_id AND og_membership.state='1' AND og_membership.gid='481')=1 AND ogm.field_name = 'og_user_node' AND ogm.entity_type = 'user' ");
+
+$dpair_count = $result->fetchField(0);
+  $block['content'] .= '<div id="community_various_info">
+<span>Admin: '.$community_authorname.'</span></br>
+<span>'.$member_count.' '.$mem_str .'</span></br>
+<span>'.$dpair_count .' D-Pairs</span></br>';
+
+
+/*$result = db_query("SELECT u.uid FROM users AS u JOIN field_data_field_how_do_want_to_use_lif AS f ON u.uid = f.entity_id JOIN og_membership AS og ON f.entity_id = og.etid WHERE f.field_how_do_want_to_use_lif_tid = '108'
+AND og.gid = '$gid'");*/
+
+
+$result = db_query("SELECT distinct u.uid FROM users AS u JOIN field_data_field_how_do_want_to_use_lif AS f ON u.uid = f.entity_id JOIN og_membership AS og ON f.entity_id = og.etid JOIN  lifeecho_og_discipler on u.uid = lifeecho_og_discipler.uid  WHERE f.field_how_do_want_to_use_lif_tid = '108'
+AND og.gid = '$gid'");
+
+$disciplers_count = $result->rowCount();
+
+$block['content'] .= '<span>'.($disciplers_count) .' Open disciplers</span></br>';
+
+$result = db_query("SELECT distinct u.uid FROM users AS u JOIN field_data_field_how_do_want_to_use_lif AS f ON u.uid = f.entity_id JOIN og_membership AS og ON f.entity_id = og.etid WHERE f.field_how_do_want_to_use_lif_tid = '109' AND og.gid = '$gid'");
+
+$Disciples_count = $result->rowCount();
+$block['content'] .= '<span>'.$Disciples_count.' Open Disciples</span></div>';
+
+if(isset($node_info->field_tell_us_about_your_communi['und'][0]['value'])) {
+  $block['content'] .= '<div id="community_about"><span>'.t('About').' '.$node_info->field_what_is_the_name_of_your_o['und'][0]['value'].': </span>'.$node_info->field_tell_us_about_your_communi['und'][0]['value'].'</div>';
+}
+  $block['content'] .= '</div>';
+} else {
+  $block['content'] = '';
+}
+  return $block;
+  }
+
+}

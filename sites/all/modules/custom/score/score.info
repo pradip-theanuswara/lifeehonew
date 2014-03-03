@@ -1,0 +1,5 @@
+name = score
+description = "Module for usermatch and score"
+core = 7.x
+package = Custom
+files[] = score/views/score.views.inc

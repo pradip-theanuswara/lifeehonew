@@ -1,0 +1,36 @@
+<?php
+
+/*
+* Implemets hook_schema.
+*/
+
+function custom_table_schema() {
+
+$schema['table4'] = array(
+  'description' => 'TODO: please describe this table!',
+  'fields' => array(
+    'user_id1' => array(
+      'description' => 'TODO: please describe this field!',
+      'type' => 'int',
+      'not null' => FALSE,
+    ),
+    'user_id2' => array(
+      'description' => 'TODO: please describe this field!',
+      'type' => 'int',
+      'not null' => FALSE,
+    ),
+    'points' => array(
+      'description' => 'TODO: please describe this field!',
+      'type' => 'float',
+      'not null' => FALSE,
+    ),
+  ),
+);
+
+ return $schema;
+
+}
+
+function custom_table_uninstall() {
+  drupal_uninstall_schema('custom_table');
+}

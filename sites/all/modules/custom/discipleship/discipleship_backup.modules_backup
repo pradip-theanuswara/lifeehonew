@@ -1,0 +1,563 @@
+<?php
+
+/*
+* Implements hook_menu()
+*/
+
+function discipleship_menu() {
+
+$items = array();
+
+$items['discipleship-101'] = array(
+'title' => 'Discipleship 101',
+'type' => MENU_CALLBACK,
+'page callback' => 'discipleship_content',
+'access arguments' => array('access content'),
+
+);
+
+$items['discipleship/callback'] = array(
+'title' => 'Discipleship Pager Callback',
+'type' => MENU_CALLBACK,
+'page callback' => '_discipleship_callback',
+'access arguments' => array('access content'),
+);
+
+$items['discipleshipadmin/callback'] = array(
+'title' => 'Discipleship Pager Callback',
+'type' => MENU_CALLBACK,
+'page callback' => '_discipleshipadmin_callback',
+'access arguments' => array('access content'),
+);
+
+  $items['admin/managevideo/settings'] = array(
+    'title' => 'Manage Community Video',
+    'description' => 'Manage Community Video',
+    'page callback' => 'manage_community_video_callback',
+    'access arguments' => array('access administration pages'),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['post/community'] = array(
+    'title' => 'Post Message or Video',
+    'page callback' => 'get_community_post_options',
+    'access callback' => 'user_is_logged_in',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['share/communitypost'] = array(
+    'title' => 'Share Video to all Users',
+    'page callback' => 'community_node_manage_videos',
+    'access callback' => 'user_is_logged_in',
+    'type' => MENU_CALLBACK,
+  );
+
+
+  $items['postanalert/general'] = array(
+    'title' => 'Post an Alert',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('superadmin_alertuser_form'),
+    'access arguments' => array('access administration pages'),
+    'type' => MENU_CALLBACK,
+  );
+return $items;
+}
+
+
+/*
+* Implements hook_form_alter().
+*/
+
+function discipleship_form_alter(&$form, &$form_state, $form_id) {
+
+if($form_id == 'community_video_node_form') {
+
+$form['record_video'] = array(
+'#markup' => "<a href='#' class='button' onclick='popup2()'>".t('Video record')."</a>
+<script>
+function popup2()
+	{
+		
+		poupwin = window.open('".base_path()."?q=video-record', 'mywindow', 'width=414,height=420,scrollbars=no,dialog=yes,maximize=no,alwaystop=yes,copyhistory= no,resizable=no,toolbar=no,titlebar=0,location=yes,menubar=no,directories=no,status=1,left=200,top=200');
+	}
+</script>",
+);
+
+$form['video_option_or'] = array(
+'#prefix' => '<div id="video_or_markup">',
+'#markup' => "OR",
+'#suffix' => '</div>',
+);
+
+$form['field_youtube_record_response']['#attributes']['style'] = 'display:none';
+$form['#validate'][] = "custom_community_video_node_form_validation";
+
+}
+
+}
+
+/*
+* custom validation function to check at least a video selected.
+*/
+
+function custom_community_video_node_form_validation(&$form, &$form_state) {
+
+$video_upload = $form_state['input']['field_video']['und'][0]['fid'];
+$video_record = $form_state['input']['field_youtube_record_response']['und'][0]['value'];
+
+if($video_upload == 0 && $video_record == '') {
+form_set_error('field_video', t('Please select a video field'));
+}
+
+}
+
+
+function discipleship_content() {
+	drupal_add_js(drupal_get_path('module', 'community_roster') . '/jquery.url.js');
+	drupal_add_js(drupal_get_path('module', 'discipleship') . '/discipleship.js');
+	drupal_add_js('initializeTable();', 'inline');
+	//$block = module_invoke('discipleship', 'block_view', 'discipleship_101');
+	return ('<div id="table-container" class="community_list_div"></div>');
+}
+
+function _discipleship_callback() {
+	
+	header("Content-type: text/html");
+	header("Expires: Wed, 29 Jan 1975 04:15:00 GMT");
+	header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
+	header("Cache-Control: no-cache, must-revalidate");
+	header("Pragma: no-cache");
+
+ global $user;
+ $uid = $user->uid;
+ $user_info = user_load($uid);
+
+$gids = array();
+
+// query to get all joined communties
+
+ $get_communities =   db_select('og_membership', 'og')
+                         ->fields('og',array('gid'))
+                         ->condition('og.etid', $uid )
+			 ->condition('og.entity_type','user')
+			 ->condition('og.state',1);
+
+//print_r($get_communities->__toString());
+
+$result_get_communities = $get_communities->execute();
+$og_community_count = $result_get_communities->rowCount();
+
+if($og_community_count > 0) { // check user is member of any community
+while($record_get_communities = $result_get_communities->fetchAssoc()) {
+                 $gids[] = $record_get_communities['gid'];
+}
+
+$query = db_select('node','n');
+$query->fields('n',array('nid','uid','title','type','created'));
+$query->fields('fdb',array('body_value','entity_id'));
+$query->fields('u',array('name'));
+$query->fields('fm',array('uri'));
+
+$query->fields('fyrr',array('field_youtube_record_response_value','timestamp'));
+$query->fields('fdfv',array('timestamp'));
+$query->fields('fdny',array('field_what_is_the_name_of_your_o_value'));
+$query->leftJoin('field_data_body','fdb','n.nid=fdb.entity_id');
+$query->join('users','u','u.uid = n.uid');
+$query->leftJoin('field_data_field_video','fdfv','n.nid=fdfv.entity_id');
+/* new additions for record video */
+$query->leftJoin('field_data_field_youtube_record_response','fyrr','n.nid=fyrr.entity_id');
+/* end */
+
+$query->leftJoin('file_managed','fm','fm.fid=fdfv.field_video_fid');
+$query->join('og_membership','og','og.etid = u.uid');
+$query->leftJoin('field_data_field_what_is_the_name_of_your_o','fdny','og.gid=fdny.entity_id');
+$query = $query->condition('og.gid',$gids,'IN')
+->condition('og.state',1,'=')
+->condition('n.status',1,'=')
+->condition('n.type',array('community_content','community_video'),'IN')
+->orderBy('n.created', 'DESC')
+->groupBy('n.nid')
+->extend('PagerDefault') // Pager Extender
+->limit(5); // 10 results per page
+
+$result = $query->execute();
+
+$row_count = $result->rowCount();
+}
+else {
+$row_count = 0;
+}
+
+if($row_count > 0) {
+	$rows = array();	
+	foreach ($result as $node) {
+
+if($node->type == 'community_content' ) {
+
+if($node->uid == $user->uid) {
+$action = '<a href="'.base_path().'node/'.$node->nid.'/delete'.'"><img src="'.base_path().drupal_get_path('theme','lifeecho').'/images/'.'delete101.png" alt="Delete" height="20px" width="20px" /></a>';
+}
+else { $action = ''; }
+
+		$rows[] = array(
+					'data' => array(
+							 ''.date("Y-m-d h:i:s",$node->created) ." ".$node->name." [ ".$node->field_what_is_the_name_of_your_o_value." ] "." ".'Recently said :'
+					)
+		);
+		$rows[] = array(
+					'data' => array(
+							 ''.$node->body_value.$action.''
+					)
+		);
+}
+else if($node->type == 'community_video') {
+
+if($node->uid == $user->uid) {
+$action = '<a href="'.base_path().'node/'.$node->nid.'/delete'.'"><img src="'.base_path().drupal_get_path('theme','lifeecho').'/images/'.'delete101.png" alt="Delete" height="20px" width="20px" /></a>';
+}
+else { $action = ''; }
+
+if($node->uri <> '') {
+$pieces = explode("/", $node->uri);
+}
+else {
+$pieces[3] = $node->field_youtube_record_response_value;
+}
+
+		$rows[] = array(
+					'data' => array(
+							 ''.date("Y-m-d h:i:s",$node->created) ."   ".$node->name." [ ".$node->field_what_is_the_name_of_your_o_value." ] "." ".t('Recently posted a Video : ')
+					)
+		);
+
+$rows[] = array(
+					'data' => array(
+							 '<iframe width="400" height="290" src="http://www.youtube.com/embed/'.$pieces[3].'" frameborder="0" allowfullscreen></iframe>'.$action.''
+					)
+		);
+
+}
+	}
+$html = theme('table', 
+				array(
+					'rows'=>$rows,
+					'sticky' => TRUE, //Optional to indicate whether the table headers should be sticky
+			'empty' => 'No Users have join in this Community',
+//Optional empty text for the table if resultset is empty
+				)
+			);
+	
+	//Append pager: http://api.drupal.org/api/drupal/includes--pager.inc/function/theme_pager
+	$html .= theme('pager',
+				array(
+					'tags' => array(),
+				)
+			);
+}
+else {
+$html = '<div class="view-empty">';
+/* first login check */
+
+if($user->created == $user->login) {
+$html .= '<iframe height="290" frameborder="0" width="400" allowfullscreen="" src="//www.youtube.com/embed/';
+$html .= variable_get('firstlogin_alert_youtubevideoid');
+$html .= '?rel=0;autoplay=0" class="media-youtube-player"></iframe>';
+}
+else {
+$html .= t('There are no posts');
+}
+$html .= '</div>';
+}		
+die ($html);
+}
+
+function manage_community_video_callback() {
+
+        header("Content-type: text/html");
+	header("Expires: Wed, 29 Jan 1975 04:15:00 GMT");
+	header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
+	header("Cache-Control: no-cache, must-revalidate");
+	header("Pragma: no-cache");
+
+$query = db_select('node','n');
+$query->fields('n',array('nid','uid','title','type','created'));
+$query->fields('u',array('name'));
+$query->fields('fm',array('uri'));
+$query->fields('fyrr',array('field_youtube_record_response_value','timestamp'));
+$query->fields('fdfv',array('timestamp'));
+$query->join('users','u','u.uid = n.uid');
+$query->leftJoin('field_data_field_video','fdfv','n.nid=fdfv.entity_id');
+
+/* new additions for record video */
+$query->leftJoin('field_data_field_youtube_record_response','fyrr','n.nid=fyrr.entity_id');
+/* end */
+
+$query->leftJoin('file_managed','fm','fm.fid=fdfv.field_video_fid');
+$query = $query->condition('n.status',1,'=')
+->condition('n.type','community_video','=')
+->orderBy('n.created', 'DESC')
+->extend('PagerDefault')	//Pager Extender
+->limit(3); //15 results per page
+//$block['content'] = $query->__toString();
+$result = $query->execute();
+$row_count = $result->rowCount();
+if($row_count > 0) {
+$rows = array();
+	foreach ($result as $node) {
+if($node->type == 'community_video') {
+
+if($node->uri <> '') {
+$pieces = explode("/", $node->uri);
+}
+else {
+$pieces[3] = $node->field_youtube_record_response_value;
+}
+
+$rows[] = array(
+              'data' => array(''.$node->title.'','<iframe width="100" height="100" src="http://www.youtube.com/embed/'.$pieces[3].'" frameborder="0" allowfullscreen></iframe>',''.date("Y-m-d h:i:s",$node->created).'',''.l(t("EDIT"),"node/".$node->nid."/edit").''));
+
+}
+	}
+$html = theme('table', 
+				array(
+					'rows'=>$rows,
+					'sticky' => TRUE, //Optional to indicate whether the table headers should be sticky
+			'empty' => t('No Users have join in this Community'),
+//Optional empty text for the table if resultset is empty
+				)
+			); 
+	
+	//Append pager: http://api.drupal.org/api/drupal/includes--pager.inc/function/theme_pager
+	$html .= theme('pager',
+				array(
+					'tags' => array()
+				)
+			); }
+return $html;
+}
+
+function _discipleshipadmin_callback() {
+
+        header("Content-type: text/html");
+	header("Expires: Wed, 29 Jan 1975 04:15:00 GMT");
+	header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
+	header("Cache-Control: no-cache, must-revalidate");
+	header("Pragma: no-cache");
+
+ global $user;
+ $uid = $user->uid;
+ $user_info = user_load($uid);
+
+$gids = array();
+
+$query = db_select('node','n');
+$query->fields('n',array('nid','uid','title','type','created'));
+$query->fields('fdb',array('body_value'));
+$query->fields('u',array('name'));
+$query->fields('fm',array('uri'));
+
+$query->fields('fyrr',array('field_youtube_record_response_value','timestamp'));
+$query->fields('fdfv',array('timestamp'));
+
+$query->leftJoin('field_data_body','fdb','n.nid=fdb.entity_id');
+$query->join('users','u','u.uid = n.uid');
+$query->leftJoin('field_data_field_video','fdfv','n.nid=fdfv.entity_id');
+/* new additions for record video */
+$query->leftJoin('field_data_field_youtube_record_response','fyrr','n.nid=fyrr.entity_id');
+/* end */
+
+$query->leftJoin('file_managed','fm','fm.fid=fdfv.field_video_fid');
+$query->join('field_data_field_share_post_with_all_lifeec','fsp','n.nid = fsp.entity_id');
+$query = $query->condition('n.status',1,'=')
+->condition('n.type',array('community_content','community_video'),'IN')
+->condition('fsp.field_share_post_with_all_lifeec_value',1,'=')
+->orderBy('n.created', 'DESC')
+->groupBy('n.nid')
+->extend('PagerDefault') //Pager Extender
+->limit(5); //10 results per page
+//print_r($query->__toString());
+$result = $query->execute();
+$row_count = $result->rowCount();
+
+if($row_count > 0) {
+
+	//$rows = array();
+
+	foreach ($result as $node) {
+
+//if($record['fdfv_timestamp'] > $record['timestamp']) {
+$pieces = explode("/", $node->uri);
+//}
+//else {
+//$pieces[3] = $node->field_youtube_record_response_value;
+//}
+		$rows[] = array(
+					'data' => array(
+							 ''.date("Y-m-d h:i:s",$node->created) ."   ".$node->name." ".t('Recently posted a Video : ')
+					)
+		);
+
+$rows[] = array(
+					'data' => array(
+							 '<iframe width="400" height="290" src="http://www.youtube.com/embed/'.$pieces[3].'" frameborder="0" allowfullscreen></iframe>'
+					)
+		);
+
+	}
+
+$html = theme('table', 
+				array(
+					'rows'=>$rows,
+					'sticky' => TRUE, //Optional to indicate whether the table headers should be sticky
+			'empty' => t('No Users have join in this Community'),
+//Optional empty text for the table if resultset is empty
+				)
+			);
+	
+//Append pager: http://api.drupal.org/api/drupal/includes--pager.inc/function/theme_pager
+
+$html .= theme('pager',
+				array(
+					'tags' => array(),
+					'parameters' => array('t' => '#tab2'),
+				)
+			);
+}
+else {
+$html = '<div class="view-empty">'.t('There are no posts').'</div>';
+}
+die ($html);
+
+}
+
+// function to select post option to community
+
+function get_community_post_options() {
+module_load_include('inc', 'node', 'node.pages');
+$content = '<div id="community_post_option" class="clearfix">';
+$content .= render(drupal_get_form('community_post_options_form'));
+$content .= '<div style="display:none" id="post_message_wrapper">';
+$content .= drupal_render(node_add("community_content"));
+$content .= '</div>';
+$content .= '<div style="display:none" id="post_video_wrapper">';
+$content .= drupal_render(node_add("community_video"));
+$content .= '</div>';
+$content .= '<div style="display:none" id="post_alter_wrapper">';
+$content .= render(drupal_get_form('community_post_alert_form'));
+$content .= '</div>';
+$content .= '</div>';
+return $content;
+}
+
+function community_post_options_form() {
+$options[1] = t('Post a Message to Community');
+$options[3] = t('Post a video to Community');
+$options[2] = t('Post an Alert to Community');
+$form = array();
+$form['radio_post_message'] = array(
+'#type' => 'radios',
+'#name' => 'post_meesage_option',
+'#options' => $options,
+);
+return $form;
+}
+
+function community_post_alert_form() {
+$form = array();
+$form['post_alert'] = array(
+'#type' => 'textarea',
+'#cols' => '55',
+'#rows' => '5',
+'#resizable' => FALSE,
+'#name' => 'postalert',
+//'#required' => TRUE,
+);
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Post Alert'),
+  );
+
+return $form;
+}
+
+function community_post_alert_form_submit($form,&$form_state) {
+global $user;
+$post_alert = '';
+$post_alert = $form_state['input']['postalert'];
+$nid = get_logged_user_community_ID();
+$query = db_insert('lifeecho_alerts');
+$query->fields(array(
+'alerttext' => $post_alert,
+'alerttype' => 'dplan',
+'alertto' => $nid,
+'alertfrom' => $user->uid,
+'alerttime' => REQUEST_TIME,
+'alertstatus' => 0,
+'accept_status' => 0
+));
+$result = $query->execute();
+drupal_set_message(t('Alert posted successfully'),'status');
+drupal_goto('post/community');
+}
+
+function community_video_node_custom_submit($form,$form_state) {
+drupal_set_message(t('Video posted successfully'),'status');
+//drupal_goto('post/community');
+$form_state['redirect'] = 'post/community';
+}
+
+function community_node_manage_videos()
+{
+$manage_videos = render(module_invoke('discipleship', 'block_view', 'manage_community_video'));
+$content = '<div>'.$manage_videos.'</div>';
+return $content;
+}
+
+/* Custom function for adding an alert - super admin feature */
+
+function superadmin_alertuser_form() {
+$form = array();
+
+$form['alert'] = array(
+  '#type' => 'fieldset',
+  '#title' => t('Post an Alert'),
+  '#weight' => 5,
+  '#collapsible' => TRUE,
+  '#collapsed' => FALSE,
+);
+
+$form['alert']['post_alert'] = array(
+'#type' => 'textarea',
+'#cols' => '20',
+'#rows' => '5',
+'#resizable' => FALSE,
+'#name' => 'postalert',
+);
+
+  $form['alert']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Post Alert'),
+  );
+
+return $form;
+}
+
+function superadmin_alertuser_form_submit($form,&$form_state) {
+global $user;
+$post_alert = '';
+$post_alert = $form_state['input']['postalert'];
+$query = db_insert('lifeecho_alerts');
+$query->fields(array(
+'alerttext' => $post_alert,
+'alerttype' => 'general-alert',
+'alertto' => 0,
+'alertfrom' => $user->uid,
+'alerttime' => REQUEST_TIME,
+'alertstatus' => 0,
+'accept_status' => 0
+));
+$result = $query->execute();
+drupal_set_message(t('Alert posted successfully'),'status');
+drupal_goto('postanalert/general');
+}

@@ -1,0 +1,9 @@
+	
+name = Devex Service
+description = Services for the Devex calendar.
+package = devcex example
+dependencies[] = services
+files[] = devex_service.inc
+files[] = devex_service.module
+core = 7.x
+

@@ -1,0 +1,10 @@
+name = Custom Blocks
+description = Custom blocks for LifeEcho
+package = Custom
+version = VERSION
+core = 7.x
+
+; Information added by drupal.org packaging script on 2012-12-19
+version = "7.15"
+project = "drupal"
+datestamp = "1343839327"

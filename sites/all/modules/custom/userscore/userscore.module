@@ -1,0 +1,65 @@
+<?php
+
+/* 
+* Implements hook_user_update.
+*/
+
+function userscore_user_update(&$edit, $account, $category) {
+
+$struggle_score = 0;
+$hobbies_score = 0;
+// find out user score based on the question "Where do you face current struggles ?".
+
+if(isset($account->field_where_do_face_current_['und'])) {
+if(count($account->field_where_do_face_current_['und']) > 0) {
+$vid = 7;
+$selected_items = 0;
+$total_terms = count(taxonomy_get_tree($vid));
+$selected_items = count($account->field_where_do_face_current_['und']);
+$struggle_score = ($total_terms/$selected_items)*2;
+}
+}
+
+// update user score to field api table , for this we have added a new column 'strugglescore'.
+
+$query1 = db_update('field_data_field_where_do_face_current_')
+->fields(array('strugglescore' => $struggle_score))
+->condition('entity_id',$account->uid)
+->condition('entity_type','user')
+->execute();
+
+$query2 = db_update('field_revision_field_where_do_face_current_')
+->fields(array('strugglescore' => $struggle_score))
+->condition('entity_id',$account->uid)
+->condition('entity_type','user')
+->execute();
+
+// find out user score based on the question "What are your hobbies and interests?".
+
+if(isset($account->field_what_are_hobbies_and_['und'])) {
+if(count($account->field_what_are_hobbies_and_['und']) > 0) {
+$vid = 8;
+$selected_items_h = 0;
+$total_terms_h = count(taxonomy_get_tree($vid));
+$selected_items_h = count($account->field_what_are_hobbies_and_['und']);
+$hobbies_score = $total_terms_h/$selected_items_h;
+}
+}
+
+// update user score to field api table , for this we have added a new column 'hobbiesscore'.
+
+$query3 = db_update('field_data_field_what_are_hobbies_and_')
+->fields(array('hobbiesscore' => $hobbies_score))
+->condition('entity_id',$account->uid)
+->condition('entity_type','user')
+->execute();
+
+$query4 = db_update('field_revision_field_what_are_hobbies_and_')
+->fields(array('hobbiesscore' => $hobbies_score))
+->condition('entity_id',$account->uid)
+->condition('entity_type','user')
+->execute();
+
+//drupal_set_message(t('your struggle score is:'.$struggle_score),'status');
+//drupal_set_message(t('your hobbies score is:'.$hobbies_score),'status');
+}

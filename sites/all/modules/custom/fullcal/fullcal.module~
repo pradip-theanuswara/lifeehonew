@@ -1,0 +1,889 @@
+<?php
+/* 
+*
+*Implements hook_menu
+*/
+function fullcal_menu() {
+	$items = array();
+	global $user;
+
+	$items['calendar'] = array(
+		'title' => 'life echo master calendar ',
+  		'type' => MENU_CALLBACK,
+  		'page callback' => 'get_master_calendar',
+  		'access arguments' => array('access content')
+	); 
+	$items['dplancalendar'] = array(
+		'title' => 'life echo master calendar ',
+  		'type' => MENU_CALLBACK,
+  		'page callback' => 'get_dplan_calendar',
+  		'access arguments' => array('access content')
+	); 		 
+   $items['mastercalendar/getEvents'] = array(
+  		'title' => 'Get events',
+  		'type' => MENU_CALLBACK,
+  		'page callback' => 'mastercalendarEvents',
+  		'access arguments' => array('access content'),
+	);
+
+$items['dplancalendar/getEvents'] = array(
+  'title' => 'Get dplan events',
+  'type' => MENU_CALLBACK,
+  'page callback' => 'dplancalendarEvents',
+  'access arguments' => array('access content'),
+);
+
+$items['mastercalendar/changeEvent'] = array(
+	  'title' => 'update the event item',
+  'type' => MENU_CALLBACK,
+  'page callback' => 'update_event',
+  'access arguments' => array('access content')
+); 
+
+$items['calendar/createEvent'] = array(
+	  'title' => 'create the event item',
+  'type' => MENU_CALLBACK,
+  'page callback' => 'create_event',
+  'access arguments' => array('access content')
+); 
+
+$items['calendar/deleteEvent'] = array(
+	  'title' => 'delete the event item',
+  'type' => MENU_CALLBACK,
+  'page callback' => 'delete_event',
+  'access arguments' => array('access content')
+); 
+
+$items['dplancalendar/updateEvent'] = array(
+	  'title' => 'update the event items main',
+  'type' => MENU_CALLBACK,
+  'page callback' => 'edit_event',
+  'access arguments' => array('access content')
+); 
+$items['calendar/getuser'] = array(
+	  'title' => 'get user details by id',
+  'type' => MENU_CALLBACK,
+  'page callback' => 'get_user',
+  'access arguments' => array('access content')
+);
+$items['calendar/ical'] = array(
+	  'title' => 'get ical export',
+  'type' => MENU_CALLBACK,
+  'page callback' => 'export_ical',
+  'access arguments' => array('access content')
+);
+/* $items['calendar/remainder'] = array(
+	  'title' => 'get calender remainder alerts',
+  'type' => MENU_CALLBACK,
+  'page callback' => 'get_calendar_remainder',
+  'access arguments' => array('access content')
+);*/
+
+  return $items;
+}
+function export_ical(){
+		$filename='icall';
+		$events="";
+		$events=trim($_POST['ical_events']);
+		$events=json_decode($events, TRUE);
+		$lines = array();
+		$lines[] = 'BEGIN:VCALENDAR';
+		$lines[] = 'PRODID:-//My Events Calendar//';
+		$lines[] = 'VERSION:2.0';
+
+		foreach ($events as $e){
+			$lines[] = 'BEGIN:VEVENT';
+			$lines[] = "DTSTART:".date("Ymd\This\Z",strtotime($e['start']));
+			$lines[] = "DTEND:".date("Ymd\This\Z",strtotime($e['end']));
+			$lines[] = 'DESCRIPTION:'.$e['description'];
+			$lines[] = 'SUMMARY:'.$e['title'];
+			$lines[] = 'END:VEVENT';
+		}
+		$lines[] = 'END:VCALENDAR';
+		//This is the most important coding.
+	
+       header("Content-Type: text/Calendar;charset=utf-8");
+       header('Content-Disposition: inline; filename="' . $filename . '.ics"');
+/*     header('Content-Transfer-Encoding: binary');
+       header('Expires: -1');
+       header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+       header('Pragma: public');
+       header('Content-Length: ' . mb_strlen( $output, '8bit' ) );
+    */
+    	echo implode("\n",$lines);  die();
+	}
+//get user name for post uid, return - name of user. to show dplan with
+function get_user(){
+	global $user;
+	$log_uid = $user->uid;
+	$uid=trim($_POST['uid']);
+	if($uid){
+		$user_data=user_load($uid);
+		die($user_data->name);
+		}
+	else{
+		global $user;
+		$uid = $user->uid;
+		die($user_data=user_load($uid));
+			
+		}
+	}
+//fetech event for master calendar
+function mastercalendarEvents() {
+global $user;
+$uid = $user->uid;
+$query = new EntityFieldQuery();
+$query->entityCondition('entity_type', 'node')
+ 	 ->entityCondition('bundle', 'event') // ex. article
+ 	 ->propertyCondition('uid', $uid) // node written by a specific user
+ 	 ->propertyCondition('status', 1);
+ 	 
+ //	 ->propertyCondition('created', REQUEST_TIME - 3600, '>='); // created within the past 1 hour
+$result = $query->execute();
+
+ $aids = array();
+  foreach($result['node'] as $record) {
+  	
+ $aids[] = $record->nid;
+  }
+  
+	$query1 = new EntityFieldQuery();
+$query1->entityCondition('entity_type', 'node')
+ 	 ->entityCondition('bundle', 'event') // ex. article
+ 	  ->fieldCondition('field_dplanwith','value', $uid, '=') //to get nodeid event dplaned by other user
+ 	
+ 	 ->propertyCondition('status', 1); // published nodes
+ //	 ->propertyCondition('created', REQUEST_TIME - 3600, '>='); // created within the past 1 hour
+$result1 = $query1->execute();  
+  foreach($result1['node'] as $record1) {
+  	
+ $aids[] = $record1->nid;
+  }
+ 
+  $events = entity_load('node', $aids);//get all node details of type event as array
+  echo json_encode($events);
+die();
+
+}
+//fetch events for dplan calender
+function dplancalendarEvents() {
+global $user;
+$uid = $user->uid;
+$dplan_uid=0;
+
+$dplan_uid=trim($_POST['dplanwith']);
+$query = new EntityFieldQuery();
+$query->entityCondition('entity_type', 'node')
+ 	 ->entityCondition('bundle', 'event') // ex. article
+ 	 ->fieldCondition('field_dplanwith','value', $dplan_uid, '=') 
+ 	 ->propertyCondition('uid', $uid) // node written by a specific user
+ 	 ->propertyCondition('status', 1); // published nodes
+ //	 ->propertyCondition('created', REQUEST_TIME - 3600, '>='); // created within the past 1 hour
+$result = $query->execute();
+
+ $aids = array();
+  foreach($result['node'] as $record) {
+  	
+ $aids[] = $record->nid;
+  }
+  
+//to get receprocal relation dplan events
+
+$query1 = new EntityFieldQuery();
+$query1->entityCondition('entity_type', 'node')
+ 	 ->entityCondition('bundle', 'event') // ex. article
+ 	 ->fieldCondition('field_dplanwith','value',$uid, '=') 
+ 	 ->propertyCondition('uid',$dplan_uid) // node written by a specific user
+ 	 ->propertyCondition('status', 1); // published nodes
+
+$result1 = $query1->execute();  
+  foreach($result1['node'] as $record1) {
+  	
+ $aids[] = $record1->nid;
+  }
+  $events = entity_load('node', $aids);//get all node details of type event as array
+  echo json_encode($events);
+die();
+
+}
+
+/* to update the events */
+
+function update_event(){
+$entity_type='node';
+$field_start='field_start';
+$field_end='field_end';
+$field_fbevent='field_fb_event_id';
+$langcode='und';
+$index='value';
+$fb_event_id=0;
+$type=trim($_POST['ttype']);
+$allDay=trim($_POST['allDay']);
+$node_id=trim($_POST['node_id']);
+
+$date_difference=trim($_POST['differ']).' days';
+$minute_difference=trim($_POST['minuteDelta']).' min';
+  
+$entity = entity_load($entity_type, array($node_id));
+$entity = reset($entity);
+$start_item = &$entity->{$field_start}[$langcode][0];
+ $end_item = &$entity->{$field_end}[$langcode][0];
+ $fb_event_obj = &$entity->{$field_fbevent}[$langcode][0];
+  	$old_start = $start_item['value'];
+$old_end = $end_item['value'];
+$fb_event_id=$fb_event_obj['value'];
+$fb_event_id= $fb_event_obj['value'];
+$format = date_type_format($start_item['date_type']);
+
+  // Datestamp can't combine with words for strtotime, convert to ISO for now.
+  if ($format) {
+  	
+ //$old_start = date(DATE_FORMAT_ISO, $old_start);
+ //$old_end = date(DATE_FORMAT_ISO, $old_end);
+ 
+  }
+
+  	if($type =='resize'){
+  	 
+  		if($old_end)
+ 			$end_item['value'] = date($format, strtotime($old_end . $date_difference. $minute_difference));
+ 	else
+  				$end_item['value'] = date($format, strtotime($old_start . $date_difference. $minute_difference));
+  				
+  			
+  		}
+  	else{
+  		
+  		
+  			
+  	 	if($old_start)
+ 			$start_item['value'] = date($format, strtotime($old_start . $date_difference .$minute_difference));
+ 		if($old_end)
+ 			$end_item['value'] = date($format, strtotime($old_end . $date_difference.$minute_difference));
+	}
+
+  // Save the new start/end values.
+  if (module_exists('entity')) {
+  	
+	
+  	
+ entity_save($entity_type, $entity);
+//update event in facebook 
+
+	if($old_end){	
+	$events=array(
+       
+           'end_time' => date("Y-m-d",strtotime($old_end . $date_difference.$minute_difference)) . 'T' . date("H:i:s",strtotime($old_end . $date_difference.$minute_difference)) .'+00:00',
+           'start_time' => date("Y-m-d", strtotime($old_start . $date_difference .$minute_difference)) . 'T' . date("H:i:s",strtotime($old_start . $date_difference .$minute_difference)) .'+00:00'
+         
+           );
+    }else{
+    	$events=array(
+       
+           
+           'start_time' => date("Y-m-d", strtotime($old_start . $date_difference .$minute_difference)) . 'T' . date("H:i:s",strtotime($old_start . $date_difference .$minute_difference)) .'+00:00'
+         
+           );
+    	
+    	}
+  
+	$is_fb_update=facebook_event_update($fb_event_id,$events);   
+ 
+ $old_end='';
+ $old_start='';
+ die('1');
+  }
+  else {
+ field_attach_presave($entity_type, $entity);
+ field_attach_update($entity_type, $entity);
+ die(0);
+  }
+
+
+
+}
+//create event on day click
+function create_event(){
+		global $user;
+	$uid = $user->uid;
+	$entity_type='node';
+	$field_start='field_start';
+	$field_end='field_end';
+	$field_dplanwith='field_dplanwith';
+	$field_fbevent='field_fb_event_id';
+	$langcode='und';
+	$index='value';
+	$dplan_uid=trim($_POST['dplan_uid']);
+	$date=trim($_POST['date']);
+	$date= date('Y-m-d H:i:s', strtotime($date));
+	$title=trim($_POST['title1']);
+	$allDay=trim($_POST['allDay']);
+
+	$new=entity_create($entity_type,array('type'=>'event'));
+	$new->title=$title;
+	$new->uid=$uid;
+	$langcode = field_language($entity_type, $new, $field_start);
+	$start_item = &$new->{$field_start}[$langcode][0];
+	$dplanwith_item = &$new->{$field_dplanwith}[$langcode][0];
+	$fbEventID = &$new->{$field_fbevent}[$langcode][0];
+	$format = date_type_format($start_item['date_type']);
+	
+	$start_item['value'] = date('Y-m-d H:i:s',strtotime($date));
+	$dplanwith_item['value']=$dplan_uid;
+	
+	
+	//to insert events in facebook it return fb event id
+	$events=array(
+                  'name' => $title,
+                  'start_time' => date("Y-m-d", strtotime($date)) . 'T' . date("H:i:s",strtotime($date)) .'+00:00',
+                  'privacy_type' => 'FRIENDS'
+                    );
+	$fb_event_id=facebook_event_insert($events);
+	$fbEventID['value']=$fb_event_id;
+	
+	if(($dplan_uid > 0) && ($dplan_uid != '')){ //is from dplan calender
+		//to get fb id of user
+		$dplan_user_fb_id=_get_user_fbuid($dplan_uid);
+		//invide the dplan user to this created event
+		facebook_invite_user($fb_event_id,$dplan_user_fb_id);
+		
+		}
+	
+	$created=entity_save($entity_type, $new);
+
+	die($new->nid);//return created node id
+
+	
+	}
+	
+	
+	
+	//create event when ical import
+	function create_event_item($title,$start,$end,$desc='',$allday=1,$dplan='0'){
+		
+	global $user;
+	
+	$uid = $user->uid;
+	$entity_type='node';
+	$field_start='field_start';
+	$field_end='field_end';
+	$field_dplanwith='field_dplanwith';
+	$field_fbevent='field_fb_event_id';
+	$langcode='und';
+	$index='value';
+	$dplan=trim($dplan);
+
+	$e_start= date('Y-m-d H:i:s', strtotime(trim($start)));
+	$e_end= date('Y-m-d H:i:s', strtotime(trim($end)));
+	$title=trim($title);
+	$allDay=trim($allday);
+
+	$new=entity_create($entity_type,array('type'=>'event'));
+	$new->title=$title;
+	$new->uid=$uid;
+	$langcode = field_language($entity_type, $new, $field_start);
+	$start_item = &$new->{$field_start}[$langcode][0];
+	$end_item = &$new->{$field_end}[$langcode][0];
+	$dplanwith_item = &$new->{$field_dplanwith}[$langcode][0];
+	$fbEventID = &$new->{$field_fbevent}[$langcode][0];
+	$format = date_type_format($start_item['date_type']);
+	
+	$start_item['value'] = date('Y-m-d H:i:s',strtotime($e_start));
+	$end_item['value'] = date('Y-m-d H:i:s',strtotime($e_end));
+	
+	
+	$dplanwith_item['value']=$dplan;
+	
+	
+	
+	//to insert events in facebook it return fb event id
+	if($e_end){
+	$events=array(
+                  'name' => $title,
+                  'start_time' => date("Y-m-d", strtotime($e_start)) . 'T' . date("H:i:s",strtotime($e_start)) .'+00:00',
+                  'end_time' => date("Y-m-d", strtotime($e_end)) . 'T' . date("H:i:s",strtotime($e_end)) .'+00:00',
+                  'privacy_type' => 'FRIENDS'
+                    );
+            }else{
+    $events=array(
+                  'name' => $title,
+                  'start_time' => date("Y-m-d", strtotime($e_start)) . 'T' . date("H:i:s",strtotime($e_start)) .'+00:00',
+                 
+                  'privacy_type' => 'FRIENDS'
+                    );        	
+            	
+            	
+            	
+            	}
+	$fb_event_id=facebook_event_insert($events);
+	$fbEventID['value']=$fb_event_id;
+	
+	if(($dplan > 0) && ($dplan != '')){ //is from dplan calender
+		//to get fb id of user
+		$dplan_user_fb_id=_get_user_fbuid($dplan);
+		//invide the dplan user to this created event
+		facebook_invite_user($fb_event_id,$dplan_user_fb_id);
+		
+		}	
+	$created=entity_save($entity_type, $new);
+
+	return $new->nid;//return created node id
+
+	
+	}
+	
+	
+		
+	
+	function delete_event(){
+		$event_id=trim($_POST['event_id']);
+		$field_fbevent='field_fb_event_id';
+		$entity_type='node';
+		$langcode='und';
+		if($event_id){
+			$entity = entity_load($entity_type, array($event_id));
+			$entity = reset($entity);
+			$fb_event_obj = &$entity->{$field_fbevent}[$langcode][0];
+  			$fb_event_id = $fb_event_obj['value'];
+			facebook_event_delete($fb_event_id);//to edit facebook events	
+			node_delete($event_id);
+			
+				die('1');
+			
+			}
+		
+		}
+		
+function edit_event(){
+	$entity_type='node';
+	$field_start='field_start';
+	$field_end='field_end';
+	$field_body='body';
+	$field_allday='field_allday';
+	$field_r_count='field_remainder_count';
+	$field_r_type='field_remainder_type';
+	$field_fbevent='field_fb_event_id';
+	$langcode='und';
+	$index='value';
+	$format='Y-m-d H:i:s';
+	$allDay=trim($_POST['allDay']);
+	$desc_value=trim($_POST['desc']);
+	$title=trim($_POST['evt_title']);
+	$node_id=trim($_POST['node_id']);
+	$start_date=trim($_POST['start_date']);
+	$end_date=trim($_POST['end_date']);
+	$remainder_count=trim($_POST['r_count']);
+	$remainder_type=trim($_POST['r_type']);
+	$entity = entity_load($entity_type, array($node_id));
+	$entity = reset($entity);
+	$start_item = &$entity->{$field_start}[$langcode][0];
+	$end_item = &$entity->{$field_end}[$langcode][0];
+	$is_allday = &$entity->{$field_allday}[$langcode][0];
+	$desc = &$entity->{$field_body}[$langcode][0];
+	$fb_event_obj = &$entity->{$field_fbevent}[$langcode][0];
+   $fb_event_id = $fb_event_obj['value'];
+	if($start_date)
+		$start_item['value']=date($format, strtotime($start_date));
+	if($end_date)
+		$end_item['value']=date($format, strtotime($end_date));
+	$is_allday['value']=$allDay;
+	$desc['value']=$desc_value;
+	$entity->title=$title;
+	//set reminder
+	if($remainder_count > 0){
+		$rcount = &$entity->{$field_r_count}[$langcode][0];
+		$rtype = &$entity->{$field_r_type}[$langcode][0];	
+		$rcount['value']=$remainder_count;
+		$rtype['value']=$remainder_type;
+	}
+  // Save the new start/end values.
+  if(module_exists('entity')) {
+  		entity_save($entity_type, $entity);
+		//update to facebook
+		if($end_date){
+		$events=array(  
+				'name' => $title,
+           'start_time' => date("Y-m-d", strtotime($start_date)) . 'T' . date("H:i:s",strtotime($start_date)) .'+00:00',
+           'end_time' =>date("Y-m-d", strtotime($end_date)) . 'T' . date("H:i:s",strtotime($end_date)) .'+00:00',
+           'description' => $desc_value
+                    );
+      }else{
+      	$events=array(  
+				'name' => $title,
+           'start_time' => date("Y-m-d", strtotime($start_date)) . 'T' . date("H:i:s",strtotime($start_date)) .'+00:00',
+           'description' => $desc_value
+                    );
+      	      	}
+     	
+  		echo $is_fb_update=facebook_event_update($fb_event_id,$events);   		
+		
+		die('1');
+  }
+  else {
+ field_attach_presave($entity_type, $entity);
+ field_attach_update($entity_type, $entity);
+ die(0);
+  }
+		
+		}
+
+/*
+*  Implements hook_block_info
+*/	
+function fullcal_block_info() {
+  $blocks = array();
+  $blocks['master_calendar'] = array(
+ 'info' => t('Master Calendar'),
+ 'cache' => DRUPAL_NO_CACHE,
+  );
+  $blocks['dplan_calendar'] = array(
+ 'info' => t('Dplan Calendar'),
+ 'cache' => DRUPAL_NO_CACHE,
+  );
+  $blocks['remainder_alerts'] = array(
+ 'info' => t('Calendar Remainder alerts'),
+ 'cache' => DRUPAL_NO_CACHE,
+  );
+  $blocks['ical_import'] = array(
+ 'info' => t('Calendar ical_import'),
+ 'cache' => DRUPAL_NO_CACHE,
+  );
+  return $blocks;
+}
+
+/*
+*  Implements master calendar page
+*/
+function get_master_calendar() {
+	$ical_import_block = module_invoke('fullcal', 'block_view', 'ical_import');
+	$block = module_invoke('fullcal', 'block_view', 'master_calendar');
+	return ('<div><div class="cal_import">'.render($ical_import_block).'</div>'.render($block['content']).'</div>');
+}
+
+function get_dplan_calendar() {
+	$ical_import_block = module_invoke('fullcal', 'block_view', 'ical_import');
+	$block = module_invoke('fullcal', 'block_view', 'dplan_calendar');
+	return ('<div><div class="cal_import">'.render($ical_import_block).'</div>'.render($block['content']).'</div>');
+}
+
+function get_calendar_remainder() {
+	$block = module_invoke('fullcal', 'block_view', 'remainder_alerts');
+	return ('<div>'.render($block['content']).'</div>');
+}
+/*
+*  Implements hook_block_view
+*/
+
+function fullcal_block_view($block_name = 'master_calendar') {
+	global $user;
+		$uid = $user->uid;
+	if ($block_name == 'master_calendar') {
+		drupal_add_css(drupal_get_path('module', 'fullcal') . '/datetimepicker/jquery-ui-timepicker-addon.css');	
+		drupal_add_css(drupal_get_path('module', 'fullcal') . '/fullcalendar/lifeechocal/theme.css');
+		drupal_add_css(drupal_get_path('module', 'fullcal') . '/fullcalendar/fullcalendar.css');
+   	//drupal_add_css(drupal_get_path('module', 'fullcal') . '/fullcalendar/fullcalendar.print.css');
+		drupal_add_css(drupal_get_path('module', 'fullcal') . '/css/master_cal.css');
+               // drupal_add_js(drupal_get_path('theme', 'lifeecho') . '/js/jquery-migrate-1.0.0.js');
+		drupal_add_js(drupal_get_path('module', 'fullcal') . '/jquery/jquery-1.9.1.min.js');
+//drupal_add_js('jQuery(document).ready(function () { var $k=jQuery.noConflict(); });', 'inline');
+		drupal_add_js(drupal_get_path('module', 'fullcal') . '/jquery/jquery-ui-1.10.2.custom.min.js');
+//drupal_add_js(base_path(). '/misc/jquery.js');
+		drupal_add_js(drupal_get_path('module', 'fullcal') . '/jquery/jquery-ui.min.js');
+		drupal_add_js(drupal_get_path('module', 'fullcal') . '/datetimepicker/jquery-ui-timepicker-addon.js');
+		drupal_add_js(drupal_get_path('module', 'fullcal') . '/datetimepicker/jquery-ui-sliderAccess.js');
+		drupal_add_js(drupal_get_path('module', 'fullcal') . '/fullcalendar/fullcalendar.min.js');
+		drupal_add_js(drupal_get_path('module', 'fullcal') . '/fullcal.js');
+		drupal_add_js(drupal_get_path('module', 'fullcal') . '/master_cal.js');
+ 		$list ='<div id="master_cal"></div><input type="hidden" value="'.$uid.'" id="current_uid">';//master cal();
+		$block = array(
+			'content' => $list,
+		);
+ 		return $block;
+ 	 }
+ 	 
+	if($block_name == 'dplan_calendar') {
+		global $user;
+		$uid = $user->uid;
+		drupal_add_css(drupal_get_path('module', 'fullcal') . '/datetimepicker/jquery-ui-timepicker-addon.css');	
+		drupal_add_css(drupal_get_path('module', 'fullcal') . '/fullcalendar/lifeechocal/theme.css');
+		drupal_add_css(drupal_get_path('module', 'fullcal') . '/fullcalendar/fullcalendar.css');
+		drupal_add_css(drupal_get_path('module', 'fullcal') . '/css/master_cal.css');
+		drupal_add_js(drupal_get_path('module', 'fullcal') . '/jquery/jquery-1.9.1.min.js');
+		drupal_add_js(drupal_get_path('module', 'fullcal') . '/jquery/jquery-ui-1.10.2.custom.min.js');
+		drupal_add_js(drupal_get_path('module', 'fullcal') . '/jquery/jquery-ui.min.js');
+		drupal_add_js(drupal_get_path('module', 'fullcal') . '/datetimepicker/jquery-ui-timepicker-addon.js');
+   	drupal_add_js(drupal_get_path('module', 'fullcal') . '/datetimepicker/jquery-ui-sliderAccess.js');
+		drupal_add_js(drupal_get_path('module', 'fullcal') . '/fullcalendar/fullcalendar.min.js');
+		drupal_add_js(drupal_get_path('module', 'fullcal') . '/fullcal.js');
+		drupal_add_js(drupal_get_path('module', 'fullcal') . '/dplan_cal.js');
+		$list ='<div id="dplan_cal"></div><input type="hidden" value="'.$uid.'" id="current_uid">';//dplan cal();
+		$block = array(
+			'content' => $list,
+		);
+ 		return $block;
+  	}
+  	
+  
+  	if($block_name == 'remainder_alerts') {
+  		$langcode='und';
+		global $user;
+		$uid = $user->uid;
+		$query = new EntityFieldQuery();
+		$query->entityCondition('entity_type', 'node')
+ 	 		->entityCondition('bundle', 'event') // ex. article
+ 	 		->propertyCondition('uid', $uid) // node written by a specific user
+ 	 		->propertyCondition('status', 1)
+ 	 		->fieldCondition('field_remainder_count','value', 0 , '>');
+ 	 
+ 		//->propertyCondition('field_start', REQUEST_TIME - 3600, '>='); // created within the past 1 hour
+		$result = $query->execute();
+		$aids = array();
+if (isset($result['node'])) {
+  		foreach($result['node'] as $record) {
+  			 $aids[] = $record->nid;
+  		}
+}
+
+  		$query1 = new EntityFieldQuery();
+		$query1->entityCondition('entity_type', 'node')
+ 	 		->entityCondition('bundle', 'event') // ex. article
+ 	  		->fieldCondition('field_dplanwith','value', $uid, '=') //to get nodeid event dplaned by other user
+			->propertyCondition('status', 1); // published nodes
+ 			// ->propertyCondition('created', REQUEST_TIME - 3600, '>='); // created within the past 1 hour
+		$result1 = $query1->execute();
+ if (isset($result1['node'])) {
+  		foreach($result1['node'] as $record1) {
+  			 $aids[] = $record1->nid;
+  		}
+}
+
+ 	  $events = entity_load('node', $aids);//get all node details of type event as array
+ 	  $remainder_alerts_events=array();
+ 	  $contant='';
+		foreach($events as $evt){
+			
+			$r_count = &$evt->{'field_remainder_count'}[$langcode][0];
+  			$r_count_value = $r_count['value'];
+  			$r_type = &$evt->{'field_remainder_type'}[$langcode][0];
+  			$r_type_value = $r_type['value'];
+  			$start = &$evt->{'field_start'}[$langcode][0];
+  			$start_value = $start['value'];
+  			$remainder_seconds=$r_count_value*$r_type_value;
+  			$remainder_start_time=date('Y-m-d H:i:s',(strtotime($start_value)-$remainder_seconds));
+  			if(strtotime($remainder_start_time) < strtotime("now") && strtotime("now") < strtotime($start_value) ){
+  		   	$remainder_alerts_events=array(
+  														'title'=>$evt->title,
+  														'start'=>$start_value,
+  														'uid'=>$evt->uid
+  														);
+  				$contant .='<li>You have an event '.$evt->title.' at '.date('F j, Y, g:i a',strtotime($start_value)).'</li>';
+  			}
+			
+			}
+		
+		$list ="<div class='clear'></div><div id='remainder_alerts' class='clearfix'><ul>".$contant."</ul></div>";
+		$block = array(
+			'content' => $list,
+		);
+ 		return $block;
+  	}
+  	
+  	if($block_name == 'ical_import') {
+  			
+  			$item=drupal_get_form('icalimport_form');
+  		
+  		$block = array(
+			'content' => $item,
+		);
+		return $block;
+  		}
+  	  		
+
+}
+
+function icalimport_form() {
+	
+		  $form = array();
+	
+  $form['file'] = array(
+        '#type' => 'file',
+              '#size' => '5',
+       /* '#title' => t('ical import'),
+        '#description' => t('Upload a ics file'),*/
+  );
+  $form['userdplanwith'] = array(
+        '#type' => 'hidden',
+          '#attributes' => array('id' => 'userdplaned'),   
+       /* '#title' => t('ical import'),
+        '#description' => t('Upload a ics file'),*/
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('iCal Import'),
+  );
+
+  return $form;
+	
+	
+	}
+	
+	function icalimport_form_validate($form, &$form_state) {
+		
+	
+  $file = file_save_upload('file', array(
+     
+      'file_validate_extensions' => array('ics'),
+  ));
+  
+  
+  
+
+  if ($file) {
+  	
+  	
+		
+  	
+  	
+  	
+    if ($file = file_move($file, 'public://')) {
+      $form_state['values']['file'] = $file;
+    }
+    else {
+      form_set_error('file', t('Failed to write the uploaded file the site\'s file folder.'));
+    }
+  }
+  else {
+    form_set_error('file', t('No file was uploaded.'));
+  }
+}
+
+function icalimport_form_submit($form, &$form_state) {
+		
+  $file=$form_state['values']['file'];
+  $dplanwith=$form_state['values']['userdplanwith'];
+
+//  print_r($file);
+ require_once 'iCalReader.php';
+$file_path = drupal_realpath("public://").'/'.$file->filename;
+$ical_event_array='';
+
+  unset($form_state['values']['file']);
+  $file->status = FILE_STATUS_PERMANENT;
+  file_save($file);
+  
+  $ical = new ical($file_path);
+
+$ical_event_array=$ical->get_event_array();
+if((count($ical_event_array)) > 0){
+	
+		foreach($ical_event_array as $val){
+		
+			create_event_item($val['SUMMARY'],$val['DTSTART'],$val['DTEND'],$val['DESCRIPTION'],1,$dplanwith);
+	
+		}
+	
+	}
+ 
+ // drupal_set_message(t('The form has been submitted and the image has been saved, filename: @filename.', array('@filename' => $file->filename)));
+}
+//event insert to facebook
+function facebook_event_insert($events) {
+  $event_id = 0;
+  if (($client = facebook_client()) && ($user = $client->getUser())) {
+    try {
+      // Proceed knowing you have a logged in user who's authenticated.
+      $ret_obj = $client->api('/me/events', 'POST', $events);
+                                 
+         if(isset($ret_obj['id'])) {
+          // Success
+          $event_id = $ret_obj['id'];
+         
+        } else {
+          $event_id = 0;
+        }
+    
+    } catch (FacebookApiException $e) {
+      $event_id = 0;
+    }
+  }
+  return $event_id;
+}
+
+//event update to facebook
+function facebook_event_update($event_id='0',$events) {
+	$event_id=trim($event_id);
+  $res=0;
+  if (($client = facebook_client()) && ($user = $client->getUser()) && ($event_id > 0)) {
+    try {
+     
+      // Proceed knowing you have a logged in user who's authenticated.
+      $ret_obj = $client->api("/$event_id", 'POST', $events);
+                          
+         if(isset($ret_obj)) {
+          // Success
+          $res = $ret_obj;
+         
+        } else {
+          $res = 0;
+        }
+    
+    } catch (FacebookApiException $e) {
+      $res = 0;
+    }
+  }
+  return $res;
+}
+
+//event delete to facebook
+function facebook_event_delete($event_id='0') {
+	$event_id=trim($event_id);
+  $res=0;
+  if (($client = facebook_client()) && ($user = $client->getUser()) && ($event_id > 0)) {
+    try {
+     
+      // Proceed knowing you have a logged in user who's authenticated.
+      $ret_obj = $client->api("/$event_id", 'DELETE');
+                          
+         if(isset($ret_obj)) {
+          // Success
+          $res = $ret_obj;
+         
+        } else {
+          $res = 0;
+        }
+    
+    } catch (FacebookApiException $e) {
+      $res = 0;
+    }
+  }
+  return $res;
+}
+
+
+//event delete to facebook
+function facebook_invite_user($event_id='0',$user_fb_id) {
+	$event_id=trim($event_id);
+  $res=0;
+  if (($client = facebook_client()) && ($user = $client->getUser()) && ($event_id > 0)) {
+    try {
+     
+      // Proceed knowing you have a logged in user who's authenticated.
+      $ret_obj = $client->api($event_id . "/invited/" . $user_fb_id,
+                     'POST');
+
+                          
+         if(isset($ret_obj)) {
+          // Success
+          $res = $ret_obj;
+         
+        } else {
+          $res = 0;
+        }
+    
+    } catch (FacebookApiException $e) {
+      $res = 0;
+    }
+  }
+  return $res;
+}
+

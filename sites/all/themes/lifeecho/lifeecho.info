@@ -1,0 +1,42 @@
+
+name = Lifeecho
+description = A flexible, recolorable theme with many regions.
+package = Custom
+version = VERSION
+core = 7.x
+
+stylesheets[all][] = css/master.css
+stylesheets[all][] = css/master-second.css
+stylesheets[all][] = css/layout.css
+stylesheets[all][] = css/colors.css
+stylesheets[print][] = css/print.css
+
+regions[help] = Help
+regions[header] = Header
+regions[headervideo] = Home page video view
+regions[fblogin] = FB login
+regions[content] = Content
+regions[homecontent] = Home Content
+regions[userprofilemybio] = User Profile My bio
+regions[userprofilesidebar] = User Profile Sidebar
+regions[userprofilecontent] = User Profile Content
+regions[community_request] = Community Request
+regions[sidebar_first] = Sidebar first
+regions[sidebar_second] = Sidebar second
+regions[sidebar_ad1] = Sidebar advertisement 1
+regions[sidebar_ad2] = Sidebar advertisement 2
+regions[sidebar_ad3] = Sidebar advertisement 3
+regions[sidebar_ad4] = Sidebar advertisement 4
+regions[sidebar_ad5] = Sidebar advertisement 5
+regions[footer] = Footer
+regions[videofooter] = Footer video show
+regions[discipleship_share_video] = Discipleship share video
+regions[userprofile_onpagemenu] = User Profile top page menu
+settings[shortcut_module_link] = 0
+
+
+; Information added by drupal.org packaging script on 2012-08-01
+version = "1.0"
+project = "drupal"
+datestamp = "1343839327"
+

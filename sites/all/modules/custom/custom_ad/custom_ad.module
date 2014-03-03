@@ -1,0 +1,223 @@
+<?php
+
+/*
+* Implements hook_menu()
+*/
+
+function custom_ad_menu() {
+
+ $items = array();
+	
+	
+	$items['admin/config/customad/settings'] = array(
+	'title' => 'Manage Custom ad',
+	'description' => 'Manage Custom ad',
+	'page callback' => 'drupal_get_form',
+	'page arguments' => array('custom_ad_admin_settings'),
+	'access arguments' => array('administer site configuration'),
+	'type' => MENU_NORMAL_ITEM,
+	);
+
+	$items['admin/config/customad'] = array(
+	'title' => 'Manage Custom ad',
+	'description' => 'Manage Custom ad.',
+	'position' => 'right',
+	'weight' => -5,
+	'page callback' => 'system_admin_menu_block_page',
+	'access arguments' => array('administer site configuration'),
+	'file' => 'system.admin.inc',
+	'file path' => drupal_get_path('module', 'system'),
+	);
+
+	$items['admin/config/custom_alert/settings'] = array(
+	'title' => 'Manage Custom alert',
+	'description' => 'Manage Custom alert',
+	'page callback' => 'drupal_get_form',
+	'page arguments' => array('custom_alert_admin_settings'),
+	'access arguments' => array('administer site configuration'),
+	'type' => MENU_NORMAL_ITEM,
+	);
+
+	$items['admin/config/custom_alert'] = array(
+	'title' => 'Manage Custom alert',
+	'description' => 'Manage Custom alert.',
+	'position' => 'right',
+	'weight' => -6,
+	'page callback' => 'system_admin_menu_block_page',
+	'access arguments' => array('administer site configuration'),
+	'file' => 'system.admin.inc',
+	'file path' => drupal_get_path('module', 'system'),
+	);
+
+
+  return $items;
+}
+
+/*
+* Implements hook_block_info()
+*/
+
+
+function custom_ad_block_info() {
+
+  $blocks['leftsidebar_ad1'] = array(
+    'info' => t('Leftsidebar Advertisement 1'), 
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  
+  $blocks['leftsidebar_ad2'] = array(
+    'info' => t('Leftsidebar Advertisement 2'), 
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  
+  $blocks['leftsidebar_ad3'] = array(
+    'info' => t('Leftsidebar Advertisement 3'), 
+    'cache' => DRUPAL_NO_CACHE,
+  );
+
+  $blocks['leftsidebar_ad4'] = array(
+    'info' => t('Leftsidebar Advertisement 4'), 
+    'cache' => DRUPAL_NO_CACHE,
+  );
+
+  $blocks['leftsidebar_ad5'] = array(
+    'info' => t('Leftsidebar Advertisement 5'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+
+return $blocks;
+
+}
+
+/*
+* Implements hook_block_view()
+*/
+
+
+function custom_ad_block_view($delta = '') {
+ $block = array();
+ 
+  switch ($delta) {
+
+	case 'leftsidebar_ad1':
+	$block['subject'] = 'Advertisement 1';
+	$block['content'] = variable_get('leftsidebar_ad1');
+	break;
+
+	case 'leftsidebar_ad2':
+	$block['subject'] = 'Advertisement 2';
+	$block['content'] = variable_get('leftsidebar_ad2');
+	break;
+
+	case 'leftsidebar_ad3':
+	$block['subject'] = 'Advertisement 3';
+	$block['content'] = variable_get('leftsidebar_ad3');
+	break;
+
+        case 'leftsidebar_ad4':
+	$block['subject'] = 'Advertisement 4';
+	$block['content'] = variable_get('leftsidebar_ad4');
+	break;
+
+        case 'leftsidebar_ad5':
+	$block['subject'] = 'Advertisement 5';
+	$block['content'] = variable_get('leftsidebar_ad5');
+	break;
+
+}
+return $block;
+}
+
+function custom_ad_admin_settings() {
+ $form = array();
+ 
+  $form['ad1'] = array(
+    '#type' => 'textarea',
+    '#title' => t('First Ad'),
+    '#default_value' => variable_get('leftsidebar_ad1'),
+    '#wysiwyg' => false,
+    '#rows' => 3,
+    '#cols' => 5,
+  );
+
+$form['ad2'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Second Ad'),
+    '#default_value' => variable_get('leftsidebar_ad2'),
+    '#wysiwyg' => false,
+    '#rows' => 3,
+    '#cols' => 5,
+  );
+
+$form['ad3'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Third Ad'),
+    '#default_value' => variable_get('leftsidebar_ad3'),
+    '#wysiwyg' => false,
+    '#rows' => 3,
+    '#cols' => 5,
+  );
+
+$form['ad4'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Fourth Ad'),
+    '#default_value' => variable_get('leftsidebar_ad4'),
+    '#wysiwyg' => false,
+    '#rows' => 3,
+    '#cols' => 5,
+  );
+
+$form['ad5'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Fifth Ad'),
+    '#default_value' => variable_get('leftsidebar_ad5'),
+    '#wysiwyg' => false,
+    '#rows' => 3,
+    '#cols' => 5,
+  );
+ 
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit'),
+  );
+
+return $form;
+
+}
+
+function custom_ad_admin_settings_submit($form, &$form_state) {
+
+    variable_set('leftsidebar_ad1', $form_state['values']['ad1']);
+    variable_set('leftsidebar_ad2', $form_state['values']['ad2']);
+    variable_set('leftsidebar_ad3', $form_state['values']['ad3']);
+    variable_set('leftsidebar_ad4', $form_state['values']['ad4']);
+    variable_set('leftsidebar_ad5', $form_state['values']['ad5']);
+    drupal_set_message(t('Your Ad configuration has been saved.'));
+}
+
+function custom_alert_admin_settings() {
+ $form = array();
+ 
+  $form['welcome_alert'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Welcome alert Message for User'),
+    '#default_value' => variable_get('welcome_alert'),
+    '#wysiwyg' => false,
+    '#rows' => 3,
+    '#cols' => 5,
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit'),
+  );
+
+return $form;
+
+}
+
+function custom_alert_admin_settings_submit($form, &$form_state) {
+
+    variable_set('welcome_alert', $form_state['values']['welcome_alert']);
+    drupal_set_message(t('Your alert configuration has been saved.'));
+}

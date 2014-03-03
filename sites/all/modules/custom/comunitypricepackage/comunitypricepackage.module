@@ -1,0 +1,36 @@
+<?php
+/**
+* Implementation of hook_menu().
+*/
+
+
+function comunitypricepackage_menu() {
+	
+	$items['admin/config/comunitypricepackage'] = array(
+	'title' => 'Lifeecho community price management',
+	'description' => 'Community creation package pricing details.',
+	'position' => 'right',
+	'weight' => -5,
+	'page callback' => 'system_admin_menu_block_page',
+	'access arguments' => array('administer site configuration'),
+	'file' => 'system.admin.inc',
+	'file path' => drupal_get_path('module', 'system'),
+	);
+	
+	
+	$items['admin/config/comunitypricepackage/settings'] = array(
+	'title' => 'Lifeecho community price management',
+	'description' => 'Community package settings',
+	'page callback' => 'drupal_get_form',
+	'page arguments' => array('comunitypricepackage_admin_settings'),
+	'access arguments' => array('administer site configuration'),
+	'type' => MENU_NORMAL_ITEM,
+	'file' => 'comunitypricepackage.admin.inc',
+	);
+	
+	return $items;
+	}
+
+	
+	
+?>

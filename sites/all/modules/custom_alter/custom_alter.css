@@ -1,0 +1,25 @@
+
+/* terms dialog style start */
+
+#terms_dialog {
+    display:none;
+}
+
+.termsdialog_link {
+    color:blue;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.ui-dialog {
+  width:583px !important;
+  left:358px !important;
+}
+
+.ui-dialog #terms_dialog p {
+  font-family: arial,sans-serif,Helvetica;
+  font-size: 12px;
+}
+
+/* terms dialog end */
+

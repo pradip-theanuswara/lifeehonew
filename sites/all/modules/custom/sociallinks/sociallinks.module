@@ -1,0 +1,105 @@
+<?php
+
+/*
+* Implements hook_menu().
+*/
+
+function sociallinks_menu() {
+
+$items = array();
+
+	$items['admin/config/sociallinks/settings'] = array(
+	'title' => 'Manage social links',
+	'description' => 'Manage social media links on lifeEcho',
+	'page callback' => 'drupal_get_form',
+	'page arguments' => array('manage_sociallinks'),
+	'access arguments' => array('administer site configuration'),
+	'type' => MENU_NORMAL_ITEM
+	);
+
+return $items;
+
+}
+
+function manage_sociallinks() {
+
+$form['sociallinks_facebook'] = array(
+'#type' => 'textfield',
+'#title' => 'Facebook url',
+'#default_value' => variable_get('sociallinks_fburl'),
+'#size' => 60,
+'#description' => t('Enter Facebook url')
+);
+
+$form['sociallinks_twitter'] = array(
+'#type' => 'textfield',
+'#title' => 'Twitter url',
+'#default_value' => variable_get('sociallinks_twitterurl'),
+'#description' => t('Enter Twiiter url'),
+'#size' => 60,
+);
+
+$form['sociallinks_blogger'] = array(
+'#type' => 'textfield',
+'#title' => 'Blogger url',
+'#default_value' => variable_get('sociallinks_bloggerurl'),
+'#description' => t('Enter Blogger url'),
+'#size' => 60,
+);
+
+$form['miniprofile_youtubevideoid'] = array(
+'#type' => 'textfield',
+'#title' => 'Miniprofile Video ID',
+'#default_value' => variable_get('miniprofile_youtubevideoid'),
+'#description' => t('Enter Youtube Video ID for Miniprofile Page'),
+'#size' => 60,
+);
+
+$form['firstlogin_alert_youtubevideoid'] = array(
+'#type' => 'textfield',
+'#title' => 'Firstlogin Alert youtube Video ID',
+'#default_value' => variable_get('firstlogin_alert_youtubevideoid'),
+'#description' => t('Enter Youtube ID for Discipleship Video Alert'),
+'#size' => 60,
+);
+
+$form['community_page_youtubevideoid'] = array(
+'#type' => 'textfield',
+'#title' => 'Community page youtube Video ID',
+'#default_value' => variable_get('community_page_youtubevideoid'),
+'#description' => t('Enter Youtube Video ID for Community page'),
+'#size' => 60,
+);
+
+$form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save configuration'),
+ 
+  );
+
+return $form;
+
+}
+
+function manage_sociallinks_submit($form,&$form_state) {
+
+$facebook_url = $form_state['values']['sociallinks_facebook'];
+$twitter_url = $form_state['values']['sociallinks_twitter'];
+$blogger_url = $form_state['values']['sociallinks_blogger'];
+$miniprofile_youtubeID = $form_state['values']['miniprofile_youtubevideoid'];
+$alert_youtubeID = $form_state['values']['firstlogin_alert_youtubevideoid'];
+$community_page_youtubeID = $form_state['values']['community_page_youtubevideoid'];
+
+variable_set('sociallinks_fburl', $facebook_url);
+variable_set('sociallinks_twitterurl', $twitter_url);
+variable_set('sociallinks_bloggerurl', $blogger_url);
+variable_set('miniprofile_youtubevideoid', $miniprofile_youtubeID);
+variable_set('firstlogin_alert_youtubevideoid', $alert_youtubeID);
+variable_set('community_page_youtubevideoid', $community_page_youtubeID);
+
+drupal_set_message(t('Information updated successfully'));
+$form_state['redirect'] = 'admin/config/sociallinks/settings';
+
+}
+
+

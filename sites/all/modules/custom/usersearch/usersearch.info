@@ -1,0 +1,5 @@
+name = Userserach
+description = "Allows User to serach based on different criteria such as ageintrest,zip etc"
+package = Custom
+core = 7.x
+files[] = usersearch.module

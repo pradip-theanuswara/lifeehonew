@@ -1,0 +1,10 @@
+name = Lifeecho community price
+version =1.0
+description = "Allows administrator to manage Lifecho community price details"
+core = 7.x
+package = Custom
+files[] = comunitypricepackage.module
+files[] = comunitypricepackage.install
+files[] = comunitypricepackage.admin.inc
+configure=admin/config/comunitypricepackage/settings
+

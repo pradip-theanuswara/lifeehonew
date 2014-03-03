@@ -1,0 +1,5 @@
+name = "community Roster"
+description = "Roster page for community, list of names of people involved with community"
+core = "7.x"
+package = Custom
+version = "7.x-1.0"

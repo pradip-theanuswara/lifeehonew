@@ -1,0 +1,64 @@
+<?php
+
+/* 
+*Implements hook_menu
+*/
+
+function custom_pager_menu() {
+
+  $items['potential/contact_page'] = array(
+   	  'title' => 'Potential contact page',
+	  'type' => MENU_CALLBACK,
+	  'page callback' => 'potential_contacts',
+	  'access arguments' => array('access content'),
+          'file' => 'custom_pager.inc'
+  ); 	 
+	  
+  $items['potential/contact_page/callback'] = array(
+	  'title' => 'Test Pager Callback',
+	  'type' => MENU_CALLBACK,
+	  'page callback' => '_potential_contacts_callback',
+	  'access arguments' => array('access content'),
+          'file' => 'custom_pager.inc'
+  );
+
+return $items;
+}
+
+/* Implements hook_block_info
+ * 
+ * user dashboard blocks
+ */
+
+function custom_pager_block_info() {
+
+ $blocks['potential_contacts'] = array(
+    'info' => t('Potential Contacts Block'),
+    'cache' => DRUPAL_NO_CACHE,
+ );
+return $blocks;
+}
+
+function custom_pager_block_view($delta = '') {
+
+ $block = array();
+ 
+switch ($delta) {
+
+case 'potential_contacts':
+
+$block['subject'] = 'Potential Contacts';
+drupal_add_js(drupal_get_path('module', 'custom_pager') . '/jquery.url.js');
+drupal_add_js(drupal_get_path('module', 'custom_pager') . '/custom_pager.js');
+$block['content'] = '<script>refreshPotentialTable();</script>';
+$block['content'] .= '<div id="view-potential-contacts">';
+$block['content'] .= '</div>';
+
+break;
+}
+  return $block;
+}
+
+
+
+

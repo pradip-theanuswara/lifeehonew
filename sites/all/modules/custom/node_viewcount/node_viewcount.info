@@ -1,0 +1,6 @@
+name = Node view count
+description = Module count view of node for user.
+core = 7.x
+version = "7.x-1.0"
+project = "custom"
+datestamp = "1360555073"

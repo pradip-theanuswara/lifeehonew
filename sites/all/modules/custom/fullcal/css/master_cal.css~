@@ -1,0 +1,11 @@
+#master_cal {
+		width: 100%;
+		margin: 0 auto;
+		margin-bottom: 20px;
+		}
+		#master_cal .fc-header tbody{
+			border:none;
+			}
+	
+
+

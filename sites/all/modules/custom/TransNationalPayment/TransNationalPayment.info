@@ -1,0 +1,10 @@
+name = TransNational Payment Bancard Inc Integration
+version =1.0
+package = Custom
+description = "Allows administrator to manage TransNational Payment settings such as username,pasword,price etc"
+core = 7.x
+files[] = TransNationalPayment.module
+files[] = TransNationalPayment.install
+files[] = TransNationalPayment.admin.inc
+configure=admin/config/TransNationalPayment/settings
+

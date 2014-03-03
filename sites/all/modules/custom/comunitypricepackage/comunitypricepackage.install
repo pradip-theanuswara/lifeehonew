@@ -1,0 +1,40 @@
+<?php
+/**
+* Implements hook_install()
+*/
+		function comunitypricepackage_install() {
+		
+		
+		}
+
+
+
+/**
+* Implements hook_uninstall()
+*/
+/*
+
+	function comunitypricepackage_uninstall() {
+		watchdog("Community Package Module", "Uninstalling module and deleting fields");
+		//$types = node_type_get_types();
+		$types = array('community_price_one' => 'community_price_one','community_price_two' => 'community_price_two','community_price_three' => 'community_price_three');
+		
+			foreach($types as $type) 
+			{
+			comunitypricepackage_delete_paymentinfo($type);
+			}
+		
+		$field = field_info_field('community');
+		if ($field) {
+		field_delete_field('comunitypricepackage');
+		}
+	}
+	
+function comunitypricepackage_delete_paymentinfo($type) {
+
+variable_del($type);
+}
+
+*/
+?>
+

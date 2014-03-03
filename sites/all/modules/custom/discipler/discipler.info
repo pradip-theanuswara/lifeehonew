@@ -1,0 +1,5 @@
+name = discipler
+description = "Module for discipler approval in the system"
+core = 7.x
+package = Custom
+files[] = discipler/views/discipler.views.inc

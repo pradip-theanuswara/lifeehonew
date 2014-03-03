@@ -1,0 +1,856 @@
+<?php
+
+
+/*
+* Implements hook_init.
+*/
+
+function communitysearch_init() {
+
+// to check mini profile submitted before loading community search.
+if(arg(0) == 'joincommunity') {
+if(check_miniprofile_status() == FALSE ) {
+drupal_set_message(t('Please complete your profile to use this feature'),'status');
+drupal_goto('user');
+}
+}
+
+}
+
+/**
+* ImplementS of hook_menu().
+*/
+function communitysearch_menu() {
+
+	$items['joincommunity'] = array(
+	'title' => 'Search form',
+	'page callback' => 'drupal_get_form',
+	'page arguments' => array('joincommunity'),
+	'access callback' => TRUE,
+	'type' => MENU_NORMAL_ITEM
+
+	);
+	$items['communitysearch/check_name'] = array(
+	  'title' => 'Name Callback',
+	  'page callback' => 'drupal_get_form',
+	  'type' => MENU_CALLBACK,
+	  'page callback' => 'check_name',
+	  'access arguments' => array('access content'),
+	);
+
+
+
+  $items['communitysearch/autocomplete'] = array(
+    'page callback' => 'communitysearch_autocomplete',
+     'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK
+  );
+
+
+$items['communitysearch/check_zip'] = array(
+		  'title' => 'Zip Callback',
+		  'page callback' => 'drupal_get_form',
+		  'type' => MENU_CALLBACK,
+		  'page callback' => 'check_zip',
+		  'access arguments' => array('access content'),
+	);
+
+return $items;
+
+}
+	
+
+/**
+* Define a form.
+*/
+
+function communitysearch_autocomplete($string) {
+$matches = array();
+$items=array();
+
+ $query = db_select('field_data_field_city', 'c');
+
+
+$return = $query
+    ->fields('c', array('field_city_value','entity_id'))
+
+    ->condition('c.field_city_value ','%'. db_like($string) . '%', 'LIKE')
+     ->execute();
+
+  $results = '<table cellpadding="0" cellspacing="0" border="0">';
+  foreach ($return as $row) {
+
+ $results_tr = '<tr width ="100%" onclick="get_food_id('."'$row->field_city_value'".');"> <td style = "width: 50%; font-size: 11px;" >'. $row->field_city_value . '</td></tr>';
+
+
+     $matches[$row->field_city_value] = $results_tr;
+
+
+ }
+
+  $results .= '</table>';
+    drupal_json_output($matches);
+}
+
+
+function check_zip() {
+
+  global $user;
+
+ $uid = $user->uid;
+
+ $ezip =  $_GET['ezip'];
+/*
+$query = array(
+    'address' => $ezip,
+    'sensor' => 'false', // Required by TOS.
+  );
+
+  $url = url('http://maps.googleapis.com/maps/api/geocode/json', array(
+    'query' => $query,
+    'external' => TRUE,
+  ));
+
+  $http_reply = drupal_http_request($url);
+  $data = json_decode($http_reply->data);
+
+  $status_code = $data->status;
+  if ($status_code != 'OK') {
+    watchdog('location', 'Google geocoding returned status code: %status_code for the query url: %url', array('%status_code' => $data->status, '%url' => $url));
+    return NULL;
+  }
+  $location = $data->results[0]->geometry->location;
+
+  //$final = array('lat' => $location->lat, 'lon' => $location->lng);
+
+  echo $location->lat.'@'.$location->lng;
+*/
+
+    $query = db_select('zip_code','z');
+          $query->fields('z',array('lat','lon'));
+          $query->condition('z.zip_code',$ezip);
+	  $result = $query->execute();
+$row_count = $result->rowCount();
+$communityrecord = $result->fetchAssoc();
+   // $final = array('lat' => $communityrecord['lat'], 'lon' => $communityrecord['lon']);
+
+ echo $communityrecord['lat'].'@'.$communityrecord['lon'];
+}
+
+
+function sandbox_ajax_dropdown_city($form, $form_state) {
+  // Return the dropdown list including the wrapper
+
+  
+  return $form['sandbox_ajax_dropdown']['wrapper'];
+}
+
+function sandbox_ajax_dropdown_city_auto($form, $form_state) {
+  // Return the dropdown list including the wrapper
+  return $form['sandbox_ajax_dropdown']['wrapper'];
+}
+
+
+
+function joincommunity($form,&$form_state) {
+
+drupal_add_js(drupal_get_path('module', 'communitysearch') . '/jquery.url.js');
+drupal_add_js(drupal_get_path('module', 'communitysearch') . '/communitysearch.js');
+
+
+$form['zipcode'] = array(
+		'#title' => t('By Zip Code'),
+		'#type' => 'textfield',
+		'#size' => 30,
+		);
+
+$form['hdlat'] = array(
+		'#type' => 'hidden',
+		'#size' => 30,
+		
+		'#attributes' => array('id' => 'lat-id'),
+		);
+
+$form['hdlng'] = array(
+		'#type' => 'hidden',
+		'#size' => 30,
+		
+		'#attributes' => array('id' => 'lng-id'),
+		);
+
+$form['name'] = array(
+		'#title' => t('By Name'),
+		'#type' => 'textfield',
+                '#prefix' => '<div id="prefixname">',
+       '#suffix' => '</div>',
+		'#size' => 30,
+         /*        '#ajax' => array(
+      'event'=>'change',
+      'callback' =>'sandbox_ajax_dropdown_city_auto',
+      'wrapper' => 'city-wrapper'),*/
+		);
+
+
+$form['fid'] = array(
+        '#type' => 'hidden',
+        '#value' => '',
+        '#attributes' => array('id' => "hid_food_id"),
+    );
+
+$form['City'] = array(
+		'#title' => t('By City'),
+		'#type' => 'textfield',
+		'#size' => 30,
+                '#ajax' => array(
+      'event'=>'blur',
+      'callback' =>'sandbox_ajax_dropdown_city_auto',
+      'wrapper' => 'city-wrapper',
+    ),
+
+                '#prefix' => '<div id="prefixcity">',
+       '#suffix' => '</div>',
+                '#autocomplete_path' => 'communitysearch/autocomplete',
+		);
+
+
+
+db_select('og_membership', 'm');
+
+$query = db_select('taxonomy_term_data');
+	$query->join('taxonomy_vocabulary ', 'u', 'u.vid = taxonomy_term_data.vid');
+    $query->condition('u.name', 'State' , '=' );
+	$query->fields('taxonomy_term_data', array('tid','name'));
+	
+    $query->orderBy('name', 'ASC');
+    $dropdown_source = $query->execute();
+
+$dropdown_array = array('0' => ' ');
+foreach ($dropdown_source as $item) {
+$key = $item->tid;
+$value = $item->name;
+$dropdown_array[$key] = $value;
+}
+
+
+
+
+$form['state'] = array(
+        '#type' => 'select',
+        '#title' => t('By State'),
+        '#options' => $dropdown_array,
+         '#prefix' => '<div id="prefixstate">',
+       '#suffix' => '</div>',
+        '#ajax' => array(
+      'event'=>'change',
+      'callback' =>'sandbox_ajax_dropdown_city',
+      'wrapper' => 'city-wrapper',
+    ),
+		
+        
+    );
+
+    //print_r($form_state);
+
+
+
+$form['proximity'] = array(
+       '#type' => 'select',
+       '#title' => t('By Proximity'),
+       '#options' => array(
+                 'n' => t(' '),
+                10 => t(' < 10 Miles'),
+		25 => t(' < 25 Miles'),
+		50 => t(' < 50 Miles'),
+		501 => t(' > 50 Miles'),
+       ),
+       '#default_value' => '',
+       '#prefix' => '<div id="prefix">',
+       '#suffix' => '</div>',
+'#ajax' => array(
+      'event'=>'change',
+      'callback' =>'sandbox_ajax_dropdown_city',
+      'wrapper' => 'city-wrapper',
+    ),
+   );
+
+
+ $zipcode ='';
+if(isset($form_state['values']['zipcode']))
+ $zipcode = $form_state['values']['zipcode'];
+
+if($zipcode!='') {
+  //  echo "anil";
+  /*
+$query = array(
+    'address' => $zipcode,
+    'sensor' => 'false', // Required by TOS.
+  );
+
+  $url = url('http://maps.googleapis.com/maps/api/geocode/json', array(
+    'query' => $query,
+    'external' => TRUE,
+  ));
+
+  $http_reply = drupal_http_request($url);
+  $data = json_decode($http_reply->data);
+
+  $status_code = $data->status;
+  if ($status_code != 'OK') {
+    watchdog('location', 'Google geocoding returned status code: %status_code for the query url: %url', array('%status_code' => $data->status, '%url' => $url));
+    return NULL;
+  }
+  $locations = $data->results[0]->geometry->location;
+
+
+$inputlat = $locations->lat;
+$inputlng = $locations->lng;
+*/
+
+ $query = db_select('zip_code','z');
+          $query->fields('z',array('lat','lon'));
+          $query->condition('z.zip_code',$zipcode);
+	  $result = $query->execute();
+$row_count = $result->rowCount();
+$communityrecords = $result->fetchAssoc();
+   // $final = array('lat' => $communityrecord['lat'], 'lon' => $communityrecord['lon']);
+
+ //echo $communityrecords['lat'].'@'.$communityrecords['lon'];
+
+$inputlat = $communityrecords['lat'];
+$inputlng = $communityrecords['lon'];
+}
+
+
+
+/* we need to display community count before click on search button */
+
+global $user;
+$uid = $user->uid;
+if($zipcode=='') {
+
+global $user;
+$uid = $user->uid;
+$queryu = db_select('users','u')
+	->condition('uid', $uid, '=' )
+	->fields('u', array('lat','lng','uid'))
+	->execute()
+	->fetchAssoc();
+$inputlat = $queryu['lat'];
+$inputlng = $queryu['lng'];
+
+}
+$a='';
+$b='';
+$name='';
+$city='';
+$rows_count = '';
+$count_text = '';
+if(isset($form_state['values']['state']))
+$a = $form_state['values']['state'];
+else
+$a='';
+if(isset($form_state['values']['proximity']))
+$b = $form_state['values']['proximity'];
+//$b = $form['proximity'];
+else
+$b ='';
+if(isset($form_state['values']['name']))
+$name = trim($form_state['values']['name']);
+
+
+
+if(isset($_REQUEST['City']))
+$city = $_REQUEST['City'];
+
+
+
+
+if(isset($form_state['values']['name']))
+ $name = $form_state['values']['name'];
+
+//}
+//else {
+//$city='';
+//echo "city not set";
+//}
+
+if($inputlat == '0' AND $inputlng == '0' )
+{
+
+ $inputlat = $form_state['values']['hdlat'];
+ $inputlng = $form_state['values']['hdlng'];
+ 
+}
+
+
+
+$get_count = check_community_name_match_count($zipcode,$inputlat,$inputlng,$name,$city,$a,$b);
+if($get_count==1)
+$final = $get_count.' MATCH AVAILABLE!';
+else if($get_count>=2)
+$final = $get_count.' MATCHES AVAILABLE!';
+else
+$final=' 0 MATCHES AVAILABLE!';
+
+  $form['sandbox_ajax_dropdown']['wrapper']['city'] = array(
+    '#markup' => "<script>
+  var elem = document.getElementById('totalcount');
+  if(typeof elem !== 'undefined' && elem !== null)
+document.getElementById('totalcount').innerHTML='$final';
+
+var elems = document.getElementById('table-container');
+  if(typeof elems !== 'undefined' && elems !== null)
+document.getElementById('table-container').innerHTML='';
+
+</script>",
+  );
+
+
+/*$db_or = db_or();
+	$query1 = db_select('community_proximity','cp')	
+                 ->havingCondition('dist', 0 ,'>')
+	         ->fields ('cp', array (
+				'nid'
+				));
+$expression = "degrees(acos(sin( radians(cp.com_lat) )* sin( radians($inputlat))
++ cos( radians(cp.com_lat))
+* cos( radians($inputlat))
+* cos( radians(cp.com_lng - $inputlng))
+) ) * 69.09";
+
+$query1->addExpression($expression,'dist');
+$query1->join('node', 'n', 'n.nid = cp.nid');
+$query1->join('users', 'u', 'n.uid = u.uid');
+$query1->leftjoin('field_data_field_tell_us_about_your_communi','about','about.entity_id = n.nid');
+$query1->leftJoin('field_data_field_thumbnail_upload','fdfv','n.nid=fdfv.entity_id');
+$query1->leftJoin('file_managed','fm','fm.fid=fdfv.field_thumbnail_upload_fid');
+$query1->join('field_data_field_what_is_the_name_of_your_o', 'name', 'name.entity_id = n.nid');
+
+//echo ($query1->__toString());
+
+$results = $query1->execute();
+
+/* print '<pre>';
+while($record = $results->fetchAssoc()) {
+
+print_r($record);
+}
+print '</pre>'; */
+
+//$rows_count = $results->rowCount();
+
+
+
+/* we need to - END */
+
+/*$rows_count = $results->rowCount();
+if($rows_count == 1):
+$count_text = t('MATCH AVAILABLE!');
+elseif($rows_count == 0):
+$count_text = t('MATCHES AVAILABLE!');
+elseif($rows_count > 1):
+$count_text = t('MATCHES AVAILABLE!');
+endif;
+*/
+
+// <div id="totalcount" style="color:#AFC486">'.$rows_count.' '.$count_text."</div>
+
+$form['check_name'] = array(
+'#prefix' => '<div id="submitbtn">',
+'#markup' => '<div id="totalcount" class = "tc" style="color:#AFC486">'.$rows_count.' '.$count_text.'</div><a class ="button" href="#" id="check_name">' . t('See your Matches') . "</a><br/>",
+'#suffix' => '</div>', );
+ 
+	$form['status'] = array(	
+		'#markup' => "<span id='status'></span><br/>",
+	); 
+		
+	$form['table-container'] = array(
+		'#markup' => "<div id='table-container'></div><br/>",
+	); 
+	
+return $form;
+}
+
+
+
+
+function check_name($form, $form_state) {
+ global $user;
+ $uid = $user->uid;
+ $author = $user->name;
+
+
+
+
+
+ //echo "<script>alert('caching')</script>";
+
+ $inputlat = $_GET['inputlat'];
+ $inputlng = $_GET['inputlng'];
+
+
+
+if($inputlat == '0' AND $inputlng == '0')
+{
+//echo "inside if loop";
+$queryu = db_select('users','u')
+	->condition('uid', $uid, '=' )
+	->fields('u', array('lat','lng','uid'))
+	->execute()
+	->fetchAssoc();
+	
+$inputlat = $queryu['lat'];
+$inputlng = $queryu['lng'];
+}
+
+if(isset($_GET['name']))
+$name=$_GET['name'];
+
+if(isset($_GET['city']))
+$city = $_GET['city'];
+
+if(isset($_GET['state']))
+$state = $_GET['state'];
+
+
+if(isset($_GET['p']))
+$p = $_GET['p'];
+
+if(isset($_GET['zip']))
+$zip = $_GET['zip'];
+
+
+//if($p<5 && $zip!='')
+//die('Please change Proximity to continue');
+
+
+//$get_count = check_community_name_match_count($inputlat,$inputlng,$name,$city,$state,$p);
+
+	header("Content-type: text/html");
+//	header("Expires: Wed, 29 Jan 1975 04:15:00 GMT");
+	header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
+	header("Cache-Control: no-cache, must-revalidate");
+	header("Pragma: no-cache");
+
+$db_or = db_or();
+
+if(!$p) {
+	$query1 = db_select('community_proximity','cp')
+	 ->extend('PagerDefault')	//Pager Extender
+	->limit(10);			//10 results per page
+
+$query1->fields ('cp', array (
+					'nid'
+				))
+				
+	->fields ('about', array (
+					'field_tell_us_about_your_communi_value'
+				))
+				
+		->fields ('u', array (
+					'name'
+				))
+                ->fields ('name', array (
+					'field_what_is_the_name_of_your_o_value'
+				))
+
+	->fields ('fm', array (
+					'uri'
+				));
+$query1->join('node', 'n', 'n.nid = cp.nid');
+$query1->join('users', 'u', 'n.uid = u.uid');
+$query1->join('field_data_field_zip', 'zip', 'zip.entity_id = n.nid');
+$query1->leftJoin('field_data_field_tell_us_about_your_communi','about','about.entity_id = n.nid');
+$query1->leftJoin('field_data_field_thumbnail_upload','fdfv','n.nid=fdfv.entity_id');
+$query1->leftJoin('file_managed','fm','fm.fid=fdfv.field_thumbnail_upload_fid');
+$query1->leftJoin('field_data_field_what_is_the_name_of_your_o', 'name', 'name.entity_id = n.nid');
+
+
+if($zip!='') {
+$query1->condition('zip.field_zip_value', $zip,'=');
+}
+
+if($name!='' ) {
+$query1->condition('name.field_what_is_the_name_of_your_o_value', '%'. db_like($name) .'%' , 'LIKE');
+$a=1;
+}
+
+
+if($city!='') {
+$query1->join('field_data_field_city', 'city', 'city.entity_id = n.nid');
+$query1->condition('city.field_city_value','%' . db_like($city) . '%', 'LIKE');
+$b=1;
+}
+
+if($state!='' and $state!= '0')
+{
+$query1->join('field_data_field_state', 'st', 'n.nid = st.entity_id');
+$query1->join('taxonomy_term_data', 'ttd', 'st.field_state_tid = ttd.tid');
+$query1->condition('st.field_state_tid', $state,'=');
+}
+
+
+
+/*
+
+
+
+
+if($city!='') {
+$query1->join('field_data_field_city', 'city', 'city.entity_id = n.nid');
+$query1->condition('city.field_city_value','%' . db_like($city) . '%', 'LIKE');
+$b=1;
+}
+
+*/
+//echo ($query1->__toString());
+
+//die;
+$results = $query1->execute();
+/*
+ print '<pre>';
+while($record = $results->fetchAssoc()) {
+
+print_r($record);
+}
+print '</pre>';
+*/
+$rows_count = $results->rowCount();
+//if($rows_count==0) {
+//echo "<script>document.getElementById('totalcount').innerHTML='0 MATCHES AVAILABLE!'</script>";
+//}
+//else {
+//
+//$rows_count=$rows_count.' MATCHES AVAILABLE!';
+//echo "<script>document.getElementById('totalcount').innerHTML='$rows_count' </script>";
+//
+//}
+
+}
+else {
+
+
+$query1 = db_select('community_proximity','cp')
+	 ->extend('PagerDefault')	//Pager Extender
+	->limit(10);
+
+        switch($p) {
+      case 0:
+         $query1->havingCondition('dist',0,'>=');
+      break;
+     case 501:
+        $query1->havingCondition('dist',$p,'>=');
+     break;
+     default:
+        $query1->havingCondition('dist',$p,'<=');
+     break;
+}
+
+
+
+
+
+ $query1->fields ('cp', array (
+					'nid'
+				))
+
+	->fields ('about', array (
+					'field_tell_us_about_your_communi_value'
+				))
+
+		->fields ('u', array (
+					'name'
+				))
+
+	->fields ('name', array (
+					'field_what_is_the_name_of_your_o_value'
+				))
+
+	->fields ('fm', array (
+					'uri'
+				));
+
+$expression = "degrees(acos(sin( radians(cp.com_lat) )* sin( radians($inputlat))
++ cos( radians(cp.com_lat))
+* cos( radians($inputlat))
+* cos( radians(cp.com_lng - $inputlng))
+) ) * 69.09";
+
+$query1->addExpression($expression,'dist');
+
+$query1->join('node', 'n', 'n.nid = cp.nid');
+$query1->join('users', 'u', 'n.uid = u.uid');
+$query1->join('field_data_field_zip', 'zip', 'zip.entity_id = n.nid');
+$query1->leftJoin('field_data_field_tell_us_about_your_communi','about','about.entity_id = n.nid');
+$query1->leftJoin('field_data_field_thumbnail_upload','fdfv','n.nid=fdfv.entity_id');
+$query1->leftJoin('file_managed','fm','fm.fid=fdfv.field_thumbnail_upload_fid');
+$query1->leftJoin('field_data_field_what_is_the_name_of_your_o', 'name', 'name.entity_id = n.nid');
+
+if($state!='' and $state!= '0')
+{
+$query1->join('field_data_field_state', 'st', 'n.nid = st.entity_id');
+$query1->join('taxonomy_term_data', 'ttd', 'st.field_state_tid = ttd.tid');
+$query1->condition('st.field_state_tid', $state,'=');
+}
+
+if($name!='' ) {
+$query1->condition('name.field_what_is_the_name_of_your_o_value', '%'. db_like($name) .'%' , 'LIKE');
+$a=1;
+}
+
+if($city!='') {
+$query1->join('field_data_field_city', 'city', 'city.entity_id = n.nid');
+$query1->condition('city.field_city_value','%' . db_like($city) . '%', 'LIKE');
+$b=1;
+}
+$results = $query1->execute();
+ $rows_count = $results->rowCount();
+}
+//if($rows_count=='')
+//echo "no";
+
+//echo ($query1->__toString());
+//die;
+//echo "anil";
+//die;
+//if($get_count > 0) {
+
+//	if($get_count >= 2)
+//
+//	echo "<script>document.getElementById('totalcount').innerHTML=+$get_count+' MATCHES AVAILABLE!'</script>";
+//
+//	if($get_count == 1)
+//
+//	echo "<script>document.getElementById('totalcount').innerHTML=+$get_count+' MATCH AVAILABLE!'</script>";
+
+$rowss = array();
+
+foreach($results as $records) {
+
+if($records->uri <> '') {
+$real_path = file_create_url($records->uri);
+}
+else {
+$real_path = base_path().drupal_get_path('theme','lifeecho').'/images/no_community_thumbnail.jpeg';
+}
+
+//$link =  l($records->field_what_is_the_name_of_your_o_value, 'node/'. $records->nid.'?sparam=1',array('attributes' => array('class' => 'name-link')));
+$link = '<div style="width:100%;float:left;text-align:left;"><a href="'.drupal_get_path_alias('node/'. $records->nid).'?sparam=1" style="float:left;">'.$records->field_what_is_the_name_of_your_o_value.'</a></div>';
+
+$rowss[] = array('data' => array('<a href="'.drupal_get_path_alias('node/'. $records->nid).'?sparam=1" class="avatar_link2"><img src="'.$real_path.'" class="community_avatar" /></a>'.$link.'','<div class="abouttest">'.substr($records->field_tell_us_about_your_communi_value,0,280).'......<div class="com-author">'.$records->name.'</div></div>', ));
+
+ }
+ 
+$html = theme('table', array(
+  'rows' => $rowss,
+
+));
+$html .= theme('pager');
+//}
+//else {
+
+
+//echo "<script>document.getElementById('totalcount').innerHTML =''</script>";
+
+//$html = '<div class="view-empty">'.t('0 Results - Try expanding your search criteria').'</div>';
+
+//}
+
+$html .="<script>
+function testing() {
+alert('hai');
+var now = new Date();
+var time = now.getTime();
+var expireTime = time + 1000*36000;
+now.setTime(expireTime);
+var tempExp = 'Wed, 31 Oct 2012 08:50:17 GMT';
+document.cookie = 'cookie=ok;expires='+now.toGMTString()+';path=/';
+}
+</script>";
+die ($html);
+}
+
+function check_community_name_match_count($zipcode,$inputlat,$inputlng,$name,$city,$state,$p) {
+
+$db_or = db_or();
+
+	$query1 = db_select('community_proximity','cp');
+if($p>=5) {
+switch($p) {
+      case 0:
+         $query1->havingCondition('dist',0,'>=');
+      break;
+     case 501:
+        $query1->havingCondition('dist',$p,'>=');
+     break;
+     default:
+        $query1->havingCondition('dist',$p,'<=');
+     break;
+}
+}
+
+	$query1->fields ('cp', array (
+					'nid'
+				))
+
+	->fields ('about', array (
+					'field_tell_us_about_your_communi_value'
+				))
+
+		->fields ('u', array (
+					'name'
+				))
+
+	->fields ('name', array (
+					'field_what_is_the_name_of_your_o_value'
+				))
+
+	->fields ('fm', array (
+					'uri'
+				));
+if($p>=5) {
+$expression = "degrees(acos(sin( radians(cp.com_lat) )* sin( radians($inputlat))
++ cos( radians(cp.com_lat))
+* cos( radians($inputlat))
+* cos( radians(cp.com_lng - $inputlng))
+) ) * 69.09";
+
+$query1->addExpression($expression,'dist');
+}
+$query1->join('node', 'n', 'n.nid = cp.nid');
+$query1->join('users', 'u', 'n.uid = u.uid');
+$query1->join('field_data_field_zip', 'zip', 'zip.entity_id = n.nid');
+$query1->leftJoin('field_data_field_tell_us_about_your_communi','about','about.entity_id = n.nid');
+$query1->leftJoin('field_data_field_thumbnail_upload','fdfv','n.nid=fdfv.entity_id');
+$query1->leftJoin('file_managed','fm','fm.fid=fdfv.field_thumbnail_upload_fid');
+$query1->leftJoin('field_data_field_what_is_the_name_of_your_o', 'name', 'name.entity_id = n.nid');
+
+if($zipcode!='') {
+$query1->condition('zip.field_zip_value', $zipcode,'=');
+}
+
+if($state!='' and $state!= '0')
+{
+$query1->join('field_data_field_state', 'st', 'n.nid = st.entity_id');
+$query1->join('taxonomy_term_data', 'ttd', 'st.field_state_tid = ttd.tid');
+$query1->condition('st.field_state_tid', $state,'=');
+}
+
+if($name!='' ) {
+$query1->condition('name.field_what_is_the_name_of_your_o_value', '%'. db_like($name) .'%' , 'LIKE');
+$a=1;
+}
+
+if($city!='') {
+$query1->join('field_data_field_city', 'city', 'city.entity_id = n.nid');
+$query1->condition('city.field_city_value','%' . db_like($city) . '%', 'LIKE');
+$b=1;
+}
+$results = $query1->execute();
+ $rows_count = $results->rowCount();
+
+
+
+return $rows_count;
+
+}

@@ -1,0 +1,2190 @@
+<?php
+/**
+* Implementation of hook_menu().
+*/
+
+
+function usersearch_menu() {
+
+	$items['searches'] = array(
+	'title' => 'User Search form',
+	'page callback' => 'drupal_get_form',
+	'page arguments' => array('searches'),
+	'access callback' => TRUE,
+	'type' => MENU_NORMAL_ITEM
+	);
+
+	$items['usersearch/check_names'] = array(
+	  'title' => 'Name Callback',
+	  'page callback' => 'drupal_get_form',
+	  'type' => MENU_CALLBACK,
+	  'page callback' => 'check_names',
+	  'access arguments' => array('access content'),
+	);
+
+        $items['usersearch/check_zips'] = array(
+	  'title' => 'Zip Callback',
+	  'page callback' => 'drupal_get_form',
+	  'type' => MENU_CALLBACK,
+	  'page callback' => 'check_zips',
+	  'access arguments' => array('access content'),
+	);
+
+	return $items;
+}
+
+
+/**
+* Define a form.
+*/
+
+
+function check_zips() {
+  global $user;
+
+ $uid = $user->uid;
+
+ $ezip =  $_GET['ezip'];
+
+    $query = db_select('zip_code','z');
+          $query->fields('z',array('lat','lon'));
+          $query->condition('z.zip_code',$ezip);
+	  $result = $query->execute();
+$row_count = $result->rowCount();
+$communityrecord = $result->fetchAssoc();
+   // $final = array('lat' => $communityrecord['lat'], 'lon' => $communityrecord['lon']);
+
+ echo $communityrecord['lat'].'@'.$communityrecord['lon'];
+
+}
+
+function sandbox_ajax_dropdown_cityins($form, $form_state) {
+  // Return the dropdown list including the wrapper
+
+
+  return $form['sandbox_ajax_dropdown']['wrapper'];
+}
+
+function searches($form, $form_state) {
+
+drupal_add_js(drupal_get_path('module', 'usersearch') . '/jquery.url.js');
+drupal_add_js(drupal_get_path('module', 'usersearch') . '/usersearch.js');
+
+$form['name'] = array(
+		'#title' => t('NAME'),
+		'#type' => 'textfield',
+		'#size' => 30,
+		'#prefix' => '<div class="publishedSelect">',
+ 	'#suffix' => '</div>',
+
+                '#ajax' => array(
+      'event'=>'change',
+      'callback' =>'sandbox_ajax_dropdown_cityins',
+      'wrapper' => 'cityins-wrapper',
+    ),
+     '#default_value' => '',
+       '#prefix' => '<div id="prefixstate">',
+       '#suffix' => '</div>',
+    );
+
+$form['relationship'] = array(
+        '#type' => 'select',
+	'#prefix' => '<div class="publishedSelect">',
+ 	'#suffix' => '</div>',
+        '#title' => t('RELATIONSHIP'),
+        '#options' => array(
+         0 => ' ',
+         108 => t('Discipler'),
+	 109 => t('Disciple'),
+	 110 => t('Accountability'),
+       ),
+    '#default_value' => '',
+       '#prefix' => '<div id="prefixstate">',
+       '#suffix' => '</div>',
+'#ajax' => array(
+      'event'=>'change',
+      'callback' =>'sandbox_ajax_dropdown_cityins',
+      'wrapper' => 'cityins-wrapper',
+    ),
+    );
+
+
+$form['age'] = array(
+        '#type' => 'select',
+	'#prefix' => '<div class="publishedSelect">',
+ 	'#suffix' => '</div>',
+        '#title' => t('AGE'),
+              '#options' => array(
+          0 => t(' '),
+         1 => '10-20',
+         2 => '20-30',
+	 3 => '30-40',
+         4 => '40-50',
+         5 => '50-60',
+         6 => '60-70',
+	 7 => '70-80',
+	 8 => '80-90',
+         9 => '90-100',
+	 10 => '10-100',
+       ),
+      '#default_value' => '',
+       '#prefix' => '<div id="prefixstate">',
+       '#suffix' => '</div>',
+'#ajax' => array(
+      'event'=>'change',
+      'callback' =>'sandbox_ajax_dropdown_cityins',
+      'wrapper' => 'cityins-wrapper',
+    ),
+    );
+
+$form['proximities'] = array(
+       '#type' => 'select',
+       '#prefix' => '<div class="publishedSelect">',
+       '#suffix' => '</div>',
+       '#title' => t('PROXIMITY'),
+       '#options' => array(
+         0 => t(' '),
+    	10 => t(' < 10 Miles'),
+	25 => t(' < 25 Miles'),
+        50 => t(' < 50 Miles'),
+        51 => t(' > 50 Miles'),
+       ),
+      '#default_value' => '',
+       '#prefix' => '<div id="prefixstate">',
+       '#suffix' => '</div>',
+'#ajax' => array(
+      'event'=>'change',
+      'callback' =>'sandbox_ajax_dropdown_cityins',
+      'wrapper' => 'cityins-wrapper',
+    ),
+    );
+
+
+$form['zipcode'] = array(
+		'#title' => t('ZIP CODE'),
+		'#type' => 'textfield',
+		'#size' => 30,
+		'#default_value' => '',
+       '#prefix' => '<div id="prefixstate">',
+       '#suffix' => '</div>',
+'#ajax' => array(
+      'event'=>'change',
+      'callback' =>'sandbox_ajax_dropdown_cityins',
+      'wrapper' => 'cityins-wrapper',
+    ),
+    );
+
+$form['mstatus'] = array(
+        '#type' => 'select',
+        '#title' => t('MARITAL'),
+	'#prefix' => '<div class="publishedSelect">',
+ 	'#suffix' => '</div>',
+        '#options' => array(
+         0 =>t(' '),
+         1 => t('Single'),
+	 2 => t('Married'),
+	 3 => t('Divorced'),
+       ),
+      '#default_value' => '',
+       '#prefix' => '<div id="prefixstate">',
+       '#suffix' => '</div>',
+'#ajax' => array(
+      'event'=>'change',
+      'callback' =>'sandbox_ajax_dropdown_cityins',
+      'wrapper' => 'cityins-wrapper',
+    ),
+    );
+$form['children'] = array(
+        '#type' => 'select',
+	'#prefix' => '<div class="publishedSelect">',
+ 	'#suffix' => '</div>',
+        '#title' => t('CHILDREN'),
+        '#options' => array(
+         0=> ' ',
+         1 => t('Yes'),
+	 2 => t('No'),
+         ),
+         '#default_value' => '',
+       '#prefix' => '<div id="prefixstate">',
+       '#suffix' => '</div>',
+'#ajax' => array(
+      'event'=>'change',
+      'callback' =>'sandbox_ajax_dropdown_cityins',
+      'wrapper' => 'cityins-wrapper',
+    ),
+    );
+
+$query = db_select('taxonomy_term_data');
+	$query->fields('taxonomy_term_data', array('tid','name'));
+	$query->condition('taxonomy_term_data.vid', 7);
+        $query->orderBy('name', 'ASC');
+$dropdown_source_victory = $query->execute();
+
+$dropdown_array_victory = array('0' => ' ');
+foreach ($dropdown_source_victory as $item_victory) {
+$key = $item_victory->tid;
+$value = $item_victory->name;
+$dropdown_array_victory[$key] = $value;
+}
+
+$form['victory'] = array(
+        '#type' => 'select',
+	'#prefix' => '<div class="publishedSelect">',
+ 	'#suffix' => '</div>',
+        '#title' => t('VICTORIES'),
+        '#options' => $dropdown_array_victory,
+    '#default_value' => '',
+       '#prefix' => '<div id="prefixstate">',
+       '#suffix' => '</div>',
+'#ajax' => array(
+      'event'=>'change',
+      'callback' =>'sandbox_ajax_dropdown_cityins',
+      'wrapper' => 'cityins-wrapper',
+    ),
+    );
+
+
+$query = db_select('taxonomy_term_data');
+	$query->fields('taxonomy_term_data', array('tid','name'));
+	$query->condition('taxonomy_term_data.vid', 7);
+    $query->orderBy('name', 'ASC');
+    $dropdown_source_strugles = $query->execute();
+
+$dropdown_array_strugles = array('0' => t(' '));
+foreach ($dropdown_source_strugles as $item_strugles) {
+$key = $item_strugles->tid;
+$value = $item_strugles->name;
+$dropdown_array_strugles[$key] = $value;
+}
+
+$form['strugles'] = array(
+        '#type' => 'select',
+	'#prefix' => '<div class="publishedSelect">',
+ 	'#suffix' => '</div>',
+        '#title' => t('STRUGGLES'),
+        '#options' => $dropdown_array_strugles,
+    '#default_value' => '',
+       '#prefix' => '<div id="prefixstate">',
+       '#suffix' => '</div>',
+'#ajax' => array(
+      'event'=>'change',
+      'callback' =>'sandbox_ajax_dropdown_cityins',
+      'wrapper' => 'cityins-wrapper',
+    ),
+    );
+
+$query = db_select('taxonomy_term_data');
+	$query->fields('taxonomy_term_data', array('tid','name'));
+	$query->condition('taxonomy_term_data.vid', 8);
+    	$query->orderBy('name', 'ASC');
+    	$dropdown_source_intrests = $query->execute();
+
+$dropdown_array_intrests = array('0' => ' ');
+foreach ($dropdown_source_intrests as $item_intrests) {
+$key = $item_intrests->tid;
+$value = $item_intrests->name;
+$dropdown_array_intrests[$key] = $value;
+}
+
+$form['intrests'] = array(
+        '#type' => 'select',
+	'#prefix' => '<div class="publishedSelect">',
+ 	'#suffix' => '</div>',
+        '#title' => t('INTERESTS'),
+        '#options' => $dropdown_array_intrests,
+   '#default_value' => '',
+       '#prefix' => '<div id="prefixstate">',
+       '#suffix' => '</div>',
+'#ajax' => array(
+      'event'=>'change',
+      'callback' =>'sandbox_ajax_dropdown_cityins',
+      'wrapper' => 'cityins-wrapper',
+    ),
+    );
+
+
+
+
+
+$query = db_select('taxonomy_term_data');
+	$query->fields('taxonomy_term_data', array('tid','name'));
+	$query->condition('taxonomy_term_data.vid', 5);
+        $query->orderBy('name', 'ASC');
+$dropdown_source_personality = $query->execute();
+
+$dropdown_array_personality = array('0' => ' ');
+foreach ($dropdown_source_personality as $item_personality) {
+$key = $item_personality->tid;
+$value = $item_personality->name;
+$dropdown_array_personality[$key] = $value;
+}
+
+
+$form['personality'] = array(
+        '#type' => 'select',
+	'#prefix' => '<div class="publishedSelect">',
+ 	'#suffix' => '</div>',
+        '#title' => t('PERSONALITY'),
+        '#options' => $dropdown_array_personality,
+   '#default_value' => '',
+       '#prefix' => '<div id="prefixstate">',
+       '#suffix' => '</div>',
+'#ajax' => array(
+      'event'=>'change',
+      'callback' =>'sandbox_ajax_dropdown_cityins',
+      'wrapper' => 'cityins-wrapper',
+    ),
+    );
+
+
+
+$form['hdlat'] = array(
+		'#type' => 'hidden',
+		'#size' => 30,
+
+		'#attributes' => array('id' => 'lat-id'),
+		);
+
+$form['hdlng'] = array(
+		'#type' => 'hidden',
+		'#size' => 30,
+
+		'#attributes' => array('id' => 'lng-id'),
+		);
+
+$form['Occupation'] = array(
+		'#title' => t('OCCUPATION'),
+		'#type' => 'textfield',
+		'#size' => 30,
+		'#default_value' => '',
+       '#prefix' => '<div id="prefixstate">',
+       '#suffix' => '</div>',
+'#ajax' => array(
+      'event'=>'change',
+      'callback' =>'sandbox_ajax_dropdown_cityins',
+      'wrapper' => 'cityins-wrapper',
+    ),
+    );
+
+
+$form['Email'] = array(
+		'#title' => t('EMAIL'),
+		'#type' => 'textfield',
+		'#size' => 30,
+		'#default_value' => '',
+       '#prefix' => '<div id="prefixstate">',
+       '#suffix' => '</div>',
+'#ajax' => array(
+      'event'=>'change',
+      'callback' =>'sandbox_ajax_dropdown_cityins',
+      'wrapper' => 'cityins-wrapper',
+    ),
+    );
+
+$form['ChurchName'] = array(
+		'#title' => t('CHURCH'),
+		'#type' => 'textfield',
+		'#size' => 30,
+		'#default_value' => '',
+       '#prefix' => '<div id="prefixstate">',
+       '#suffix' => '</div>',
+'#ajax' => array(
+      'event'=>'change',
+      'callback' =>'sandbox_ajax_dropdown_cityins',
+      'wrapper' => 'cityins-wrapper',
+    ),
+    );
+
+
+
+$form['tcount_display'] = array(
+'#markup' => "<input readonly='readonly' type='textbox' class='tcount' id='tct' value=''>",
+);
+
+// To findout user match count before click on search button.
+
+
+if(isset($form_state['values']['relationship']))
+$relins = $form_state['values']['relationship'];
+
+if(isset($form_state['values']['name']))
+$namins = $form_state['values']['name'];
+
+
+if(isset($form_state['values']['age']))
+$agins = $form_state['values']['age'];
+
+
+
+if(isset($form_state['values']['proximities']))
+$proximitieins= $form_state['values']['proximities'];
+
+
+
+if(isset($form_state['values']['zipcode']))
+$zipcodins= $form_state['values']['zipcode'];
+
+
+
+if(isset($form_state['values']['mstatus']))
+$mstatusins= $form_state['values']['mstatus'];
+
+
+
+if(isset($form_state['values']['children']))
+$childrensins= $form_state['values']['children'];
+
+
+
+
+if(isset($form_state['values']['victory']))
+$victorysins= $form_state['values']['victory'];
+
+
+
+if(isset($form_state['values']['strugles']))
+$strugleins= $form_state['values']['strugles'];
+
+
+
+
+
+if(isset($form_state['values']['intrests']))
+$intrestins= $form_state['values']['intrests'];
+
+
+
+
+if(isset($form_state['values']['personality']))
+$personalitins= $form_state['values']['personality'];
+
+
+
+if(isset($form_state['values']['Occupation']))
+$Occins= $form_state['values']['Occupation'];
+
+
+
+if(isset($form_state['values']['Email']))
+$emlins= $form_state['values']['Email'];
+
+
+
+if(isset($form_state['values']['ChurchName']))
+$chins= $form_state['values']['ChurchName'];
+
+
+if(isset($form_state['values']['zipcode']))
+$zip= $form_state['values']['zipcode'];
+
+
+global $user;
+$count_text = '';
+$uid = $user->uid;
+
+
+$get_count = check_user_name_match_count($inputlat,$inputlng,$intrestins,$struglinse,$victorysins,$agins,$mstatusins,$childrensins,$relins,$emlins,$chins,$proximitieins,$personalitins,$namins,$Occins,$zip);
+//echo $get_count;
+//die;
+//$get_count = check_outside_user_name_match_count($ag);
+
+if($get_count==1)
+$finals = $get_count.' MATCH AVAILABLE!';
+else if($get_count>=2)
+$finals = $get_count.' MATCHES AVAILABLE!';
+else
+$finals=' 0 MATCHES AVAILABLE!';
+
+  $form['sandbox_ajax_dropdown']['wrapper']['cityins'] = array(
+    '#markup' => "<script>
+  var elem = document.getElementById('totalcounts');
+  if(typeof elem !== 'undefined' && elem !== null)
+document.getElementById('totalcounts').innerHTML='$finals';
+
+var elems = document.getElementById('table-container');
+  if(typeof elems !== 'undefined' && elems !== null)
+document.getElementById('table-container').innerHTML='';
+
+</script>",
+  );
+
+
+/*
+$query2 = db_select('users','u')
+	->groupBy('u.uid')
+	->havingCondition('dist', 0 ,'>=')
+	->fields('u', array ('uid'));
+
+$queryu = db_select('users','u')
+	->condition('uid', $uid, '=' )
+	->fields('u', array('lat','lng','uid'))
+	->execute()
+	->fetchAssoc();
+
+$inputlat = $queryu['lat'];
+$inputlng = $queryu['lng'];
+
+$expression = "degrees(acos(sin( radians(u.lat) )* sin( radians($inputlat))
++ cos( radians(u.lat))
+* cos( radians($inputlat))
+* cos( radians(u.lng - $inputlng))
+) ) * 69.09";
+$query2->addExpression($expression,'dist');
+$query2->join('og_membership','ogm','ogm.etid = u.uid');
+$string = '';
+$key = array();
+$getallcommunity = get_allcommunities_forauser(); // get all communities created/joined
+if(count($getallcommunity) > 0) {
+for($i=0;$i<count($getallcommunity['nids']);$i++) {
+	$key[] = $getallcommunity['nids'][$i];
+	if($i < count($getallcommunity['nids'])-1) {
+	$string .= $key[$i].',';
+	}
+	else {
+	$string .= $key[$i];
+	}
+}
+}
+//print "string".$string.'</br>';
+$query2->condition('ogm.gid', array($string),'IN');
+//print "UID".$uid.'</br>';
+$query2->condition('u.uid', $uid,'!=');
+
+//echo ($query2->__toString());
+
+$results = $query2->execute();
+
+$rows_count = $results->rowCount();
+if($rows_count == 1):
+$count_text = t('MATCH AVAILABLE!');
+elseif($rows_count == 0):
+$count_text = t('MATCHES AVAILABLE!');
+elseif($rows_count > 1):
+$count_text = t('MATCHES AVAILABLE!');
+endif;
+*/
+$form['check_name'] = array(
+'#prefix' => '<div id="submitbtn">',
+		'#markup' => '<div id="totalcounts" class="tc" style="color:#AFC486">'.$rows_count.' '.$count_text."</div><a class ='button' href='#' id='check_name'>" . t('See your Matches') . "</a><br/>",
+//'#markup' => "<a class ='button' href='#' id='check_name'>" . t('See your Matches') . "</a><br/>",
+'#suffix' => '</div>',
+		);
+
+
+	$form['status'] = array(
+
+		'#markup' => "<span id='status'></span><br/>",
+
+	);
+
+	$form['table-container'] = array(
+		'#markup' => "<div id='table-container'></div><br/>",
+
+	);
+return $form;
+}
+
+/*
+* ajax function to display count and result on submit button click .
+*/
+
+function check_names() {
+ global $user;
+ $uid = $user->uid;
+ $author = $user->name;
+
+//echo "<script>alert('caching step1')</script>";
+
+$inputlat = $_GET['inputlat'];
+
+$inputlng = $_GET['inputlng'];
+
+if($inputlat=='0' AND $inputlng=='0')
+{
+
+$queryu = db_select('users','u')
+	->condition('uid', $uid, '=' )
+	->fields('u', array('lat','lng','uid'))
+	->execute()
+	->fetchAssoc();
+
+$inputlat = $queryu['lat'];
+$inputlng = $queryu['lng'];
+}
+
+
+if(isset($_GET['name']))
+$name = $_GET['name'];
+
+
+if(isset($_GET['Occupation']))
+ $Occupation = $_GET['Occupation'];
+
+if(isset($_GET['intrest']))
+$intrest=$_GET['intrest'];
+
+
+if(isset($_GET['strugles']))
+$strugles = $_GET['strugles'];
+
+if(isset($_GET['victory']))
+$victory = $_GET['victory'];
+
+if($_GET['age']!=' ')
+$age = explode('-',$_GET['age']);
+else
+$age = $_GET['age'];
+
+
+if(isset($_GET['mstat']))
+$mstat = $_GET['mstat'];
+
+if(isset($_GET['children']))
+$children = $_GET['children'];
+
+if(isset($_GET['relation']))
+$relation = $_GET['relation'];
+
+
+if(isset($_GET['email']))
+$email = $_GET['email'];
+
+
+if(isset($_GET['church']))
+$church = $_GET['church'];
+
+
+if(isset($_GET['prox']))
+$prox = $_GET['prox'];
+
+if(isset($_GET['personality']))
+$personality = $_GET['personality'];
+
+if(isset($_GET['zip']))
+$zip = $_GET['zip'];
+
+
+
+  $get_count = check_user_name_match_count($inputlat,$inputlng,$intrest,$strugles,$victory,$age,$mstat,$children,$relation,$email,$church,$prox,$personality,$name,$Occupation,$zip);
+
+//$get_count = check_user_name_match_count($inputlat,$inputlng,$intrest,$strugles,$victory,$age,$mstat,$children,$relation,$email,$church,$prox,$personality);
+
+//echo "mstat-anil".$mstat;
+
+	header("Content-type: text/html");
+	header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
+	header("Cache-Control: no-cache, must-revalidate");
+	header("Pragma: no-cache");
+$db_and = db_and();
+if(!$prox) {
+
+$db_and = db_and();
+
+	$query2 = db_select('users','u')
+
+->groupBy('u.uid')
+
+->extend('PagerDefault')	// Pager Extender
+	->limit(5)		// 10 results per page
+	->fields ('u', array (
+					'uid'
+				))
+
+	->fields ('u', array (
+					'name'
+				))
+
+		->fields ('fab', array (
+					'field_what_do_you_want_to_tell_o_value'
+				));
+
+$query2->join('og_membership','ogm','ogm.etid = u.uid');
+$query2->leftjoin('field_data_field_what_do_you_want_to_tell_o','fab','u.uid = fab.entity_id');
+$query2->leftjoin('field_data_field_email_adrs','em','u.uid = em.entity_id');
+
+if($Occupation!='')
+{
+
+$query2->leftjoin('field_data_field_occupation','fo','u.uid = fo.entity_id');
+$db_and->condition('fo.field_occupation_value', $Occupation,'=');
+$query2->condition($db_and);
+}
+
+if($name!=''){
+
+   $query2->condition('u.name', '%'. db_like($name) .'%' , 'LIKE');
+   //$query2->condition('u.name', $name,'=');
+}
+
+
+
+if($zip!='') {
+
+$query2->join('field_data_field_user_zip_code', 'zip', 'zip.entity_id = u.uid');
+$query2->condition('zip.field_user_zip_code_value', $zip,'=');
+//$query2->condition($db_and);
+}
+
+if($email!='')
+{
+//$db_and->condition('u.mail', '%'. db_like($email) .'%' , 'LIKE');
+$query2->condition('em.field_email_adrs_value',$email);
+//$query2->condition($db_and);
+}
+
+if($church!='') //used mysql like
+{
+$query2->leftjoin('field_data_field_if_what_church_','fwhatch','u.uid = fwhatch.entity_id');
+$db_and->condition('fwhatch.field_if_what_church__value', '%'. db_like($church) .'%' , 'LIKE');
+$query2->condition($db_and);
+}
+
+
+if($personality!= '' && $personality!= '0')
+{
+$query2->leftjoin('field_data_field_how_would_you_describe','hwyd','u.uid= hwyd.entity_id');
+$db_and->condition('hwyd.field_how_would_you_describe_tid', $personality,'=');
+$query2->condition($db_and);
+}
+
+
+if($intrest!='' and $intrest!='0')
+{
+$query2->leftjoin('field_data_field_what_are_hobbies_and_', 'fint', 'u.uid= fint.entity_id');
+$db_and->condition('fint.field_what_are_hobbies_and__tid', $intrest,'=');
+$query2->condition($db_and);
+}
+
+if($strugles!='' and $strugles!='0')
+{
+$query2->leftjoin('field_data_field_where_do_face_current_', 'fc', 'u.uid= fc.entity_id');
+$db_and->condition('fc.field_where_do_face_current__tid', $strugles,'=');
+$query2->condition($db_and);
+}
+
+
+if($victory!='' and $victory!='0') {
+$query2->leftjoin('field_data_field_where_have_seen_christ','fwsc','u.uid= fwsc.entity_id');
+$db_and->condition('fwsc.field_where_have_seen_christ_tid', $victory,'=');
+$query2->condition($db_and);
+}
+
+if($age[0]!='') {
+$query2->leftjoin('field_data_field_age','fa','u.uid= fa.entity_id');
+$condition = 'DATEDIFF(CURRENT_DATE, fa.field_age_value) Between (:fid1 * 365.25) and  (:fid2 * 365.25)';
+$query2->where($condition, array(':fid1' => $age[0], ':fid2' => $age[1]));
+}
+
+
+if($mstat!='' and $mstat!='0') {
+$query2->leftjoin('field_data_field_marital_status','ms','u.uid= ms.entity_id');
+$db_and->condition('ms.field_marital_status_value', $mstat,'=');
+$query2->condition($db_and);
+
+}
+
+if($relation!='' and $relation!='0') {
+$query2->leftjoin('field_data_field_how_do_want_to_use_lif','fhw','u.uid= fhw.entity_id');
+$db_and->condition('fhw.field_how_do_want_to_use_lif_tid', $relation,'=');
+$query2->condition($db_and);
+
+}
+
+//field_children_value
+
+
+if($children!='' and $children!='0') {
+$query2->leftjoin('field_data_field_children','fch','u.uid= fch.entity_id');
+$db_and->condition('fch.field_children_value', $children,'=');
+$query2->condition($db_and);
+
+}
+
+
+
+
+
+
+$string = '';
+$key = array();
+$getallcommunity = get_allcommunities_forauser(); // get all communities created/joined
+if(count($getallcommunity) > 0) {
+for($i=0;$i<count($getallcommunity['nids']);$i++) {
+	$key[] = $getallcommunity['nids'][$i];
+	if($i < count($getallcommunity['nids'])-1) {
+	$string .= $key[$i].',';
+	}
+	else {
+	$string .= $key[$i];
+	}
+}
+}
+
+$xy=explode(',',$string);
+$query2->condition('ogm.gid', $xy,'IN');
+$query2->condition('u.uid', $uid,'!=');
+
+
+$results = $query2->execute();
+
+$rows_count = $results->rowCount();
+}
+else if($prox <= 50)
+{
+
+
+//echo $inputlat
+
+$db_and = db_and();
+$query3 = db_select('users','u')
+
+->groupBy('u.uid')
+->havingCondition('dist', $prox,'<=')
+//->extend('PagerDefault')	// Pager Extender
+	//->limit(5)
+	->fields ('u', array (
+					'uid'
+				))
+
+	->fields ('u', array (
+					'name'
+				))
+
+		->fields ('fab', array (
+					'field_what_do_you_want_to_tell_o_value'
+				));
+
+$expressions = "degrees(acos(sin( radians(u.lat) )* sin( radians($inputlat))
++ cos( radians(u.lat))
+* cos( radians($inputlat))
+* cos( radians(u.lng - $inputlng))
+) ) * 69.09";
+
+$query3->addExpression($expressions,'dist');
+$query3->join('og_membership','ogm','ogm.etid = u.uid');
+$query3->leftJoin('field_data_field_what_do_you_want_to_tell_o','fab','u.uid = fab.entity_id');
+
+if($name!=''){
+
+    $query3->condition('u.name', '%'. db_like($name) .'%' , 'LIKE');
+}
+
+if($zip!='') {
+
+$query3->join('field_data_field_user_zip_code', 'zip', 'zip.entity_id = u.uid');
+$query3->condition('zip.field_user_zip_code_value', $zip,'=');
+//$query2->condition($db_and);
+}
+
+if($Occupation!='')
+{
+
+$query3->leftjoin('field_data_field_occupation','fo','u.uid = fo.entity_id');
+$db_and->condition('fo.field_occupation_value', $Occupation,'=');
+$query3->condition($db_and);
+}
+
+if($intrest!='' and $intrest!='0')
+{
+$query3->leftjoin('field_data_field_what_are_hobbies_and_', 'fint', 'u.uid= fint.entity_id');
+$db_and->condition('fint.field_what_are_hobbies_and__tid', $intrest,'=');
+$query3->condition($db_and);
+}
+
+if($strugles!='' and $strugles!='0')
+{
+$query3->leftjoin('field_data_field_where_do_face_current_', 'fc', 'u.uid= fc.entity_id');
+$db_and->condition('fc.field_where_do_face_current__tid', $strugles,'=');
+$query3->condition($db_and);
+}
+
+
+if($victory!='' and $victory!='0')
+
+{
+$query3->leftjoin('field_data_field_where_have_seen_christ','fwsc','u.uid= fwsc.entity_id');
+$db_and->condition('fwsc.field_where_have_seen_christ_tid', $victory,'=');
+$query3->condition($db_and);
+
+}
+
+
+if($age[0]!='')
+{
+$query3->leftjoin('field_data_field_age','fa','u.uid= fa.entity_id');
+$condition = 'DATEDIFF(CURRENT_DATE, fa.field_age_value) Between (:fid1 * 365.25) and  (:fid2 * 365.25)';
+$query3->where($condition, array(':fid1' => $age[0], ':fid2' => $age[1]));
+}
+
+
+if($mstat!='' and $mstat!='0')
+{
+$query3->leftjoin('field_data_field_marital_status','ms','u.uid= ms.entity_id');
+$db_and->condition('ms.field_marital_status_value', $mstat,'=');
+$query3->condition($db_and);
+
+}
+
+if($relation!='' and $relation!='0')
+
+{
+$query3->leftjoin('field_data_field_how_do_want_to_use_lif','fhw','u.uid= fhw.entity_id');
+$db_and->condition('fhw.field_how_do_want_to_use_lif_tid', $relation,'=');
+$query3->condition($db_and);
+
+}
+
+//field_children_value
+
+
+if($children!='' and $children!='0')
+
+{
+$query3->leftjoin('field_data_field_children','fch','u.uid= fch.entity_id');
+$db_and->condition('fch.field_children_value', $children,'=');
+$query3->condition($db_and);
+
+}
+
+
+if($email!='')
+{
+    $query3->leftjoin('field_data_field_email_adrs','em','u.uid = em.entity_id');
+//$db_and->condition('u.mail', '%'. db_like($email) .'%' , 'LIKE');
+$query3->condition('em.field_email_adrs_value',$email);
+//$query2->condition($db_and);
+}
+
+if($church!='')
+{
+$query3->leftjoin('field_data_field_if_what_church_','fwhatch','u.uid	= fwhatch.entity_id');
+$db_and->condition('fwhatch.field_if_what_church__value', '%'. db_like($church) .'%' , 'LIKE');
+$query3->condition($db_and);
+}
+
+if($personality!= '' && $personality!= '0')
+{
+$query3->leftjoin('field_data_field_how_would_you_describe','hwyd','u.uid= hwyd.entity_id');
+$db_and->condition('hwyd.field_how_would_you_describe_tid', $personality,'=');
+$query3->condition($db_and);
+}
+
+$string = '';
+$key = array();
+$getallcommunity = get_allcommunities_forauser(); // get all communities created/joined
+if(count($getallcommunity) > 0) {
+for($i=0;$i<count($getallcommunity['nids']);$i++) {
+	$key[] = $getallcommunity['nids'][$i];
+	if($i < count($getallcommunity['nids'])-1) {
+	$string .= $key[$i].',';
+	}
+	else {
+	$string .= $key[$i];
+	}
+}
+}
+//echo $uid;
+
+$xyzx=explode(',',$string);
+$query3->condition('ogm.gid', $xyzx,'IN');
+$query3->condition('u.uid', $uid,'!=');
+
+//print_r($xyzx);
+//echo ($query2->__toString());
+//die();
+$resultss = $query3->execute();
+$get_count  = $resultss->rowCount();
+
+
+
+//end
+
+$db_and = db_and();
+$query2 = db_select('users','u')
+
+->groupBy('u.uid')
+->havingCondition('dist', $prox,'<=')
+//->extend('PagerDefault')	// Pager Extender
+	//->limit(5)
+	->fields ('u', array (
+					'uid'
+				))
+
+	->fields ('u', array (
+					'name'
+				))
+
+		->fields ('fab', array (
+					'field_what_do_you_want_to_tell_o_value'
+				));
+
+$expressions = "degrees(acos(sin( radians(u.lat) )* sin( radians($inputlat))
++ cos( radians(u.lat))
+* cos( radians($inputlat))
+* cos( radians(u.lng - $inputlng))
+) ) * 69.09";
+
+$query2->addExpression($expressions,'dist');
+$query2->join('og_membership','ogm','ogm.etid = u.uid');
+
+$query2->leftJoin('field_data_field_what_do_you_want_to_tell_o','fab','u.uid = fab.entity_id');
+
+if($name!=''){
+
+    $query2->condition('u.name', '%'. db_like($name) .'%' , 'LIKE');
+}
+
+if($Occupation!='')
+{
+
+$query2->leftjoin('field_data_field_occupation','fo','u.uid = fo.entity_id');
+$db_and->condition('fo.field_occupation_value', $Occupation,'=');
+$query2->condition($db_and);
+}
+
+if($intrest!='' and $intrest!='0')
+{
+$query2->leftjoin('field_data_field_what_are_hobbies_and_', 'fint', 'u.uid= fint.entity_id');
+$db_and->condition('fint.field_what_are_hobbies_and__tid', $intrest,'=');
+$query2->condition($db_and);
+}
+
+if($strugles!='' and $strugles!='0')
+{
+$query2->leftjoin('field_data_field_where_do_face_current_', 'fc', 'u.uid= fc.entity_id');
+$db_and->condition('fc.field_where_do_face_current__tid', $strugles,'=');
+$query2->condition($db_and);
+}
+
+
+if($victory!='' and $victory!='0')
+
+{
+$query2->leftjoin('field_data_field_where_have_seen_christ','fwsc','u.uid= fwsc.entity_id');
+$db_and->condition('fwsc.field_where_have_seen_christ_tid', $victory,'=');
+$query2->condition($db_and);
+
+}
+
+
+if($age[0]!='')
+{
+$query2->leftjoin('field_data_field_age','fa','u.uid= fa.entity_id');
+$condition = 'DATEDIFF(CURRENT_DATE, fa.field_age_value) Between (:fid1 * 365.25) and  (:fid2 * 365.25)';
+$query2->where($condition, array(':fid1' => $age[0], ':fid2' => $age[1]));
+}
+
+
+if($mstat!='' and $mstat!='0')
+{
+$query2->leftjoin('field_data_field_marital_status','ms','u.uid= ms.entity_id');
+$db_and->condition('ms.field_marital_status_value', $mstat,'=');
+$query2->condition($db_and);
+
+}
+
+if($relation!='' and $relation!='0')
+
+{
+$query2->leftjoin('field_data_field_how_do_want_to_use_lif','fhw','u.uid= fhw.entity_id');
+$db_and->condition('fhw.field_how_do_want_to_use_lif_tid', $relation,'=');
+$query2->condition($db_and);
+
+}
+
+//field_children_value
+
+
+if($children!='' and $children!='0')
+
+{
+$query2->leftjoin('field_data_field_children','fch','u.uid= fch.entity_id');
+$db_and->condition('fch.field_children_value', $children,'=');
+$query2->condition($db_and);
+
+}
+
+
+if($email!='')
+{
+    $query2->leftjoin('field_data_field_email_adrs','em','u.uid = em.entity_id');
+//$db_and->condition('u.mail', '%'. db_like($email) .'%' , 'LIKE');
+$query2->condition('em.field_email_adrs_value',$email);
+//$query2->condition($db_and);
+}
+
+if($church!='')
+{
+$query2->leftjoin('field_data_field_if_what_church_','fwhatch','u.uid	= fwhatch.entity_id');
+$db_and->condition('fwhatch.field_if_what_church__value', '%'. db_like($church) .'%' , 'LIKE');
+$query2->condition($db_and);
+}
+
+if($personality!= '' && $personality!= '0')
+{
+$query2->leftjoin('field_data_field_how_would_you_describe','hwyd','u.uid= hwyd.entity_id');
+$db_and->condition('hwyd.field_how_would_you_describe_tid', $personality,'=');
+$query2->condition($db_and);
+}
+
+if($zip!='') {
+ $query2->join('field_data_field_user_zip_code', 'zip', 'zip.entity_id = u.uid');
+$query2->condition('zip.field_user_zip_code_value', $zip,'=');
+//$query2->condition($db_and);
+}
+
+$string = '';
+$key = array();
+$getallcommunity = get_allcommunities_forauser(); // get all communities created/joined
+if(count($getallcommunity) > 0) {
+for($i=0;$i<count($getallcommunity['nids']);$i++) {
+	$key[] = $getallcommunity['nids'][$i];
+	if($i < count($getallcommunity['nids'])-1) {
+	$string .= $key[$i].',';
+	}
+	else {
+	$string .= $key[$i];
+	}
+}
+}
+//echo $uid;
+//print "string".$string.'</br>';
+$xyzx=explode(',',$string);
+$query2->condition('ogm.gid', $xyzx,'IN');
+$query2->condition('u.uid', $uid,'!=');
+
+//print_r($xyzx);
+//echo ($query2->__toString());
+
+$results = $query2->execute();
+$rows_count = $results->rowCount();
+}
+
+else if($prox >= 51)
+{
+
+
+//echo $inputlat
+
+$db_and = db_and();
+$query3 = db_select('users','u')
+
+->groupBy('u.uid')
+->havingCondition('dist', $prox,'>=')
+//->extend('PagerDefault')	// Pager Extender
+	//->limit(5)
+	->fields ('u', array (
+					'uid'
+				))
+
+	->fields ('u', array (
+					'name'
+				))
+
+		->fields ('fab', array (
+					'field_what_do_you_want_to_tell_o_value'
+				));
+
+$expressions = "degrees(acos(sin( radians(u.lat) )* sin( radians($inputlat))
++ cos( radians(u.lat))
+* cos( radians($inputlat))
+* cos( radians(u.lng - $inputlng))
+) ) * 69.09";
+
+$query3->addExpression($expressions,'dist');
+$query3->join('og_membership','ogm','ogm.etid = u.uid');
+$query3->leftJoin('field_data_field_what_do_you_want_to_tell_o','fab','u.uid = fab.entity_id');
+
+if($name!=''){
+
+    $query3->condition('u.name', '%'. db_like($name) .'%' , 'LIKE');
+}
+
+if($zip!='') {
+
+$query3->join('field_data_field_user_zip_code', 'zip', 'zip.entity_id = u.uid');
+$query3->condition('zip.field_user_zip_code_value', $zip,'=');
+//$query2->condition($db_and);
+}
+
+if($Occupation!='')
+{
+
+$query3->leftjoin('field_data_field_occupation','fo','u.uid = fo.entity_id');
+$db_and->condition('fo.field_occupation_value', $Occupation,'=');
+$query3->condition($db_and);
+}
+
+if($intrest!='' and $intrest!='0')
+{
+$query3->leftjoin('field_data_field_what_are_hobbies_and_', 'fint', 'u.uid= fint.entity_id');
+$db_and->condition('fint.field_what_are_hobbies_and__tid', $intrest,'=');
+$query3->condition($db_and);
+}
+
+if($strugles!='' and $strugles!='0')
+{
+$query3->leftjoin('field_data_field_where_do_face_current_', 'fc', 'u.uid= fc.entity_id');
+$db_and->condition('fc.field_where_do_face_current__tid', $strugles,'=');
+$query3->condition($db_and);
+}
+
+
+if($victory!='' and $victory!='0')
+
+{
+$query3->leftjoin('field_data_field_where_have_seen_christ','fwsc','u.uid= fwsc.entity_id');
+$db_and->condition('fwsc.field_where_have_seen_christ_tid', $victory,'=');
+$query3->condition($db_and);
+
+}
+
+
+if($age[0]!='')
+{
+$query3->leftjoin('field_data_field_age','fa','u.uid= fa.entity_id');
+$condition = 'DATEDIFF(CURRENT_DATE, fa.field_age_value) Between (:fid1 * 365.25) and  (:fid2 * 365.25)';
+$query3->where($condition, array(':fid1' => $age[0], ':fid2' => $age[1]));
+}
+
+
+if($mstat!='' and $mstat!='0')
+{
+$query3->leftjoin('field_data_field_marital_status','ms','u.uid= ms.entity_id');
+$db_and->condition('ms.field_marital_status_value', $mstat,'=');
+$query3->condition($db_and);
+
+}
+
+if($relation!='' and $relation!='0')
+
+{
+$query3->leftjoin('field_data_field_how_do_want_to_use_lif','fhw','u.uid= fhw.entity_id');
+$db_and->condition('fhw.field_how_do_want_to_use_lif_tid', $relation,'=');
+$query3->condition($db_and);
+
+}
+
+//field_children_value
+
+
+if($children!='' and $children!='0')
+
+{
+$query3->leftjoin('field_data_field_children','fch','u.uid= fch.entity_id');
+$db_and->condition('fch.field_children_value', $children,'=');
+$query3->condition($db_and);
+
+}
+
+
+if($email!='')
+{
+    $query3->leftjoin('field_data_field_email_adrs','em','u.uid = em.entity_id');
+//$db_and->condition('u.mail', '%'. db_like($email) .'%' , 'LIKE');
+$query3->condition('em.field_email_adrs_value',$email);
+//$query2->condition($db_and);
+}
+
+if($church!='')
+{
+$query3->leftjoin('field_data_field_if_what_church_','fwhatch','u.uid	= fwhatch.entity_id');
+$db_and->condition('fwhatch.field_if_what_church__value', '%'. db_like($church) .'%' , 'LIKE');
+$query3->condition($db_and);
+}
+
+if($personality!= '' && $personality!= '0')
+{
+$query3->leftjoin('field_data_field_how_would_you_describe','hwyd','u.uid= hwyd.entity_id');
+$db_and->condition('hwyd.field_how_would_you_describe_tid', $personality,'=');
+$query3->condition($db_and);
+}
+
+$string = '';
+$key = array();
+$getallcommunity = get_allcommunities_forauser(); // get all communities created/joined
+if(count($getallcommunity) > 0) {
+for($i=0;$i<count($getallcommunity['nids']);$i++) {
+	$key[] = $getallcommunity['nids'][$i];
+	if($i < count($getallcommunity['nids'])-1) {
+	$string .= $key[$i].',';
+	}
+	else {
+	$string .= $key[$i];
+	}
+}
+}
+//echo $uid;
+
+$xyzx=explode(',',$string);
+$query3->condition('ogm.gid', $xyzx,'IN');
+$query3->condition('u.uid', $uid,'!=');
+
+//print_r($xyzx);
+//echo ($query2->__toString());
+//die();
+$resultss = $query3->execute();
+$get_count  = $resultss->rowCount();
+
+
+
+//end
+
+$db_and = db_and();
+$query2 = db_select('users','u')
+
+->groupBy('u.uid')
+->havingCondition('dist', $prox,'>=')
+//->extend('PagerDefault')	// Pager Extender
+	//->limit(5)
+	->fields ('u', array (
+					'uid'
+				))
+
+	->fields ('u', array (
+					'name'
+				))
+
+		->fields ('fab', array (
+					'field_what_do_you_want_to_tell_o_value'
+				));
+
+$expressions = "degrees(acos(sin( radians(u.lat) )* sin( radians($inputlat))
++ cos( radians(u.lat))
+* cos( radians($inputlat))
+* cos( radians(u.lng - $inputlng))
+) ) * 69.09";
+
+$query2->addExpression($expressions,'dist');
+$query2->join('og_membership','ogm','ogm.etid = u.uid');
+
+$query2->leftJoin('field_data_field_what_do_you_want_to_tell_o','fab','u.uid = fab.entity_id');
+
+if($name!=''){
+
+    $query2->condition('u.name', '%'. db_like($name) .'%' , 'LIKE');
+}
+
+if($Occupation!='')
+{
+
+$query2->leftjoin('field_data_field_occupation','fo','u.uid = fo.entity_id');
+$db_and->condition('fo.field_occupation_value', $Occupation,'=');
+$query2->condition($db_and);
+}
+
+if($intrest!='' and $intrest!='0')
+{
+$query2->leftjoin('field_data_field_what_are_hobbies_and_', 'fint', 'u.uid= fint.entity_id');
+$db_and->condition('fint.field_what_are_hobbies_and__tid', $intrest,'=');
+$query2->condition($db_and);
+}
+
+if($strugles!='' and $strugles!='0')
+{
+$query2->leftjoin('field_data_field_where_do_face_current_', 'fc', 'u.uid= fc.entity_id');
+$db_and->condition('fc.field_where_do_face_current__tid', $strugles,'=');
+$query2->condition($db_and);
+}
+
+
+if($victory!='' and $victory!='0')
+
+{
+$query2->leftjoin('field_data_field_where_have_seen_christ','fwsc','u.uid= fwsc.entity_id');
+$db_and->condition('fwsc.field_where_have_seen_christ_tid', $victory,'=');
+$query2->condition($db_and);
+
+}
+
+
+if($age[0]!='')
+{
+$query2->leftjoin('field_data_field_age','fa','u.uid= fa.entity_id');
+$condition = 'DATEDIFF(CURRENT_DATE, fa.field_age_value) Between (:fid1 * 365.25) and  (:fid2 * 365.25)';
+$query2->where($condition, array(':fid1' => $age[0], ':fid2' => $age[1]));
+}
+
+
+if($mstat!='' and $mstat!='0')
+{
+$query2->leftjoin('field_data_field_marital_status','ms','u.uid= ms.entity_id');
+$db_and->condition('ms.field_marital_status_value', $mstat,'=');
+$query2->condition($db_and);
+
+}
+
+if($relation!='' and $relation!='0')
+
+{
+$query2->leftjoin('field_data_field_how_do_want_to_use_lif','fhw','u.uid= fhw.entity_id');
+$db_and->condition('fhw.field_how_do_want_to_use_lif_tid', $relation,'=');
+$query2->condition($db_and);
+
+}
+
+//field_children_value
+
+
+if($children!='' and $children!='0')
+
+{
+$query2->leftjoin('field_data_field_children','fch','u.uid= fch.entity_id');
+$db_and->condition('fch.field_children_value', $children,'=');
+$query2->condition($db_and);
+
+}
+
+
+if($email!='')
+{
+    $query2->leftjoin('field_data_field_email_adrs','em','u.uid = em.entity_id');
+//$db_and->condition('u.mail', '%'. db_like($email) .'%' , 'LIKE');
+$query2->condition('em.field_email_adrs_value',$email);
+//$query2->condition($db_and);
+}
+
+if($church!='')
+{
+$query2->leftjoin('field_data_field_if_what_church_','fwhatch','u.uid	= fwhatch.entity_id');
+$db_and->condition('fwhatch.field_if_what_church__value', '%'. db_like($church) .'%' , 'LIKE');
+$query2->condition($db_and);
+}
+
+if($personality!= '' && $personality!= '0')
+{
+$query2->leftjoin('field_data_field_how_would_you_describe','hwyd','u.uid= hwyd.entity_id');
+$db_and->condition('hwyd.field_how_would_you_describe_tid', $personality,'=');
+$query2->condition($db_and);
+}
+
+if($zip!='') {
+ $query2->join('field_data_field_user_zip_code', 'zip', 'zip.entity_id = u.uid');
+$query2->condition('zip.field_user_zip_code_value', $zip,'=');
+//$query2->condition($db_and);
+}
+
+$string = '';
+$key = array();
+$getallcommunity = get_allcommunities_forauser(); // get all communities created/joined
+if(count($getallcommunity) > 0) {
+for($i=0;$i<count($getallcommunity['nids']);$i++) {
+	$key[] = $getallcommunity['nids'][$i];
+	if($i < count($getallcommunity['nids'])-1) {
+	$string .= $key[$i].',';
+	}
+	else {
+	$string .= $key[$i];
+	}
+}
+}
+//echo $uid;
+//print "string".$string.'</br>';
+$xyzx=explode(',',$string);
+$query2->condition('ogm.gid', $xyzx,'IN');
+$query2->condition('u.uid', $uid,'!=');
+
+//print_r($xyzx);
+//echo ($query2->__toString());
+
+$results = $query2->execute();
+$rows_count = $results->rowCount();
+}
+if(($zip=='') AND ($intrest=='0') AND ($strugles=='0') AND ($victory=='0') AND ($age[0]<'10') AND ($mstat=='0') AND ($children=='0') AND ($relation=='0') AND ($email=='') AND ($church=='') AND ($prox=='0') AND ($personality == '0') AND ($email=='') AND ($name=='') AND ($Occupation=='') ) {
+
+   $get_count = 0;
+}
+//echo $get_count;
+if($get_count > 0) {
+
+ if($get_count >= 2)
+echo "<script>document.getElementById('totalcounts').value=+$get_count+' MATCHES AVAILABLE!'</script>";
+if($get_count == 1)
+echo "<script>document.getElementById('totalcounts').value=+$get_count+' MATCH AVAILABLE!'</script>";
+
+//if($get_count > 0) {
+
+//if($get_count >= 2 )
+//echo "<script>document.getElementById('tct').value=+$get_count+' MATCHES AVAILABLE!'</script>";
+
+//if($get_count == 1)
+//echo "<script>document.getElementById('tct').value=+$get_count+' MATCH AVAILABLE!'</script>";
+
+$rowss = array();
+
+foreach($results as $records) {
+
+$real_path = file_create_url($records->uri);
+
+
+$fbuid = get_facebookid_from_userid($records->uid);
+$fb_avatar = get_user_avatar($fbuid,'small','45','45');
+
+$username = explode( ' ',$records->name);
+$username = $username[0].'...';
+
+//echo $records->name;
+$name = explode(" ", $records->name);
+if($name[2]!='')
+$link3 =  l($records->name, 'user/'. $records->uid,array('attributes' => array('class' => 'username_link')));
+else {
+
+//$new_name ="$name[0] $name[1]";
+if(count($name[0]>=10))
+$name[0] = substr($name[0],0,9);
+if(count($name[1]>=10))
+$name[1] = substr($name[1],0,9);
+
+$link1 =  l($name[0], 'user/'. $records->uid,array('attributes' => array('class' => 'username_link')));
+$link2 =  l($name[1], 'user/'. $records->uid,array('attributes' => array('class' => 'username_link')));
+$link3 = $link1.'</ br>'.$link2;
+}
+$rowss[] = array(
+		'data' => array('<a class="useravatar" href="'.drupal_get_path_alias('user/'. $records->uid).'">'.$fb_avatar.'</a>'.$link3.'<b>'.t('ABOUT ME: ').'</b>'.substr($records->field_what_do_you_want_to_tell_o_value,0,280).'......'.'' )
+		);
+ }
+
+
+$html = theme('table', array(
+  'rows' => $rowss,
+
+));
+$html .= theme('pager');
+}
+else {
+
+
+echo "<script>document.getElementById('tct').value=''</script>";
+
+$html = '<div class="view-empty">'.t('0 Results - Try expanding your search criteria').'</div>'; }
+die ($html);
+
+}
+
+/* greater than 50*/
+
+
+
+
+/*
+* function to get count - always '>=' for distance calculation.
+*/
+function check_user_name_match_count($inputlat = '',$inputlng = '',$intrest='',$strugles='',$victory='',$age='',$mstat='',$children='',$relation='',$email='',$church='',$prox='',$personality = '',$name='',$Occupation='',$zip='') {
+
+//function check_user_name_match_count($inputlat = '',$inputlng = '',$intrest = '',$strugles = '',$victory = '',$age = '',$mstat = '',$children = '',$relation = '',$email = '',$church = '',$prox = '',$personality = '') {
+
+
+
+if(!isset($_GET['age'])) {
+ switch($age) {
+
+     case 1:
+     $age=array();
+      $age[0]=10;
+      $age[1]=20;
+     break;
+
+     case 2:
+      $age=array();
+      $age[0]=20;
+      $age[1]=30;
+     break;
+
+    case 3:
+     $age=array();
+      $age[0]=30;
+      $age[1]=40;
+     break;
+   case 4:
+     $age=array();
+      $age[0]=40;
+      $age[1]=50;
+     break;
+
+     case 5:
+     $age=array();
+      $age[0]=50;
+      $age[1]=60;
+     break;
+
+     case 6:
+     $age=array();
+      $age[0]=60;
+      $age[1]=70;
+     break;
+
+   case 7:
+     $age=array();
+      $age[0]=70;
+      $age[1]=80;
+     break;
+
+     case 8:
+     $age=array();
+      $age[0]=80;
+      $age[1]=90;
+     break;
+
+     case 9:
+     $age=array();
+      $age[0]=90;
+      $age[1]=100;
+     break;
+
+
+     case 10:
+     $age=array();
+      $age[0]=10;
+      $age[1]=100;
+     break;
+
+
+
+   default:
+     $age=array();
+
+      $age[0]=0;
+      $age[1]=0;
+     break;
+  }
+
+
+}
+
+
+
+
+global $user;
+$uid = $user->uid;
+$db_and = db_and();
+if(!$prox) {
+//$db_and = db_and();
+	$query2 = db_select('users','u')
+
+->groupBy('u.uid')
+
+//->extend('PagerDefault')	// Pager Extender
+	//->limit(5)		// 10 results per page
+	->fields ('u', array (
+					'uid'
+				))
+
+	->fields ('u', array (
+					'name'
+				))
+
+		->fields ('fab', array (
+					'field_what_do_you_want_to_tell_o_value'
+				));
+
+$query2->join('og_membership','ogm','ogm.etid = u.uid');
+$query2->leftjoin('field_data_field_what_do_you_want_to_tell_o','fab','u.uid = fab.entity_id');
+
+
+if($Occupation!='')
+{
+
+$query2->leftjoin('field_data_field_occupation','fo','u.uid = fo.entity_id');
+$db_and->condition('fo.field_occupation_value', $Occupation,'=');
+$query2->condition($db_and);
+}
+
+if($name!=''){
+
+   $query2->condition('u.name', '%'. db_like($name) .'%' , 'LIKE');
+   //$query2->condition('u.name', $name,'=');
+}
+
+
+
+if($zip!='') {
+
+$query2->join('field_data_field_user_zip_code', 'zip', 'zip.entity_id = u.uid');
+$query2->condition('zip.field_user_zip_code_value', $zip,'=');
+//$query2->condition($db_and);
+}
+
+if($email!='')
+{
+
+$query2->leftjoin('field_data_field_email_adrs','em','u.uid = em.entity_id');
+//$db_and->condition('u.mail', '%'. db_like($email) .'%' , 'LIKE');
+$query2->condition('em.field_email_adrs_value',$email,'=');
+//$query2->condition($db_and);
+}
+
+if($church!='') //used mysql like
+{
+$query2->leftjoin('field_data_field_if_what_church_','fwhatch','u.uid = fwhatch.entity_id');
+$db_and->condition('fwhatch.field_if_what_church__value', '%'. db_like($church) .'%' , 'LIKE');
+$query2->condition($db_and);
+}
+
+
+if($personality!= '' && $personality!= '0')
+{
+$query2->leftjoin('field_data_field_how_would_you_describe','hwyd','u.uid= hwyd.entity_id');
+$db_and->condition('hwyd.field_how_would_you_describe_tid', $personality,'=');
+$query2->condition($db_and);
+}
+
+
+if($intrest!='' and $intrest!='0')
+{
+$query2->leftjoin('field_data_field_what_are_hobbies_and_', 'fint', 'u.uid= fint.entity_id');
+$db_and->condition('fint.field_what_are_hobbies_and__tid', $intrest,'=');
+$query2->condition($db_and);
+}
+
+if($strugles!='' and $strugles!='0')
+{
+$query2->leftjoin('field_data_field_where_do_face_current_', 'fc', 'u.uid= fc.entity_id');
+$db_and->condition('fc.field_where_do_face_current__tid', $strugles,'=');
+$query2->condition($db_and);
+}
+
+
+if($victory!='' and $victory!='0') {
+$query2->leftjoin('field_data_field_where_have_seen_christ','fwsc','u.uid= fwsc.entity_id');
+$db_and->condition('fwsc.field_where_have_seen_christ_tid', $victory,'=');
+$query2->condition($db_and);
+}
+
+if($age[0]!='') {
+$query2->leftjoin('field_data_field_age','fa','u.uid= fa.entity_id');
+$condition = 'DATEDIFF(CURRENT_DATE, fa.field_age_value) Between (:fid1 * 365.25) and  (:fid2 * 365.25)';
+$query2->where($condition, array(':fid1' => $age[0], ':fid2' => $age[1]));
+}
+
+
+if($mstat!='' and $mstat!='0') {
+$query2->leftjoin('field_data_field_marital_status','ms','u.uid= ms.entity_id');
+$db_and->condition('ms.field_marital_status_value', $mstat,'=');
+$query2->condition($db_and);
+
+}
+
+if($relation!='' and $relation!='0') {
+$query2->leftjoin('field_data_field_how_do_want_to_use_lif','fhw','u.uid= fhw.entity_id');
+$db_and->condition('fhw.field_how_do_want_to_use_lif_tid', $relation,'=');
+$query2->condition($db_and);
+
+}
+
+//field_children_value
+
+
+if($children!='' and $children!='0') {
+$query2->leftjoin('field_data_field_children','fch','u.uid= fch.entity_id');
+$db_and->condition('fch.field_children_value', $children,'=');
+$query2->condition($db_and);
+
+}
+
+
+
+
+
+
+$string = '';
+$key = array();
+$getallcommunity = get_allcommunities_forauser(); // get all communities created/joined
+if(count($getallcommunity) > 0) {
+for($i=0;$i<count($getallcommunity['nids']);$i++) {
+	$key[] = $getallcommunity['nids'][$i];
+	if($i < count($getallcommunity['nids'])-1) {
+	$string .= $key[$i].',';
+	}
+	else {
+	$string .= $key[$i];
+	}
+}
+}
+
+$xy=explode(',',$string);
+$query2->condition('ogm.gid', $xy,'IN');
+$query2->condition('u.uid', $uid,'!=');
+
+
+$results = $query2->execute();
+
+ $rows_count = $results->rowCount();
+//($query2->__toString());
+//print "string".$string.'</br>';
+
+
+}
+else if($prox <=50)
+{
+
+/*testing */
+$inputlat = $_GET['inputlat'];
+
+$inputlng = $_GET['inputlng'];
+
+if($inputlat=='' AND $inputlng=='')
+{
+
+$queryu = db_select('users','u')
+	->condition('uid', $uid, '=' )
+	->fields('u', array('lat','lng','uid'))
+	->execute()
+	->fetchAssoc();
+
+$inputlat = $queryu['lat'];
+$inputlng = $queryu['lng'];
+}
+
+/* testing */
+
+
+
+
+$db_and = db_and();
+$query2 = db_select('users','u')
+
+->groupBy('u.uid')
+->havingCondition('dist', $prox,'<=')
+//->extend('PagerDefault')	// Pager Extender
+	//->limit(5)
+	->fields ('u', array (
+					'uid'
+				))
+
+	->fields ('u', array (
+					'name'
+				))
+
+		->fields ('fab', array (
+					'field_what_do_you_want_to_tell_o_value'
+				));
+
+$expressions = "degrees(acos(sin( radians(u.lat) )* sin( radians($inputlat))
++ cos( radians(u.lat))
+* cos( radians($inputlat))
+* cos( radians(u.lng - $inputlng))
+) ) * 69.09";
+
+$query2->addExpression($expressions,'dist');
+$query2->join('og_membership','ogm','ogm.etid = u.uid');
+$query2->leftJoin('field_data_field_what_do_you_want_to_tell_o','fab','u.uid = fab.entity_id');
+
+if($name!=''){
+
+    $query2->condition('u.name', '%'. db_like($name) .'%' , 'LIKE');
+}
+
+if($zip!='') {
+
+$query2->join('field_data_field_user_zip_code', 'zip', 'zip.entity_id = u.uid');
+$query2->condition('zip.field_user_zip_code_value', $zip,'=');
+//$query2->condition($db_and);
+}
+
+if($Occupation!='')
+{
+
+$query2->leftjoin('field_data_field_occupation','fo','u.uid = fo.entity_id');
+$db_and->condition('fo.field_occupation_value', $Occupation,'=');
+$query2->condition($db_and);
+}
+
+if($intrest!='' and $intrest!='0')
+{
+$query2->leftjoin('field_data_field_what_are_hobbies_and_', 'fint', 'u.uid= fint.entity_id');
+$db_and->condition('fint.field_what_are_hobbies_and__tid', $intrest,'=');
+$query2->condition($db_and);
+}
+
+if($strugles!='' and $strugles!='0')
+{
+$query2->leftjoin('field_data_field_where_do_face_current_', 'fc', 'u.uid= fc.entity_id');
+$db_and->condition('fc.field_where_do_face_current__tid', $strugles,'=');
+$query2->condition($db_and);
+}
+
+
+if($victory!='' and $victory!='0')
+
+{
+$query2->leftjoin('field_data_field_where_have_seen_christ','fwsc','u.uid= fwsc.entity_id');
+$db_and->condition('fwsc.field_where_have_seen_christ_tid', $victory,'=');
+$query2->condition($db_and);
+
+}
+
+
+if($age[0]!='')
+{
+$query2->leftjoin('field_data_field_age','fa','u.uid= fa.entity_id');
+$condition = 'DATEDIFF(CURRENT_DATE, fa.field_age_value) Between (:fid1 * 365.25) and  (:fid2 * 365.25)';
+$query2->where($condition, array(':fid1' => $age[0], ':fid2' => $age[1]));
+}
+
+
+if($mstat!='' and $mstat!='0')
+{
+$query2->leftjoin('field_data_field_marital_status','ms','u.uid= ms.entity_id');
+$db_and->condition('ms.field_marital_status_value', $mstat,'=');
+$query2->condition($db_and);
+
+}
+
+if($relation!='' and $relation!='0')
+
+{
+$query2->leftjoin('field_data_field_how_do_want_to_use_lif','fhw','u.uid= fhw.entity_id');
+$db_and->condition('fhw.field_how_do_want_to_use_lif_tid', $relation,'=');
+$query2->condition($db_and);
+
+}
+
+//field_children_value
+
+
+if($children!='' and $children!='0')
+
+{
+$query2->leftjoin('field_data_field_children','fch','u.uid= fch.entity_id');
+$db_and->condition('fch.field_children_value', $children,'=');
+$query2->condition($db_and);
+
+}
+
+
+if($email!='')
+{
+    $query2->leftjoin('field_data_field_email_adrs','em','u.uid = em.entity_id');
+//$db_and->condition('u.mail', '%'. db_like($email) .'%' , 'LIKE');
+$query2->condition('em.field_email_adrs_value',$email);
+//$query2->condition($db_and);
+}
+
+if($church!='')
+{
+$query2->leftjoin('field_data_field_if_what_church_','fwhatch','u.uid	= fwhatch.entity_id');
+$db_and->condition('fwhatch.field_if_what_church__value', '%'. db_like($church) .'%' , 'LIKE');
+$query2->condition($db_and);
+}
+
+if($personality!= '' && $personality!= '0')
+{
+$query2->leftjoin('field_data_field_how_would_you_describe','hwyd','u.uid= hwyd.entity_id');
+$db_and->condition('hwyd.field_how_would_you_describe_tid', $personality,'=');
+$query2->condition($db_and);
+}
+
+$string = '';
+$key = array();
+$getallcommunity = get_allcommunities_forauser(); // get all communities created/joined
+if(count($getallcommunity) > 0) {
+for($i=0;$i<count($getallcommunity['nids']);$i++) {
+	$key[] = $getallcommunity['nids'][$i];
+	if($i < count($getallcommunity['nids'])-1) {
+	$string .= $key[$i].',';
+	}
+	else {
+	$string .= $key[$i];
+	}
+}
+}
+//echo $uid;
+
+$xyzx=explode(',',$string);
+$query2->condition('ogm.gid', $xyzx,'IN');
+$query2->condition('u.uid', $uid,'!=');
+
+//print_r($xyzx);
+//echo ($query2->__toString());
+//die();
+$results = $query2->execute();
+$rows_count = $results->rowCount();
+} 
+else if($prox >= 51)
+{
+
+/*testing */
+$inputlat = $_GET['inputlat'];
+
+$inputlng = $_GET['inputlng'];
+
+if($inputlat=='' AND $inputlng=='')
+{
+
+$queryu = db_select('users','u')
+	->condition('uid', $uid, '=' )
+	->fields('u', array('lat','lng','uid'))
+	->execute()
+	->fetchAssoc();
+
+$inputlat = $queryu['lat'];
+$inputlng = $queryu['lng'];
+}
+
+/* testing */
+
+
+
+
+$db_and = db_and();
+$query2 = db_select('users','u')
+
+->groupBy('u.uid')
+->havingCondition('dist', $prox,'>=')
+//->extend('PagerDefault')	// Pager Extender
+	//->limit(5)
+	->fields ('u', array (
+					'uid'
+				))
+
+	->fields ('u', array (
+					'name'
+				))
+
+		->fields ('fab', array (
+					'field_what_do_you_want_to_tell_o_value'
+				));
+
+$expressions = "degrees(acos(sin( radians(u.lat) )* sin( radians($inputlat))
++ cos( radians(u.lat))
+* cos( radians($inputlat))
+* cos( radians(u.lng - $inputlng))
+) ) * 69.09";
+
+$query2->addExpression($expressions,'dist');
+$query2->join('og_membership','ogm','ogm.etid = u.uid');
+$query2->leftJoin('field_data_field_what_do_you_want_to_tell_o','fab','u.uid = fab.entity_id');
+
+if($name!=''){
+
+    $query2->condition('u.name', '%'. db_like($name) .'%' , 'LIKE');
+}
+
+if($zip!='') {
+
+$query2->join('field_data_field_user_zip_code', 'zip', 'zip.entity_id = u.uid');
+$query2->condition('zip.field_user_zip_code_value', $zip,'=');
+//$query2->condition($db_and);
+}
+
+if($Occupation!='')
+{
+
+$query2->leftjoin('field_data_field_occupation','fo','u.uid = fo.entity_id');
+$db_and->condition('fo.field_occupation_value', $Occupation,'=');
+$query2->condition($db_and);
+}
+
+if($intrest!='' and $intrest!='0')
+{
+$query2->leftjoin('field_data_field_what_are_hobbies_and_', 'fint', 'u.uid= fint.entity_id');
+$db_and->condition('fint.field_what_are_hobbies_and__tid', $intrest,'=');
+$query2->condition($db_and);
+}
+
+if($strugles!='' and $strugles!='0')
+{
+$query2->leftjoin('field_data_field_where_do_face_current_', 'fc', 'u.uid= fc.entity_id');
+$db_and->condition('fc.field_where_do_face_current__tid', $strugles,'=');
+$query2->condition($db_and);
+}
+
+
+if($victory!='' and $victory!='0')
+
+{
+$query2->leftjoin('field_data_field_where_have_seen_christ','fwsc','u.uid= fwsc.entity_id');
+$db_and->condition('fwsc.field_where_have_seen_christ_tid', $victory,'=');
+$query2->condition($db_and);
+
+}
+
+
+if($age[0]!='')
+{
+$query2->leftjoin('field_data_field_age','fa','u.uid= fa.entity_id');
+$condition = 'DATEDIFF(CURRENT_DATE, fa.field_age_value) Between (:fid1 * 365.25) and  (:fid2 * 365.25)';
+$query2->where($condition, array(':fid1' => $age[0], ':fid2' => $age[1]));
+}
+
+
+if($mstat!='' and $mstat!='0')
+{
+$query2->leftjoin('field_data_field_marital_status','ms','u.uid= ms.entity_id');
+$db_and->condition('ms.field_marital_status_value', $mstat,'=');
+$query2->condition($db_and);
+
+}
+
+if($relation!='' and $relation!='0')
+
+{
+$query2->leftjoin('field_data_field_how_do_want_to_use_lif','fhw','u.uid= fhw.entity_id');
+$db_and->condition('fhw.field_how_do_want_to_use_lif_tid', $relation,'=');
+$query2->condition($db_and);
+
+}
+
+//field_children_value
+
+
+if($children!='' and $children!='0')
+
+{
+$query2->leftjoin('field_data_field_children','fch','u.uid= fch.entity_id');
+$db_and->condition('fch.field_children_value', $children,'=');
+$query2->condition($db_and);
+
+}
+
+
+if($email!='')
+{
+    $query2->leftjoin('field_data_field_email_adrs','em','u.uid = em.entity_id');
+//$db_and->condition('u.mail', '%'. db_like($email) .'%' , 'LIKE');
+$query2->condition('em.field_email_adrs_value',$email);
+//$query2->condition($db_and);
+}
+
+if($church!='')
+{
+$query2->leftjoin('field_data_field_if_what_church_','fwhatch','u.uid	= fwhatch.entity_id');
+$db_and->condition('fwhatch.field_if_what_church__value', '%'. db_like($church) .'%' , 'LIKE');
+$query2->condition($db_and);
+}
+
+if($personality!= '' && $personality!= '0')
+{
+$query2->leftjoin('field_data_field_how_would_you_describe','hwyd','u.uid= hwyd.entity_id');
+$db_and->condition('hwyd.field_how_would_you_describe_tid', $personality,'=');
+$query2->condition($db_and);
+}
+
+$string = '';
+$key = array();
+$getallcommunity = get_allcommunities_forauser(); // get all communities created/joined
+if(count($getallcommunity) > 0) {
+for($i=0;$i<count($getallcommunity['nids']);$i++) {
+	$key[] = $getallcommunity['nids'][$i];
+	if($i < count($getallcommunity['nids'])-1) {
+	$string .= $key[$i].',';
+	}
+	else {
+	$string .= $key[$i];
+	}
+}
+}
+//echo $uid;
+
+$xyzx=explode(',',$string);
+$query2->condition('ogm.gid', $xyzx,'IN');
+$query2->condition('u.uid', $uid,'!=');
+
+//print_r($xyzx);
+//echo ($query2->__toString());
+//die();
+$results = $query2->execute();
+$rows_count = $results->rowCount();
+} 
+return  $rows_count;
+}

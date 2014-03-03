@@ -1,0 +1,52 @@
+<?php
+
+/**
+ * Implements hook_schema().
+ */
+function node_viewcount_schema() {  
+  $schema = array();
+  
+  $schema['node_viewcount'] = array(
+    'description' => 'The count views of node for every user.',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The unique ID.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'nid' => array(
+        'description' => 'The node ID.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'uid' => array(
+        'description' => 'The user ID who view of node.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'status' => array(
+        'description' => 'Status 0 means first time author views this node 1 means not first time',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0, 
+      ),
+      'timestamp' => array(
+        'description' => 'The Unix timestamp when the node was view.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0, 
+      ),
+    ),
+    'primary key' => array('id'),     
+    'indexes' => array(
+      'nid_uid' => array('uid', 'nid'),
+      'timestamp' => array('timestamp'),  
+    ),  
+  );
+  
+  return $schema;
+}
