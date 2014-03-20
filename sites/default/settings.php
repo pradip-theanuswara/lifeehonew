@@ -1,5 +1,5 @@
 <?php
-
+ini_set('apc.cache_by_default','Off');
 /**
  * @file
  * Drupal site-specific configuration file.

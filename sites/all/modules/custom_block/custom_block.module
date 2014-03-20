@@ -156,8 +156,9 @@ else{
 		      $block['content'] =  '<div class="no_cover"></div>';
 		      } // IF ISSET END
           $block['content'] =  '<div><img src="'.$cover_image.'" width="968px" height="178px" alt=" "/></div>';
-      } // If arg(0) node check END
-}
+      } 
+}// If arg(0) node check END
+
 
 
       else if((arg(0) == 'node') && (arg(1) == '108')) { // here 108 is the node id of community roster page.
@@ -228,7 +229,6 @@ $k("#fb_cover_image").fbGetcover("'.$fbuid.'");
 	}); </script>';
 }    
           }
-		
 		  // Elseif arg(0) == 'user' check END
           
       break;
@@ -775,7 +775,7 @@ $user_link_based_on_relation = check_allready_relation($user->uid,$alert_from); 
                 }
                 if($record['alerttext']=='connect in accountability with') {
                  
-                 $block['content'] .= '<li class="request_wrapper"><div class="uralert_text"><a href="'.$user_link_based_on_relation.'">'.$username_accept.'</a>'.t('has accepted your invitation to join accountability with him ').t('- go to User Dashboard').' <span class="alerttime">'.$alert_time.'</span></div>';
+                 $block['content'] .= '<li class="request_wrapper"><div class="uralert_text"><a href="'.$user_link_based_on_relation.'">'.$username_accept.'</a>'.t(' has accepted your invitation to join accountability with him ').t('- go to User Dashboard').' <span class="alerttime">'.$alert_time.'</span></div>';
 
                 $block['content'] .= '<div class="uralert_buttons">'.l(t('Remove'),'removealert/'.$alert_id,array('attributes' => array('class' => 'relationship_accept')));
                 }else {
