@@ -734,7 +734,7 @@ $db_and = db_and();
 
 	->groupBy('u.uid')
 	->extend('PagerDefault')	// Pager Extender
-	->limit(5)			// 10 results per page
+	->limit(10)			// 10 results per page
 	->fields ('u', array (
 					'uid'
 				))
@@ -891,7 +891,7 @@ $db_and = db_and();
 	->groupBy('u.uid')
         ->havingCondition('dist', $prox,'<=')
 	->extend('PagerDefault')	// Pager Extender
-	->limit(5)			// 10 results per page
+	->limit(10)			// 10 results per page
 	->fields ('u', array (
 					'uid'
 				))
@@ -1207,7 +1207,7 @@ $db_and = db_and();
 	->groupBy('u.uid')
         ->havingCondition('dist', $prox,'>=')
 	->extend('PagerDefault')	// Pager Extender
-	->limit(5)			// 10 results per page
+	->limit(10)			// 10 results per page
 	->fields ('u', array (
 					'uid'
 				))
@@ -1557,7 +1557,7 @@ $link1 =  l($name[0], 'user/'. $records->uid,array('attributes' => array('class'
 $link2 =  l($name[1], 'user/'. $records->uid,array('attributes' => array('class' => 'username_link')));
 $link3 = $link1.'</ br>'.$link2;
 }
-$rowss[] = array('data' => array('<a class="useravatar" href="'.drupal_get_path_alias('user/'. $records->uid).'">'.$fb_avatar.$link3.'</a>'.t('ABOUT ME: ').substr($records->field_what_do_you_want_to_tell_o_value,0,280).'......'.'' )
+$rowss[] = array('data' => array('<div class="search-view-field"><a class="useravatar" href="'.drupal_get_path_alias('user/'. $records->uid).'">'.$fb_avatar.$link3.'</a></div><div class="search-view-desc"><span class="search_abt_wrap">'.t('ABOUT ME: ').substr($records->field_what_do_you_want_to_tell_o_value,0,280).'......'.'</span></div>' )
 	);
         
     //    $rowss[] = array(

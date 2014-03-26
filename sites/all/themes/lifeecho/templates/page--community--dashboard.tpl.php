@@ -90,6 +90,9 @@
 	<div id="MPOuter">
 	<div class="header"></div>
 <div id="menu">
+<?php global $base_url;
+$beta =  "/sites/all/themes/lifeecho/beta.png";
+?>
         <?php if ($logo): ?>
 
       <a href="#" title="beta" rel="home" id="logo">

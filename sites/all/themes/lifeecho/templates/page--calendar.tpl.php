@@ -126,7 +126,7 @@ $beta =  "/sites/all/themes/lifeecho/beta.png";
         )); ?>
       </li> <!-- /#main-menu -->
     <?php endif; ?>
-	<?php
+<?php
 if(function_exists('get_allcommunities_forauser')) {
 $hascommunity_count = 0;
 $hascommunity_count = count(get_allcommunities_forauser());
@@ -230,7 +230,7 @@ if(count($community_array) > 0) {
 
                                 print l(t('USER DASHBOARD'),'user', array('attributes' => array('class' => 'dashboard-link'))).'</br>';
 
-if($community_count !='' || $community_count_admin > 0) {  // check logged user has a community
+if($community_count != '' || $community_count_admin > 0) {// check logged user has a community
 print l(t('ADMIN DASHBOARD'),'community/dashboard');
 }
 
@@ -239,7 +239,7 @@ else {
 
 print l(t('USER DASHBOARD'),'user').'</br>';
 
-if($community_count !='' || $community_count_admin > 0) {  // check logged user has a community
+if($community_count != '' || $community_count_admin > 0) { // check logged user has a community
 echo '<a class="dashboard-link" href="'.url('community/dashboard').'" >'.t('ADMIN DASHBOARD').'</a>';
 }
 

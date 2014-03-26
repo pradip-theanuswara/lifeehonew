@@ -75,7 +75,10 @@ unset($_SESSION['messages']['warning']);
 if(arg(0) == 'node' && arg(1) == 'add' && arg(2) == 'community-content') {
 $variables['title'] = 'DISCIPLESHIP 101';
 }
-
+if(arg(0) == 'searches') {
+//$variables['title'] = 'User Search';
+drupal_set_title('User Search Form');
+}
 // to remove menu and left sidebar jquery conflict we added below jquery migrate file.
 if(arg(0) == 'dplan' && is_numeric(arg(1))) {
 drupal_add_js(drupal_get_path('theme','lifeecho').'/js/jquery-migrate-1.0.0.js', 'file');

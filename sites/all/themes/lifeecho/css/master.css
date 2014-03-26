@@ -4188,7 +4188,7 @@ padding-top:30px;
 
 #view-potential-contacts .item-list ul.pager li.first {
     margin-left: -104px;
-    margin-top: -68px;
+    margin-top: -56px;
     position: absolute;
 }
 
@@ -4503,7 +4503,9 @@ margin-top: 30px;
 background-color:#FFF;
 word-break: break-word;
 }
-
+#joincommunity #table-container table tbody tr.even td,tr.odd td{
+padding-bottom:5px;
+}
 .tcount {
 clear:both;
 border-style: none;
@@ -4873,3 +4875,19 @@ blockquote:before, blockquote:after {
 		width:750px !important;
 		float:right;
 	}
+.search-view-field{
+	width:85px;
+	text-align:left;
+	float:left;
+}
+.search-view-desc{
+	float:right;
+	width:328px;
+}
+.search_abt_wrap{
+	color: #333333;
+    font-family: Segoe UI;
+    font-size: 14px;
+    padding-bottom: 20px;
+    word-wrap: break-word;
+}	

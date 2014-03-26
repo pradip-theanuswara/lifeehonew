@@ -685,7 +685,7 @@ $db_and = db_and();
 ->groupBy('u.uid')
 
 ->extend('PagerDefault')	// Pager Extender
-	->limit(5)		// 10 results per page
+	->limit(10)		// 10 results per page
 	->fields ('u', array (
 					'uid'
 				))
@@ -1540,7 +1540,7 @@ $link2 =  l($name[1], 'user/'. $records->uid,array('attributes' => array('class'
 $link3 = $link1.'</ br>'.$link2;
 }
 $rowss[] = array(
-		'data' => array('<a class="useravatar" href="'.drupal_get_path_alias('user/'. $records->uid).'">'.$fb_avatar.'</a>'.$link3.'<b>'.t('ABOUT ME: ').'</b>'.substr($records->field_what_do_you_want_to_tell_o_value,0,280).'......'.'' )
+		'data' => array('<div class="search-view-field"><a class="useravatar" href="'.drupal_get_path_alias('user/'. $records->uid).'">'.$fb_avatar.'</a>'.$link3.'</div><div class="search-view-desc"><span class="search_abt_wrap">'.t('ABOUT ME: ').'</span><span class="search_abt_wrap">'.substr($records->field_what_do_you_want_to_tell_o_value,0,280).'......'.'</span></div>' )
 		);
  }
 
