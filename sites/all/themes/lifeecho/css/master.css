@@ -4118,7 +4118,7 @@ color:#CC6600;
     border: 1px solid;
     padding: 10px;
     width: 650px;
-    height:107px;
+    height:115px;
 }
 
 #roster_community_info #community_logo {
@@ -4139,12 +4139,13 @@ color:#CC6600;
     padding: 8px 0 0 5px;
     text-align: left;
     width: 204px;
+	height:110px
 }
 
 #roster_community_info #community_about {
     border: 1px solid;
     float: left;
-    height: 102px;
+    height: 110px;
     margin-left: 11px;
     padding: 6px 0 0 6px;
     text-align: left;
@@ -4890,4 +4891,10 @@ blockquote:before, blockquote:after {
     font-size: 14px;
     padding-bottom: 20px;
     word-wrap: break-word;
+}
+.usermatch_container .pager-last{
+	display:none !important;
 }	
+.usermatch_container .pager-first{
+	display:none !important;
+}
