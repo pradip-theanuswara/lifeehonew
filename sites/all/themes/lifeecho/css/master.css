@@ -3740,6 +3740,7 @@ min-height:283px;
 
 .second #tabs {
     text-align: left;
+	word-break:break-all;
 }
 
 #matches_outside .view-matches-outside-of-your-community .view-content,.view-matches-outside-of-your-community-disciplee .view-content, .view-matches-outside-of-your-community-discipler .view-content {
@@ -4118,7 +4119,7 @@ color:#CC6600;
     border: 1px solid;
     padding: 10px;
     width: 650px;
-    height:115px;
+    height:107px;
 }
 
 #roster_community_info #community_logo {
@@ -4139,13 +4140,12 @@ color:#CC6600;
     padding: 8px 0 0 5px;
     text-align: left;
     width: 204px;
-	height:110px
 }
 
 #roster_community_info #community_about {
     border: 1px solid;
     float: left;
-    height: 110px;
+    height: 102px;
     margin-left: 11px;
     padding: 6px 0 0 6px;
     text-align: left;
@@ -4189,7 +4189,7 @@ padding-top:30px;
 
 #view-potential-contacts .item-list ul.pager li.first {
     margin-left: -104px;
-    margin-top: -56px;
+    margin-top: -68px;
     position: absolute;
 }
 
@@ -4504,9 +4504,7 @@ margin-top: 30px;
 background-color:#FFF;
 word-break: break-word;
 }
-#joincommunity #table-container table tbody tr.even td,tr.odd td{
-padding-bottom:5px;
-}
+
 .tcount {
 clear:both;
 border-style: none;
@@ -4876,25 +4874,3 @@ blockquote:before, blockquote:after {
 		width:750px !important;
 		float:right;
 	}
-.search-view-field{
-	width:85px;
-	text-align:left;
-	float:left;
-}
-.search-view-desc{
-	float:right;
-	width:328px;
-}
-.search_abt_wrap{
-	color: #333333;
-    font-family: Segoe UI;
-    font-size: 14px;
-    padding-bottom: 20px;
-    word-wrap: break-word;
-}
-.usermatch_container .pager-last{
-	display:none !important;
-}	
-.usermatch_container .pager-first{
-	display:none !important;
-}

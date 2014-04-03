@@ -47,7 +47,7 @@ text-align: center;
 
 <div id="MPOuterMost">
 <div id="MPOuter">
-<div class="header"></div>
+<!--<div class="header">upload</div>-->
 <div id="menu">
 
 <?php global $base_url;
