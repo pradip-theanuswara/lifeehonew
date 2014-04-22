@@ -120,6 +120,9 @@
         ?>
     </div>
     <div class="communityfield_chktxt">
+	<?php if(arg(2) == 'edit') { ?>
+		<input type="hidden" id="edit_term" name="edit_term" value="1" />
+	<?php }?>
         <?php
         global $user;
  print t('I , ' . $user->name . ' and my organization, agree with and believe the Statement of Faith above.  ');
@@ -144,6 +147,7 @@
     </div>
     <div class="comm_notice"><?php print t('(Scroll to the bottom to enable checkbox)</b>') ?></div>
     <div class="communityfield_chkbox communityfield_row"><?php print render($form['field_accept']); ?>
+	
 </div>
     <div class="communityfield_chktxt">
         <?php

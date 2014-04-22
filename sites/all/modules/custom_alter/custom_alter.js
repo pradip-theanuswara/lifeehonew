@@ -81,13 +81,12 @@ $('#edit-field-beliveaccept-und').attr("disabled", false);
 
 $('#edit-field_beliveaccept-und').attr("disabled", true);
 
-if($('#edit-field_beliveaccept-und').attr('checked')) {
-$('#edit-field_beliveaccept-und').attr("disabled", false);
+
+if($('#edit_term').val() =='1')
+{
+	$('#edit-field_beliveaccept-und').attr("disabled", false);
 }
-else {
-//this script used to chek the place holder valu action in the create community page
-$('#edit-field-beliveaccept-und').attr("disabled", true);
-}
+
 
 
 $('#termsscroller').scroll(function() {
