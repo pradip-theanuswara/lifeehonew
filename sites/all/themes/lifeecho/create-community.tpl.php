@@ -24,13 +24,13 @@
         <?php
         print render($form['field_address']);?><span style="color:red;position:absolute;margin-top:-50px;margin-left:360px;">*</span>
 <?php
-        print render($form['field_city']);?><span style="color:red;position:absolute;margin-top:0px;margin-left:-10px;">*</span>
+        print render($form['field_city']);?><span style="color:red;display:block;float:left;margin-top:0px;margin-left:-10px;">*</span>
 <?php
 
-        print render($form['field_state']);?><span style="color:red;position:absolute;margin-top:0px;">*</span>
+        print render($form['field_state']);?><span style="color:red;display:block;float:left;margin-top:0px;">*</span>
 <?php
 
-        print render($form['field_zip']);?><span style="color:red;position:absolute;margin-top:-45px;margin-left:360px;">*</span>
+        print render($form['field_zip']);?><span style="color:red;display:block;float:left;margin-top:-45px;margin-left:363px;">*</span>
 <?php
 
         print render($form['field_phone_number']);?><span style="color:red;position:absolute;margin-top:-50px;margin-left:360px;">*</span>
