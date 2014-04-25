@@ -231,20 +231,20 @@ $("#edit-field-what-is-your-role-with-thi-und-0-value").attr('maxlength','50');
           $( "#terms_dialog" ).dialog();
         });
         
-        $("#edit-field-if-what-church-und-0-value").keyup(function() {
+        /*$("#edit-field-if-what-church-und-0-value").keyup(function() {
             var text = $(this).val();
 	    $(this).val(text.replace(/[^\w\d\s\:\.\,\_\-]+/,"")); 
-        });
+        });*/
         
         /*$("#edit-field-list-christian-organ-und-0-value").keyup(function() {
             var text = $(this).val();
 	    $(this).val(text.replace(/[^\w\d\s\:\.\,\_\-]+/,"")); 
         });*/
         
-        $("#edit-field-what-is-your-personal-stat-und-0-value").keyup(function() {
+        /*$("#edit-field-what-is-your-personal-stat-und-0-value").keyup(function() {
             var text = $(this).val();
 	    $(this).val(text.replace(/[^\w\d\s\:\.\,\_\-]+/,"")); 
-        });     
+        });    
         
         $("#edit-field-what-do-you-want-to-tell-o-und-0-value").keyup(function() {
             var text = $(this).val();
@@ -269,7 +269,7 @@ $("#edit-field-what-is-your-role-with-thi-und-0-value").attr('maxlength','50');
         $("#edit-field-city-und-0-value").keyup(function() {
             var text = $(this).val();
 	    $(this).val(text.replace(/[^\w\d\s\:\.\,\_\-]+/,""));
-        });
+        });*/ 
         
       /*  $("#edit-field-what-is-your-role-with-thi-und-0-value").keyup(function() {
             var text = $(this).val();
