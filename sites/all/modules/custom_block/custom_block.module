@@ -788,7 +788,7 @@ $user_link_based_on_relation = check_allready_relation($user->uid,$alert_from); 
                 $block['content'] .= '<div class="uralert_buttons">'.l(t('Remove'),'removealert/'.$alert_id,array('attributes' => array('class' => 'relationship_accept')));
 */
                     }
-    echo $username_accept;    
+    //echo $username_accept;    
                 
 $block['content'] .= '</div></li>';
         } // if end
