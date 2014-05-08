@@ -609,6 +609,26 @@ $adminrole = user_has_community_adminrole(); // check user has admin role in any
     }
 } // END IF discipleship-101
 
+if((arg(0) == 'starteddplan')) { // check for discipleship 101 page
+
+$adminrole = user_has_community_adminrole(); // check user has admin role in any community
+
+    //if($adminrole == 0 && get_logged_user_community_ID() == NULL) {
+
+	// remove community item from menu.
+	unset($vars['page']['userprofilesidebar']['menu_menu-community-admin-dashboard-m']['2797']);
+
+	// remove invite item from menu.
+	unset($vars['page']['userprofilesidebar']['menu_menu-community-admin-dashboard-m'][2755]);
+
+	// remove post message/video item from menu.
+	unset($vars['page']['userprofilesidebar']['menu_menu-community-admin-dashboard-m'][2756]);
+
+	// remove roster page item from menu.
+	unset($vars['page']['userprofilesidebar']['menu_menu-community-admin-dashboard-m'][2757]);
+
+   // }
+}
 
 if(((get_logged_user_community_ID() == NULL) && (user_has_community_adminrole() < 0 ))) {
 // remove community item from menu
