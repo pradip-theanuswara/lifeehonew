@@ -456,14 +456,17 @@ $query =   db_select('lifeecho_alerts', 'la')
 			}
 
 			if(arg(0) == 'user') {
-			
+			print_r($gids);
+			echo $user_count_in_community;
 $query->condition('alerttype',array('dplan','dship-video','dship-message','first-video-alert','dship-share-video','general-alert','ur','ur-decline','ur-leave','ur-accept','og-accept','og-decline','ur-invalid-request'),'IN');
             if(count($gids) > 0 && $user_count_in_community != 1) { 
 			     $query->condition('alertto',$gids,'IN');
-				 //echo $gids;
-				 //print_r($query);
+				 //print_r($gids);
+				 
 			 }
-			 $query->condition('alertto',$uid);
+			 else{
+				$query->condition('alertto',$user->uid);
+			}
 /*			 		
 			$query->condition('alerttype',array('first-video-alert','dship-share-video','general-alert','ur','ur-decline','ur-leave','ur-accept','og-accept','og-decline','ur-invalid-request'),'IN');
 			$query->condition('alertto', $user->uid) ;
@@ -472,7 +475,6 @@ $query->condition('alerttype',array('dplan','dship-video','dship-message','first
 
 			if( arg(1) == 'dashboard') {
 			$query->condition('alerttype',array('og','dplan','dship-video','dship-message','og-mdelete','invite_members'),'IN');
-
 			if(count($gids) > 0 && $user_count_in_community != 1) { 
 			     $query->condition('alertto',$gids,'IN');
 			 }
@@ -481,6 +483,7 @@ $query->condition('alerttype',array('dplan','dship-video','dship-message','first
 
               $query->orderBy('alerttime', 'DESC'); //ORDER BY created
               $result = $query->execute();
+			  
 			//print $query->__toString();
 			 $row_count = $result->rowCount();
 			 
@@ -736,6 +739,7 @@ $block['content'] .= '</div></li>';
 else if($alert_type == 'dship-message') {
 
 // check alert message have 'hide' status for logged user & check user is member of community.
+
 
 if(get_dplanalertstatus($alert_id,$user->uid) == 0 && check_user_isa_member($user->uid,$alert_to) <> 0) {
 			// get posted message info
