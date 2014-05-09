@@ -456,8 +456,8 @@ $query =   db_select('lifeecho_alerts', 'la')
 			}
 
 			if(arg(0) == 'user') {
-			print_r($gids);
-			echo $user_count_in_community;
+			
+			
 $query->condition('alerttype',array('dplan','dship-video','dship-message','first-video-alert','dship-share-video','general-alert','ur','ur-decline','ur-leave','ur-accept','og-accept','og-decline','ur-invalid-request'),'IN');
             if(count($gids) > 0 && $user_count_in_community != 1) { 
 			     $query->condition('alertto',$gids,'IN');
@@ -487,6 +487,7 @@ $query->condition('alerttype',array('dplan','dship-video','dship-message','first
 			//print $query->__toString();
 			 $row_count = $result->rowCount();
 			 
+			 
 //die;
 if($row_count > 0) {
     $block['content'] = '<div class="alert_head">'.t('Alerts:').'</div>';
@@ -503,7 +504,7 @@ if($row_count > 0) {
           $alert_to = $record['alertto']; // group id
  		 $alert_from = $record['alertfrom']; // user id
 		$alert_type = $record['alerttype']; // Alert type
-		//echo $alert_type;
+		//echo $alert_type."   ";
 		 $alert_id = $record['alertid']; // Alert Id
 		// $alert_time = date('d M Y h:i a', $record['alerttime']); // Alert Time
 		  $alert_time ='';
@@ -557,9 +558,12 @@ $block['content'] .= '</li>';
 }
 
 else if($alert_type == 'invite_members' && $user_count_in_community == 1) {
-$block['content'] .= '<li>'.$record['alerttext'].'<span class="alerttime">'.$alert_time.'</span>';
-//$block['content'] .= l(t('Remove'),'removealert/'.$alert_id,array('attributes' => array('class' => 'relationship_accept')));
-$block['content'] .= '</li>';
+
+if($alert_to==$uid){
+	$block['content'] .= '<li>'.$record['alerttext'].'<span class="alerttime">'.$alert_time.'</span>';
+	//$block['content'] .= l(t('Remove'),'removealert/'.$alert_id,array('attributes' => array('class' => 'relationship_accept')));
+	$block['content'] .= '</li>';
+}
 }
 
 

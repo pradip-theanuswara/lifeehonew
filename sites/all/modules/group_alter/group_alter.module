@@ -143,7 +143,8 @@ function custom_og_subscribetest($gid) {
   if ($redirect) {
     drupal_set_message($message, 'warning');
     $url = entity_uri($entity_type, $entity);
-    drupal_goto($url['path'], $url['options']);
+	$options = array('query' => array('sparam' => '1'));
+    drupal_goto($url['path'], $options);
   }
   if (og_user_access($entity_type, $id, 'subscribe', $user) || og_user_access($entity_type, $id, 'subscribe without approval', $user)) {
 
@@ -173,7 +174,8 @@ function custom_og_subscribetest($gid) {
   $redirect = TRUE;
 
 drupal_set_message(t('Request will be sent to the community admin for approval, You will be notified via dashboard alerts on approval'),'status');
-  drupal_goto('node/'.$gid);
+$options = array('query' => array('sparam' => '1'));
+  drupal_goto('node/'.$gid,$options);
   }
 }
 
