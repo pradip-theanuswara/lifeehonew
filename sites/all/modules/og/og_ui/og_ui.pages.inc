@@ -197,7 +197,7 @@ function og_ui_confirm_unsubscribe($form, &$form_state, $group_type, $group) {
   $label = entity_label($group_type, $group);
   $url = entity_uri($group_type, $group);
   $url=$url.'?sparam=1';
-  return confirm_form($form, t('Are you sure you want to unsubscribe from the group %title?', array('%title' => $url)), $url, NULL, t('Remove'), t('Cancel'));
+  return confirm_form($form, t('Are you sure you want to unsubscribe from the group %title?', array('%title' => $label)), $url, NULL, t('Remove'), t('Cancel'));
 }
 
 /**
