@@ -724,12 +724,22 @@ function custom_alter_node_presave($node) {
   $result = $query->execute();
   $results = $result->fetchAssoc();
   $node_count = $results['ncount'];
+  
   if($node_count == 1 && arg(1) == 'add') {
       drupal_set_message(t('Only one Community per member is allowed'), 'error');
       drupal_goto('node/add/community-lifeecho');
   }
 	else{
+		$query2 = db_select('lifeecho_alerts', 'lf')
+		->fields('lf', array('alertid'))
+		->condition('lf.alerttype', 'invite_members')
+		->condition('lf.alertto',$user->uid);
+		$query2->addExpression('COUNT(lf.alertid)', 'alertcount');
+		$result2 = $query2->execute();
+		$results2 = $result2->fetchAssoc();
+		$alert_count = $results2['alertcount'];
 		
+		if($alert_count<1){
 		db_insert('lifeecho_alerts')
             ->fields(array(
             'alerttype' => 'invite_members',
@@ -743,7 +753,9 @@ function custom_alter_node_presave($node) {
             ))
             ->execute();
 		
-		}  
+		}
+		
+		}
   
   }
 }
@@ -1533,7 +1545,7 @@ $query->where[1]['conditions'][4]['value'] = $nid;
    // $query->groupBy("users.uid");
 
 	}
-	echo $row_count;
+	//echo $row_count;
 }
 
 // Available accountability block on lifeecho-community node page.
