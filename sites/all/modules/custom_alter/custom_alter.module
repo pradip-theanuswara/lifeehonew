@@ -270,6 +270,7 @@ $form['field_youtube_record_response']['#access'] = TRUE; // field used for yout
 
 	if(check_miniprofile_status() == FALSE ) { // check for firsttime profile edit
 	$form['field_last_step_please_accept_th']['und']['#default_value'][0] = 0;
+	$form['field_marital_status']['#access'] = FALSE;
 	}
 
 // if(isset($form['field_last_step_please_accept_th'])) {
