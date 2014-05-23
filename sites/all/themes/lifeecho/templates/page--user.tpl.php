@@ -160,7 +160,7 @@ $community_count = get_logged_user_community_ID();
 <li class="menu-2767 menuparent  menu-path-front   even home"><a title="Create" <?php if(check_editprofile_status() != 2 ) { ?>style="background-position: center top;" <?php } ?>><?php print t('Create'); ?></a><ul><li class="menu-2771 menu-path-user  first   odd  "><a href="<?php echo url('user/'.$user->uid.'/edit'); ?>" title="Complete profile"><?php print t('Complete Profile'); ?></a></li>
 <li class="menu-2772 menu-path-front   even   last "><a href="<?php echo url('user/'.$user->uid.'/edit'); ?>" title="Edit Profile"><?php print t('Edit Profile'); ?></a></li>
 </ul></li>
-<li class="menu-2768 menuparent  menu-path-front  first   odd  "><a title="Connect" <?php if(count(get_logged_user_joined_community_ID()) == 0) { ?>style="background-position: center top;" <?php } ?>><?php print t('Connect'); ?></a><ul>
+<li class="menu-2768 menuparent  menu-path-front  first   odd  "><a title="Connect" <?php if((count(get_logged_user_joined_community_ID()) == 0) && (check_editprofile_status() == 2)) { ?>style="background-position: center top;" <?php } ?>><?php print t('Connect'); ?></a><ul>
 <?php if($hascommunity_count > 0) { // check logged user has a community */ ?>
 <li class="menu-2773 menu-path-community-dashboard  first odd"><a href="#" title="My Community"><?php print t('My Community'); ?></a></li>
 <ul id="child-community-display" style="display: block; visibility:visible">
