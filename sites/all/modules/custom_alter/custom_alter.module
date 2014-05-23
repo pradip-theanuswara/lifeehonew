@@ -926,6 +926,16 @@ $query = db_insert('lifeecho_login_stats')
 $query->execute();
 
 }
+if($count_value == 1){
+
+	$dbid = db_update('lifeecho_login_stats')
+	->fields(array(
+	'profile_edit_status' => 2,
+	'changedtime' => REQUEST_TIME,
+ ))
+->condition('uid',$user->uid)
+->execute();
+}
 
 // field_youtube_record_value
     drupal_goto('user');
@@ -2024,6 +2034,15 @@ $result = $query->execute();
 return $result->fetchField(0);
 }
 
+function check_editprofile_status() {
+global $user;
+$query = db_select('lifeecho_login_stats','lls')
+	 ->fields('lls',array('profile_edit_status'))
+	 ->condition('lls.profile_edit_status',2)
+	 ->condition('lls.uid',$user->uid);
+$result = $query->execute();
+return $result->fetchField(0);
+}
 
 /**
  * Implements hook_og_membership_delete().
