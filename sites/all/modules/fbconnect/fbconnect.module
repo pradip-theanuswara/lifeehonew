@@ -1005,7 +1005,7 @@ function theme_fbconnect_login_button($variables) {
   if ($op == 'login') {
     $url = url('fbconnect/register/create');
     $title = t('Hello %name', array('%name' => $user_profile['name']));
-    $desc = t('Login to this site using your Facebook credentials.');
+    $desc = t('Thanks for using LifeEcho - we’ll have your profile up in one moment!');
     $link = l('<span class="fb_button_text">' . $text . '</span>', 'fbconnect/register/create', array('html' => TRUE, 'attributes' => array('class' => array('fb_button fb_button_' . $attr['size']))));
     $button = '<button onclick="location.href=\'' . $url . '\'" id="fblogin" type="button">Log in</button>';
     return '<h3>' . $title . '</h3>' . $desc . $link;
