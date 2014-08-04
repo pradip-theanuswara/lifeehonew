@@ -223,7 +223,7 @@ if(count($community_array) > 0) {
                         <div class="user">
                             <div id="imgdiv1">
                                 <?php
-if(arg(0) == 'user' || arg(0) == 'users') {
+if(arg(0) == 'user' || arg(0) == 'users' || arg(0) == 'dplan') {
 
 print l(t('USER DASHBOARD'),'user', array('attributes' => array('class' => 'dashboard-link'))).'</br>';
 

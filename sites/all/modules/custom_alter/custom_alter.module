@@ -727,7 +727,7 @@ function custom_alter_node_presave($node) {
   $node_count = $results['ncount'];
   
   if($node_count == 1 && arg(1) == 'add') {
-      drupal_set_message(t('Only one Community per member is allowed'), 'error');
+       drupal_set_message(t('Only one Community per member is allowed'), 'error');
       drupal_goto('node/add/community-lifeecho');
   }
 	else{

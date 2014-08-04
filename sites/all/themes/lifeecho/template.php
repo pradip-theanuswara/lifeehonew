@@ -563,10 +563,10 @@ function lifeecho_pager($variables) {
  */
 function lifeecho_date_part_label_year($variables) {
 if($variables['element']['#value']['year'] == '') { // newly added.
-  return t('Year', array(), array('context' => 'datetime'));
+  return t('Type the year', array(), array('context' => 'datetime'));
 }
 else {
-  return t('Year', array(), array('context' => 'datetime'));
+  return t('Type the year', array(), array('context' => 'datetime'));
 }
 }
 

@@ -132,7 +132,7 @@ $beta =  "/sites/all/themes/lifeecho/beta.png";
 <div class="innerPagecontentdiv">
       <?php  if ($messages): ?>
     <div id="messages"><div class="section clearfix">
-      <?php print html_entity_decode($messages); ?>
+      <?php print $messages; ?>
     </div></div> <!-- /.section, /#messages -->
   <?php endif; ?>
     <div class="contentinner">

@@ -219,7 +219,7 @@ if(count($community_array) > 0) {
                         <div class="user">
                             <div id="imgdiv1">
 <?php
-if(arg(0) == 'user' || arg(0) == 'users') {
+if(arg(0) == 'user' || arg(0) == 'users' || arg(0) == 'starteddplan') {
                                 print l(t('USER DASHBOARD'),'user', array('attributes' => array('class' => 'dashboard-link'))).'</br>';
 
 if($community_count !='' || $community_count_admin > 0) { // check logged user has a community
