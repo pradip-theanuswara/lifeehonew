@@ -17,6 +17,27 @@ function lifeecho_preprocess_html(&$variables) {
   // Add conditional stylesheets for IE
   drupal_add_css(path_to_theme() . '/css/ie.css', array('group' => CSS_THEME, 'browsers' => array('IE' => 'lte IE 7', '!IE' => FALSE), 'preprocess' => FALSE));
   drupal_add_css(path_to_theme() . '/css/ie6.css', array('group' => CSS_THEME, 'browsers' => array('IE' => 'IE 6', '!IE' => FALSE), 'preprocess' => FALSE));
+  
+    $description = array(        
+      '#type' => 'html_tag',
+      '#tag' => 'meta',
+      '#attributes' => array(
+        'name' => 'description',
+        'content' => 'LifeEcho is a social media platform designed to connect, equip and multiply Christ-centered discipleship relationships.  Jesus stated, in the Great Commission, "Go therefore and make disciples of all nations, baptizing them in the name of the Father and the Son and the Holy Spirit teaching them to observe all that I commanded you." Matthew 28:19-20.  LifeEcho provides you the tools to harness the power of your story (2 Cor 1:4) by using technology to connect, encourage and equip discipleship relationships within the context of Biblical community.  Christ centered discipleship ensures that your life echoes throughout eternity.',
+      )
+    );
+    drupal_add_html_head($description, 'description');
+	
+	$description = array(        
+      '#type' => 'html_tag',
+      '#tag' => 'meta',
+      '#attributes' => array(
+        'property' => 'og:image',
+        'content' => 'http://www.lifeecho.com/sites/all/themes/lifeecho/logo.png',
+      )
+    );
+    drupal_add_html_head($description, 'description');
+
 }
 
 /**

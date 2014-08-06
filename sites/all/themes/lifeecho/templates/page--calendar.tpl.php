@@ -97,12 +97,7 @@ drupal_add_js(drupal_get_path('theme', 'lifeecho') . '/js/jquery-migrate-1.0.0.j
 <?php global $base_url;
 $beta =  "/sites/all/themes/lifeecho/beta.png";
 ?>
-        <?php if ($logo): ?>
-
-      <a href="#" title="beta" rel="home" id="logo">
-        <img src="<?php echo $beta; ?>" width="50px" height="60px" alt="beta version"/>
-      </a>
-    <?php endif; ?>
+        
 
 <div class="logo"> <?php if ($logo): ?>
       <a href="<?php print $front_page; ?>" title="<?php print t('Home'); ?>" rel="home" id="logo">
