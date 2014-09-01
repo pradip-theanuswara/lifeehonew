@@ -5,6 +5,7 @@ print_r($form['field_what_is_your_preferred_ini']);
 <div id="user_register_form">
 <div class="clear-left"><?php print render($form['account']['name']); ?></div>
 <div class="clear-left"><?php print render($form['account']['mail']); ?></div>
+<div class="select-box"><?php print render($form['field_gender']); ?></div>
 <div class="clear-left"><?php print render($form['field_select_one_of_the_followin']); ?></div>
 <div class="clear-left"><?php print render($form['field_how_closely_belief']); ?></div>
 <div class="clear-left"><?php print render($form['field_how_would_you_describe_you']); ?></div>
