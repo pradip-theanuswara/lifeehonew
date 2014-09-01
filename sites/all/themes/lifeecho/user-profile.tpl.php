@@ -43,6 +43,7 @@ echo $node->body['und'][0]['value']; ?></div>
 <div class="select-box"><?php print render($form['field_user_city']); ?></div>
 <div class="select-box"><?php print render($form['field_user_state']); ?></div>
 <div class="select-box"><?php print render($form['field_user_zip_code']); ?></div>
+<div class="select-box"><?php print render($form['field_gender']); ?></div>
 <div class="select-box"><?php print render($form['field_age']); ?></div>
 <?php }
 /* first login check else case */
