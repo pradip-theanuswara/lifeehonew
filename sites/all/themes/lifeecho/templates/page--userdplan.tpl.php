@@ -201,7 +201,10 @@ if(count($community_array) > 0) {
 <li class="menu-2779 menu-path-user even last "><a target="_blank" href="https://www.youversion.com/" title="Bible"><?php print t('Bible'); ?></a></li>
 </ul></li>
 
-<li class="menu-2770 menuparent  menu-path-front odd"><a title="Disciple"><?php print t('Disciple'); ?></a><ul><li class="menu-2780 menu-path-user  first   odd   last "><a href="<?php echo url('calendar'); ?>" title="Goes to main calendar"><?php print t('Goes to main calendar'); ?></a></li>
+<li class="menu-2770 menuparent  menu-path-front odd"><a title="Disciple"><?php print t('Disciple'); ?></a><ul><li class="menu-2780 menu-path-user  first   even   ">
+<a href="https://biblestudy.lifeecho.com" target="_blank" title="Goes to Curriculum by Downline"><?php print t('Curriculum by Downline'); ?></a>
+</li>
+<li class="menu-2780 menu-path-user  first   odd   last "><a href="<?php echo url('calendar'); ?>" title="Goes to main calendar"><?php print t('Goes to main calendar'); ?></a></li>
 </ul></li>
 
 </ul>
