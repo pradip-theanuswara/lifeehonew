@@ -251,6 +251,7 @@ $form['field_what_do_you_want_to_tell_o']['#access'] = TRUE;
 $form['field_marital_status']['#access'] = TRUE;
 $form['field_children']['#access'] = TRUE;
 $form['field_occupation']['#access'] = TRUE;
+$form['field_gender']['#access'] = TRUE;
 $form['field_age']['#access'] = TRUE;
 $form['field_email_adrs']['#access'] = TRUE;
 $form['field_user_city']['#access'] = TRUE;
@@ -1579,6 +1580,37 @@ $query_custom =   db_select('node', 'n');
 	  $query->where[1]['conditions'][4]['value'] = $nid;
 	}
 
+}
+
+if(in_array($view->name,array("user_matches_accountability","user_matches_disciplee","user_matches_discipler","matches_outside_of_your_community_discipler")))
+{
+
+  $gender=get_user_gender();
+  if($gender!="")
+  {
+    $join = new views_join();
+    $join->table = 'field_data_field_gender';
+    $join->left_table = 'users';
+    $join->field = 'entity_id';
+    $join->left_field = 'uid';
+    $join->type = 'INNER';
+
+   $query->table_queue['ugender'] = array (
+      'alias' => 'ugender',
+      'table' => 'field_data_field_gender',
+      'relationship' => 'users',
+      'join' => $join,
+    );
+   // $query->where[1]['conditions']=array();
+    $query->where[1]['conditions'][]=array(
+      "field"=>"ugender.field_gender_value",
+      "value"=>$gender,
+      "operator"=>"=",
+      );
+    $query->distinct=true;
+  }
+
+ 
 }
 
 }
