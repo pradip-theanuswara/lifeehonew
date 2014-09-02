@@ -640,17 +640,21 @@ return $form;
 
 function check_names_os() {
  
+
 //echo "<script>alert('caching step1')</script>";
  global $user;
  $uid = $user->uid;
  $author = $user->name;
 
+$gender=get_user_gender();
 
 $inputlat = $_GET['inputlat'];
 $inputlng = $_GET['inputlng'];
 
 if($inputlat=='0' AND $inputlng=='0')
 {
+
+//echo "Point 8";
 
 $queryu = db_select('users','u')
 	->condition('uid', $uid, '=' )
@@ -869,8 +873,16 @@ $query1->condition('ogm.gid', $yz,'NOT IN');
 $query1->condition('u.uid', $uid,'!=');
 //print_r($yz);
 //echo ($query1->__toString());
+//echo "Point 6".$gender;
+if($gender!="")
+{
+  $query1->join('field_data_field_gender','ugender','u.uid = ugender.entity_id');
+  $db_and->condition('ugender.field_gender_value', $gender,'=');
+}
+
 
 $results = $query1->execute();
+
 
 /*print '<pre>';
 while($record = $results->fetchAssoc()) {
@@ -1026,6 +1038,7 @@ $query1->condition('ogm.gid', $xy,'NOT IN');
 $query1->condition('u.uid', $uid,'!=');
 
 //echo ($query1->__toString());
+//echo "Point 5".$gender;
 
 $results = $query1->execute();
 
@@ -1193,6 +1206,7 @@ $query3->condition('u.uid', $uid,'!=');
 //print_r($xyzx);
 //echo ($query3->__toString());
 //die();
+//echo "Point 4".$gender;
 $results = $query3->execute();
 $rows_count = $results->rowCount();
 
@@ -1342,6 +1356,7 @@ $query1->condition('ogm.gid', $xy,'NOT IN');
 $query1->condition('u.uid', $uid,'!=');
 
 //echo ($query1->__toString());
+//echo "Point 2".$gender;
 
 $results = $query1->execute();
 
@@ -1509,6 +1524,7 @@ $query3->condition('u.uid', $uid,'!=');
 //print_r($xyzx);
 //echo ($query3->__toString());
 //die();
+//echo "Point 1".$gender;
 $results = $query3->execute();
 $rows_count = $results->rowCount();
 
@@ -1585,7 +1601,7 @@ function check_outside_user_name_match_count($inputlat = '',$inputlng = '',$intr
 
 //function check_user_name_match_count($inputlat = '',$inputlng = '',$intrest = '',$strugles = '',$victory = '',$age = '',$mstat = '',$children = '',$relation = '',$email = '',$church = '',$prox = '',$personality = '') {
 
-
+$gender=get_user_gender();
 
 if(!isset($_GET['age'])) {
  switch($age) {
@@ -1688,6 +1704,8 @@ if(!$prox) {
 		->fields ('fab', array (
 					'field_what_do_you_want_to_tell_o_value'
 				));
+
+
 
 $query2->join('og_membership','ogm','ogm.etid = u.uid');
 $query2->leftjoin('field_data_field_what_do_you_want_to_tell_o','fab','u.uid = fab.entity_id');
@@ -1817,11 +1835,17 @@ $xy=explode(',',$string);
 $query2->condition('ogm.gid', $xy,'NOT IN');
 $query2->condition('u.uid', $uid,'!=');
 
+//echo "Point 1".$gender;
+if($gender!="")
+{
+  $query2->join('field_data_field_gender','ugender','u.uid = ugender.entity_id');
+  $db_and->condition('ugender.field_gender_value', $gender,'=');
+}
+
 
 $results = $query2->execute();
 
  $rows_count = $results->rowCount();
-//($query2->__toString());
 //print "string".$string.'</br>';
 
 
@@ -2005,6 +2029,14 @@ for($i=0;$i<count($getallcommunity['nids']);$i++) {
 $xyzx=explode(',',$string);
 $query2->condition('ogm.gid', $xyzx,'NOT IN');
 $query2->condition('u.uid', $uid,'!=');
+
+//echo "Point 2".$gender;
+if($gender!="")
+{
+  $query2->leftjoin('field_data_field_gender','ugender','u.uid = ugender.entity_id');
+  $db_and->condition('ugender.field_gender_value', $gender,'=');
+}
+
 
 //print_r($xyzx);
 //echo ($query2->__toString());
@@ -2192,11 +2224,40 @@ $xyzx=explode(',',$string);
 $query2->condition('ogm.gid', $xyzx,'NOT IN');
 $query2->condition('u.uid', $uid,'!=');
 
+//echo "Point 3".$gender;
+if($gender!="")
+{
+  $query2->leftjoin('field_data_field_gender','ugender','u.uid = ugender.entity_id');
+  $db_and->condition('ugender.field_gender_value', $gender,'=');
+}
+
+
 //print_r($xyzx);
 //echo ($query2->__toString());
 //die();
+
 $results = $query2->execute();
 $rows_count = $results->rowCount();
 }
 return  $rows_count;
+}
+
+if(!function_exists("get_user_gender"))
+{
+  function get_user_gender()
+  {
+    global $user;
+    $uid = $user->uid;
+    
+    $query = db_select('field_data_field_gender','g');
+    $query->fields('g', array('entity_id', 'field_gender_value'));
+    $query->condition('g.entity_id', $uid); 
+    $result = $query->execute()->fetchAssoc();
+    if(isset($result['field_gender_value']))
+    {
+      $gender=$result['field_gender_value'];
+    }
+    else $gender=null;
+    return $gender;
+  }
 }
