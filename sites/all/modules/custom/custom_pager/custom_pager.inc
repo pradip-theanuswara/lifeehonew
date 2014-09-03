@@ -72,6 +72,13 @@ $stringres = explode(',',$string);
 					'name'
 				));
 
+	$gender=get_user_gender();
+	if($gender!="")
+	{
+  		$query1->join('field_data_field_gender','ugender','users.uid = ugender.entity_id');
+  		$query1->condition('ugender.field_gender_value', $gender,'=');
+	}
+
 //print_r($roleid);
 //print_r(array($string));
 //print_r($not_in_uid);
@@ -105,4 +112,25 @@ $html .= theme('views_mini_pager');
 }
 else { $html = '<div class="view-empty">'.t('There are no potential Contacts.').'</div>'; }
 die ($html);
+}
+
+
+if(!function_exists("get_user_gender"))
+{
+  function get_user_gender()
+  {
+    global $user;
+    $uid = $user->uid;
+    
+    $query = db_select('field_data_field_gender','g');
+    $query->fields('g', array('entity_id', 'field_gender_value'));
+    $query->condition('g.entity_id', $uid); 
+    $result = $query->execute()->fetchAssoc();
+    if(isset($result['field_gender_value']))
+    {
+      $gender=$result['field_gender_value'];
+    }
+    else $gender=null;
+    return $gender;
+  }
 }
