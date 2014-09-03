@@ -1470,6 +1470,14 @@ $rtid = $form_state['values']['invite_select_opt'];
  $requester_id = $form_state['values']['requester_id'];
 //echo "<br/>";
 $requestee_id = $form_state['values']['requestee_id'];
+
+if(userrelationship_match_gender($requester_id,$requestee_id)==false)
+{
+  $message = t("Individuals of the opposite gender can not connect in discipleship relationships on LifeEcho");
+drupal_set_message($message,'warning');
+drupal_goto('user/'.$requestee_id);
+}
+
  //getting rtid 2 here But given 1 for getting into below if loop.
 //echo $rtid;
 if($rtid == 1 || $rtid ==2) {
@@ -1477,12 +1485,6 @@ if($rtid == 1 || $rtid ==2) {
 //echo count(get_logged_user_joined_community_ID())."/"; // joined
 //print lifeecho_og_users_roles(); // user roles
 //die;
-if(userrelationship_match_gender($requester_id,$requestee_id)==false)
-{
-  $message = t("Individuals of the opposite gender can not connect in discipleship relationships on LifeEcho");
-drupal_set_message($message,'warning');
-drupal_goto('user/'.$requestee_id);
-}
 
 if(lifeecho_og_users_roles() == 0) {
 

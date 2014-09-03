@@ -872,14 +872,14 @@ $query1->condition('ogm.gid', $yz,'NOT IN');
 //print "uid".$uid;
 $query1->condition('u.uid', $uid,'!=');
 //print_r($yz);
-//echo ($query1->__toString());
+
 //echo "Point 6".$gender;
 if($gender!="")
 {
   $query1->join('field_data_field_gender','ugender','u.uid = ugender.entity_id');
-  $db_and->condition('ugender.field_gender_value', $gender,'=');
+  $query1->condition('ugender.field_gender_value', $gender,'=');
 }
-
+//echo ($query1->__toString());
 
 $results = $query1->execute();
 
@@ -1839,7 +1839,7 @@ $query2->condition('u.uid', $uid,'!=');
 if($gender!="")
 {
   $query2->join('field_data_field_gender','ugender','u.uid = ugender.entity_id');
-  $db_and->condition('ugender.field_gender_value', $gender,'=');
+  $query2->condition('ugender.field_gender_value', $gender,'=');
 }
 
 
@@ -2033,8 +2033,8 @@ $query2->condition('u.uid', $uid,'!=');
 //echo "Point 2".$gender;
 if($gender!="")
 {
-  $query2->leftjoin('field_data_field_gender','ugender','u.uid = ugender.entity_id');
-  $db_and->condition('ugender.field_gender_value', $gender,'=');
+  $query2->join('field_data_field_gender','ugender','u.uid = ugender.entity_id');
+  $query2->condition('ugender.field_gender_value', $gender,'=');
 }
 
 
@@ -2228,7 +2228,7 @@ $query2->condition('u.uid', $uid,'!=');
 if($gender!="")
 {
   $query2->leftjoin('field_data_field_gender','ugender','u.uid = ugender.entity_id');
-  $db_and->condition('ugender.field_gender_value', $gender,'=');
+  $query2->condition('ugender.field_gender_value', $gender,'=');
 }
 
 
