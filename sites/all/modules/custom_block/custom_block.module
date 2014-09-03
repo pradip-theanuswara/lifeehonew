@@ -1477,6 +1477,13 @@ if($rtid == 1 || $rtid ==2) {
 //echo count(get_logged_user_joined_community_ID())."/"; // joined
 //print lifeecho_og_users_roles(); // user roles
 //die;
+if(userrelationship_match_gender($requester_id,$requestee_id)==false)
+{
+  $message = t("Individuals of the opposite gender can not connect in discipleship relationships on LifeEcho");
+drupal_set_message($message,'warning');
+drupal_goto('user/'.$requestee_id);
+}
+
 if(lifeecho_og_users_roles() == 0) {
 
 $message = t("You must ").l(t('join'),'joincommunity')."/".l(t('start'),'node/add/community-lifeecho').t(" a community and be approved as a discipler by a community administrator before you can offer to disciple someone.");
@@ -1486,6 +1493,8 @@ drupal_goto('user/'.$requestee_id);
 }
 
 }
+
+
 
 //"You must join/start a community and be approved as a discipler by a community administrator before you can offer to disciple someone."
 
@@ -2165,5 +2174,31 @@ function get_count_member_community($uid,$gid) {
 $result = $query->execute();
 $row_count = $result->rowCount();
 return $row_count;
+
+}
+
+function userrelationship_match_gender($user_id1,$user_id2)
+{
+
+  $query = db_select('field_data_field_gender','g');
+  $query->fields('g', array('entity_id', 'field_gender_value'));
+  $query->condition('g.entity_id', $user_id1); 
+  $result = $query->execute()->fetchAssoc();
+  if(isset($result['field_gender_value']))
+  {
+    $gender_1=$result['field_gender_value'];
+  }
+  else $gender_1=null;
+
+  $query = db_select('field_data_field_gender','g');
+  $query->fields('g', array('entity_id', 'field_gender_value'));
+  $query->condition('g.entity_id', $user_id2); 
+  $result = $query->execute()->fetchAssoc();
+  if(isset($result['field_gender_value']))
+  {
+    $gender_2=$result['field_gender_value'];
+  }
+  else $gender_2=null;
+  return $gender_1==$gender_2;
 
 }
