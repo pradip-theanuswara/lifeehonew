@@ -1541,6 +1541,13 @@ $query3->condition('u.uid', $uid,'!=');
 //echo ($query3->__toString());
 //die();
 //echo "Point 1".$gender;
+$gender=get_user_gender();
+if($gender!="")
+{
+  $query3->join('field_data_field_gender','ugender','u.uid = ugender.entity_id');
+  $query3->condition('ugender.field_gender_value', $gender,'=');
+}
+
 $results = $query3->execute();
 $rows_count = $results->rowCount();
 
