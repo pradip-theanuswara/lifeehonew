@@ -1039,6 +1039,11 @@ $query1->condition('u.uid', $uid,'!=');
 
 //echo ($query1->__toString());
 //echo "Point 5".$gender;
+if($gender!="")
+{
+  $query1->join('field_data_field_gender','ugender','u.uid = ugender.entity_id');
+  $query1->condition('ugender.field_gender_value', $gender,'=');
+}
 
 $results = $query1->execute();
 
@@ -1207,6 +1212,12 @@ $query3->condition('u.uid', $uid,'!=');
 //echo ($query3->__toString());
 //die();
 //echo "Point 4".$gender;
+if($gender!="")
+{
+  $query3->join('field_data_field_gender','ugender','u.uid = ugender.entity_id');
+  $query3->condition('ugender.field_gender_value', $gender,'=');
+}
+
 $results = $query3->execute();
 $rows_count = $results->rowCount();
 
@@ -1357,6 +1368,11 @@ $query1->condition('u.uid', $uid,'!=');
 
 //echo ($query1->__toString());
 //echo "Point 2".$gender;
+if($gender!="")
+{
+  $query1->join('field_data_field_gender','ugender','u.uid = ugender.entity_id');
+  $query1->condition('ugender.field_gender_value', $gender,'=');
+}
 
 $results = $query1->execute();
 
