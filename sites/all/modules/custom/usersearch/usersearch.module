@@ -824,6 +824,12 @@ $xy=explode(',',$string);
 $query2->condition('ogm.gid', $xy,'IN');
 $query2->condition('u.uid', $uid,'!=');
 
+$gender=get_user_gender();
+if($gender!="")
+{
+  $query2->leftjoin('field_data_field_gender','ugender','u.uid = ugender.entity_id');
+  $query2->condition('ugender.field_gender_value', $gender,'=');
+}
 
 $results = $query2->execute();
 
@@ -992,6 +998,14 @@ $query3->condition('u.uid', $uid,'!=');
 //print_r($xyzx);
 //echo ($query2->__toString());
 //die();
+
+$gender=get_user_gender();
+if($gender!="")
+{
+  $query3->leftjoin('field_data_field_gender','ugender','u.uid = ugender.entity_id');
+  $query3->condition('ugender.field_gender_value', $gender,'=');
+}
+
 $resultss = $query3->execute();
 $get_count  = $resultss->rowCount();
 
@@ -1155,6 +1169,13 @@ $query2->condition('u.uid', $uid,'!=');
 
 //print_r($xyzx);
 //echo ($query2->__toString());
+
+$gender=get_user_gender();
+if($gender!="")
+{
+  $query2->leftjoin('field_data_field_gender','ugender','u.uid = ugender.entity_id');
+  $query2->condition('ugender.field_gender_value', $gender,'=');
+}
 
 $results = $query2->execute();
 $rows_count = $results->rowCount();
@@ -1323,6 +1344,14 @@ $query3->condition('u.uid', $uid,'!=');
 //print_r($xyzx);
 //echo ($query2->__toString());
 //die();
+
+$gender=get_user_gender();
+if($gender!="")
+{
+  $query3->leftjoin('field_data_field_gender','ugender','u.uid = ugender.entity_id');
+  $query3->condition('ugender.field_gender_value', $gender,'=');
+}
+
 $resultss = $query3->execute();
 $get_count  = $resultss->rowCount();
 
@@ -1486,6 +1515,13 @@ $query2->condition('u.uid', $uid,'!=');
 
 //print_r($xyzx);
 //echo ($query2->__toString());
+
+$gender=get_user_gender();
+if($gender!="")
+{
+  $query2->leftjoin('field_data_field_gender','ugender','u.uid = ugender.entity_id');
+  $query2->condition('ugender.field_gender_value', $gender,'=');
+}
 
 $results = $query2->execute();
 $rows_count = $results->rowCount();
@@ -1806,6 +1842,13 @@ $query2->condition('ogm.gid', $xy,'IN');
 $query2->condition('u.uid', $uid,'!=');
 
 
+$gender=get_user_gender();
+if($gender!="")
+{
+  $query2->leftjoin('field_data_field_gender','ugender','u.uid = ugender.entity_id');
+  $query2->condition('ugender.field_gender_value', $gender,'=');
+}
+
 $results = $query2->execute();
 
  $rows_count = $results->rowCount();
@@ -1997,6 +2040,14 @@ $query2->condition('u.uid', $uid,'!=');
 //print_r($xyzx);
 //echo ($query2->__toString());
 //die();
+
+$gender=get_user_gender();
+if($gender!="")
+{
+  $query2->leftjoin('field_data_field_gender','ugender','u.uid = ugender.entity_id');
+  $query2->condition('ugender.field_gender_value', $gender,'=');
+}
+
 $results = $query2->execute();
 $rows_count = $results->rowCount();
 } 
@@ -2183,8 +2234,38 @@ $query2->condition('u.uid', $uid,'!=');
 //print_r($xyzx);
 //echo ($query2->__toString());
 //die();
+
+//echo "Point 3".$gender;
+$gender=get_user_gender();
+if($gender!="")
+{
+  $query2->leftjoin('field_data_field_gender','ugender','u.uid = ugender.entity_id');
+  $query2->condition('ugender.field_gender_value', $gender,'=');
+}
+
 $results = $query2->execute();
 $rows_count = $results->rowCount();
 } 
 return  $rows_count;
+}
+
+
+if(!function_exists("get_user_gender"))
+{
+  function get_user_gender()
+  {
+    global $user;
+    $uid = $user->uid;
+    
+    $query = db_select('field_data_field_gender','g');
+    $query->fields('g', array('entity_id', 'field_gender_value'));
+    $query->condition('g.entity_id', $uid); 
+    $result = $query->execute()->fetchAssoc();
+    if(isset($result['field_gender_value']))
+    {
+      $gender=$result['field_gender_value'];
+    }
+    else $gender=null;
+    return $gender;
+  }
 }

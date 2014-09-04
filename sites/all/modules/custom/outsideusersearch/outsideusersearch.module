@@ -874,6 +874,7 @@ $query1->condition('u.uid', $uid,'!=');
 //print_r($yz);
 
 //echo "Point 6".$gender;
+$gender=get_user_gender();
 if($gender!="")
 {
   $query1->join('field_data_field_gender','ugender','u.uid = ugender.entity_id');
@@ -1039,6 +1040,7 @@ $query1->condition('u.uid', $uid,'!=');
 
 //echo ($query1->__toString());
 //echo "Point 5".$gender;
+$gender=get_user_gender();
 if($gender!="")
 {
   $query1->join('field_data_field_gender','ugender','u.uid = ugender.entity_id');
@@ -1212,6 +1214,7 @@ $query3->condition('u.uid', $uid,'!=');
 //echo ($query3->__toString());
 //die();
 //echo "Point 4".$gender;
+$gender=get_user_gender();
 if($gender!="")
 {
   $query3->join('field_data_field_gender','ugender','u.uid = ugender.entity_id');
@@ -1368,6 +1371,7 @@ $query1->condition('u.uid', $uid,'!=');
 
 //echo ($query1->__toString());
 //echo "Point 2".$gender;
+$gender=get_user_gender();
 if($gender!="")
 {
   $query1->join('field_data_field_gender','ugender','u.uid = ugender.entity_id');
@@ -1859,6 +1863,7 @@ $query2->condition('ogm.gid', $xy,'NOT IN');
 $query2->condition('u.uid', $uid,'!=');
 
 //echo "Point 1".$gender;
+$gender=get_user_gender();
 if($gender!="")
 {
   $query2->join('field_data_field_gender','ugender','u.uid = ugender.entity_id');
@@ -2054,6 +2059,7 @@ $query2->condition('ogm.gid', $xyzx,'NOT IN');
 $query2->condition('u.uid', $uid,'!=');
 
 //echo "Point 2".$gender;
+$gender=get_user_gender();
 if($gender!="")
 {
   $query2->join('field_data_field_gender','ugender','u.uid = ugender.entity_id');
@@ -2248,6 +2254,7 @@ $query2->condition('ogm.gid', $xyzx,'NOT IN');
 $query2->condition('u.uid', $uid,'!=');
 
 //echo "Point 3".$gender;
+$gender=get_user_gender();
 if($gender!="")
 {
   $query2->leftjoin('field_data_field_gender','ugender','u.uid = ugender.entity_id');
