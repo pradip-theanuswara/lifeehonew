@@ -1583,18 +1583,19 @@ $query_custom =   db_select('node', 'n');
 }
 
 $block_id_array=array(
-  //"discipler_user_dashboard_left_sidebar",
-  //"disciplee_user_dashboard_left_sidebar",
-  //"accountability_user_dashboard_left_sidebar",
   "user_matches_accountability",
   "user_matches_disciplee",
   "user_matches_discipler",
-  "matches_outside_of_your_community_discipler"
+  "matches_outside_of_your_community_displee",
+  "matches_outside_of_your_community_discipler",
+  "matches_outside_of_your_community"
   );
+
 if(in_array($view->name,$block_id_array))
 {
 
   $gender=get_user_gender();
+
   if($gender!="")
   {
     $join = new views_join();
@@ -1602,7 +1603,7 @@ if(in_array($view->name,$block_id_array))
     $join->left_table = 'users';
     $join->field = 'entity_id';
     $join->left_field = 'uid';
-    $join->type = 'INNER';
+    $join->type = 'LEFT';
 
    $query->table_queue['ugender'] = array (
       'alias' => 'ugender',
