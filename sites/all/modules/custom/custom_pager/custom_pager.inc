@@ -119,7 +119,7 @@ if(!function_exists("get_user_gender"))
 {
   function get_user_gender()
   {
-    global $user;
+  	global $user;
     $uid = $user->uid;
     
     $query = db_select('field_data_field_gender','g');
