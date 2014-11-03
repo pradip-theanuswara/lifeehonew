@@ -487,14 +487,19 @@ $get_count = check_user_name_match_count($inputlat,$inputlng,$intrestins,$strugl
 //echo $get_count;
 //die;
 //$get_count = check_outside_user_name_match_count($ag);
-
-if($get_count==1)
-$finals = $get_count.' MATCH AVAILABLE!';
-else if($get_count>=2)
-$finals = $get_count.' MATCHES AVAILABLE!';
+if($get_count===false)
+{
+  $finals="";
+}
 else
-$finals=' 0 MATCHES AVAILABLE!';
-
+{
+  if($get_count==1)
+  $finals = $get_count.' MATCH AVAILABLE!';
+  else if($get_count>=2)
+  $finals = $get_count.' MATCHES AVAILABLE!';
+  else
+  $finals=' 0 MATCHES AVAILABLE!';
+}
   $form['sandbox_ajax_dropdown']['wrapper']['cityins'] = array(
     '#markup' => "<script>
   var elem = document.getElementById('totalcounts');
@@ -1606,6 +1611,11 @@ die ($html);
 * function to get count - always '>=' for distance calculation.
 */
 function check_user_name_match_count($inputlat = '',$inputlng = '',$intrest='',$strugles='',$victory='',$age='',$mstat='',$children='',$relation='',$email='',$church='',$prox='',$personality = '',$name='',$Occupation='',$zip='') {
+
+  if(!($inputlat || $inputlng || $intrest || $strugles || $victory || $age  || $mstat || $children || $relation|| $email || $church || $prox || $personality || $name || $Occupation || $zip))
+  {
+    return false;
+  }
 
 //function check_user_name_match_count($inputlat = '',$inputlng = '',$intrest = '',$strugles = '',$victory = '',$age = '',$mstat = '',$children = '',$relation = '',$email = '',$church = '',$prox = '',$personality = '') {
 

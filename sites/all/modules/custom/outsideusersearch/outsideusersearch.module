@@ -528,13 +528,19 @@ $uid = $user->uid;
 $get_count = check_outside_user_name_match_count($inputlat,$inputlng,$intrest,$strugle,$victorys,$ag,$mstatus,$childrens,$rel,$eml,$ch,$proximitie,$personalit,$nam,$Occ,$zipcod);
 
 //$get_count = check_outside_user_name_match_count($ag);
-
+if($get_count===false)
+{
+$final="";
+}
+else
+{
 if($get_count==1)
 $final = $get_count.' MATCH AVAILABLE!';
 else if($get_count>=2)
 $final = $get_count.' MATCHES AVAILABLE!';
 else
 $final=' 0 MATCHES AVAILABLE!';
+}
 
   $form['sandbox_ajax_dropdown']['wrapper']['citys'] = array(
     '#markup' => "<script>
@@ -1625,6 +1631,11 @@ die ($html);
 */
 
 function check_outside_user_name_match_count($inputlat = '',$inputlng = '',$intrest='',$strugles='',$victory='',$age='',$mstat='',$children='',$relation='',$email='',$church='',$prox='',$personality = '',$name='',$Occupation='',$zip='') {
+
+  if(!($inputlat || $inputlng || $intrest || $strugles || $victory || $age  || $mstat || $children || $relation|| $email || $church || $prox || $personality || $name || $Occupation || $zip))
+  {
+    return false;
+  }
 
 //function check_user_name_match_count($inputlat = '',$inputlng = '',$intrest = '',$strugles = '',$victory = '',$age = '',$mstat = '',$children = '',$relation = '',$email = '',$church = '',$prox = '',$personality = '') {
 
