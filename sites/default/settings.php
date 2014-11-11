@@ -221,10 +221,10 @@ $databases = array (
   array (
     'default' => 
     array (
-      'database' => 'd205edea3659849df81632a13e0c26eb2',//'d3730c48832dd4beb81700e74421a1acf',
-      'username' => 'uuwMogetjMyJm',//'u0OaZVNiwZAUC',
-      'password' => 'pdzKf4bHnrgFu',//'p7Fp0LeuOaiQ5',
-      'host' => 'us01-user01.crtks9njytxu.us-east-1.rds.amazonaws.com',// '10.0.17.107',
+      'database' => 'lifeechotest',//'d3730c48832dd4beb81700e74421a1acf',
+      'username' => 'root',//'u0OaZVNiwZAUC',
+      'password' => 'Progger123!',//'p7Fp0LeuOaiQ5',
+      'host' => 'localhost',// '10.0.17.107',
       'port' => '3306',
       'driver' => 'mysql',
       'prefix' => '',
