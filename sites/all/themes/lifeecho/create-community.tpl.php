@@ -95,7 +95,7 @@
         </div>
      <div class="communityfield_row">
         <?php
-        print t('<b>In order to create a LifeEcho Community your organization must belive:</b>');
+        print t('<b>In order to create a LifeEcho Community your organization must believe:</b>');
         print ('<br/>');
        // print t('(Scroll to the bottom to enable checkbox)</b>')
         ?>
