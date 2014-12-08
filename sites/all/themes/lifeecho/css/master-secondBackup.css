@@ -208,6 +208,7 @@ color:#FFFFFF;
 
 #edit-field-beliveaccept span.form-required,#edit-field-accept span.form-required {
 display:none;
+font-weight:bold; /*08-12*/
 }
 
 #edit-field-beliveaccept {
