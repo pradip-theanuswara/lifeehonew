@@ -1,4 +1,4 @@
-﻿.clear
+.clear
 {
     clear: both;
 
@@ -3345,6 +3345,7 @@ font-size:13px;
 
 #userrelationship-form .form-required {
 display:none;
+font-weight:bold; /*08-12*/
 }
 
 .accept_btn {
