@@ -1337,7 +1337,7 @@ $getnodeauthorid_query =   db_select('node', 'n')
 
 }
 
-// Available disciplees block on lifeecho-community node page.
+// Available disciples block on lifeecho-community node page.
 
 if($view->name == 'available_disciplees') {
    $query_custom =   db_select('node', 'n');
