@@ -32,6 +32,7 @@ fieldset legend {
 }
 .region-header .form-required {
   color: #eee;
+  font-weight:bold; /*08-12*/
 }
 #search-block-form input.form-submit:hover,
 #search-block-form input.form-submit:focus,
