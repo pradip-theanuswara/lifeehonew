@@ -16,7 +16,7 @@ $items = array();
 	);
 
 	$items['community/joindiscipler/%'] = array(
-	  'title' => 'Join discipler to disciplees community',
+	  'title' => 'Join discipler to disciples community',
 	  'type' => MENU_CALLBACK,
 	  'page callback' => 'drupal_get_form',
 	  'page arguments' => array('_joindisciplercommunity'),
