@@ -1223,7 +1223,7 @@ $dbid = db_insert('community_proximity')
 
 if($node->type == 'community_content') {
 
-// The Mudcat Admin has posted a message: “Evangelism Training #1�?
+// The Mudcat Admin has posted a message: â€œEvangelism Training #1â€?
 
 db_insert('lifeecho_alerts')
 ->fields(array(
@@ -1241,7 +1241,7 @@ drupal_goto('node/add/community-content');
 
 if($node->type == 'community_video') {
 
-// The Mudcat Admin has posted a video: “Evangelism Training #1�?
+// The Mudcat Admin has posted a video: â€œEvangelism Training #1â€?
 
 db_insert('lifeecho_alerts')
 ->fields(array(
@@ -1308,7 +1308,7 @@ $getnodeauthorid_query =   db_select('node', 'n')
 
 }
 
-// Available disciplees block on lifeecho-community node page.
+// Available disciples block on lifeecho-community node page.
 
 if($view->name == 'available_disciplees') {
    $query_custom =   db_select('node', 'n');
@@ -1804,7 +1804,7 @@ function custom_alter_node_update($node) {
 global $user;
 if(($node->type == 'community_video') && ($user->uid == 1)) {
 
-// The Mudcat Admin has shared a video: “Evangelism Training #1�?
+// The Mudcat Admin has shared a video: â€œEvangelism Training #1â€?
 /*
 db_insert('lifeecho_alerts')
 ->fields(array(
