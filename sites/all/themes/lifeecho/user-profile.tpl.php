@@ -120,7 +120,6 @@ print render($form['field_youtube_record_response']);
 
 	function popup()
 	{
-		
 		//var poupwin=null;
 		poupwin = window.open("<?php echo base_path(); ?>?q=youtube-upload", "mywindow", 'width=414,height=320,scrollbars=no,dialog=yes,maximize=no,alwaystop=yes,copyhistory= no,resizable=no,toolbar=no,titlebar=0,location=yes,menubar=no,directories=no,status=1,left=200,top=200');
 		//poupwin.moveTo(50, 50);	
