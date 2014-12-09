@@ -1924,5 +1924,4 @@ $nodeinfo['nids'][] = $record['nid'];
 $nodeinfo['titles'][] = $record['title'];
 }
    return $nodeinfo;
-
 }
