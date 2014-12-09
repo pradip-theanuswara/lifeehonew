@@ -117,7 +117,7 @@
        <div class="communityfield_chkbox">
         <?php
        
-        print render($form['field_beliveaccept']);
+        print render($form['field_believeaccept']);
         ?>
     </div>
     <div class="communityfield_chktxt">
