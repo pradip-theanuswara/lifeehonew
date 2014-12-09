@@ -175,6 +175,5 @@ if(arg(2) != 'edit') { ?>
     <div class="communityBtn"><?php print drupal_render($form['actions']['submit']); ?></div>
     <div class="clear">
     </div>
-
     <div style="display:none"><?php print drupal_render_children($form); ?></div>
 </div>
