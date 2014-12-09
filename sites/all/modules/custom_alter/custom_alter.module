@@ -2197,7 +2197,6 @@ function get_adminrole_bycommunity($communityid,$uid) {
 }
 
 function get_non_accountableuser($uid = '') {
-
    $nodeinfo = array();
    global $user;
    $nodes = get_allcommunities_forauser(); 
