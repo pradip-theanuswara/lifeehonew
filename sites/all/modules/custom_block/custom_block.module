@@ -2202,5 +2202,4 @@ function userrelationship_match_gender($user_id1,$user_id2)
   }
   else $gender_2=null;
   return $gender_1==$gender_2;
-
 }
