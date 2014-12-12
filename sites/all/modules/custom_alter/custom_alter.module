@@ -746,7 +746,7 @@ function custom_alter_node_presave($node) {
             ->fields(array(
             'alerttype' => 'invite_members',
             'alertto' => $user->uid, // id of the user
-            'alerttext' => "You don't have any community members yet.  Go to the 'Invitations' button to build your community.", 
+            // 'alerttext' => "You don't have any community members yet.  Go to the 'Invitations' button to build your community.", // 12-12
             'alertfrom' => $user->uid,
 	    'alerttime' => REQUEST_TIME,
 	    'accept_status' => 0,    // need to accept user relationship request
