@@ -131,7 +131,7 @@ $beta =  "/sites/all/themes/lifeecho/beta.png";
         <?php if($user->uid != 0 && arg(2) != 'edit') { ?>
 		<ul id="main-nav">
 
-<?php //print render($page['userprofile_onpagemenu']); ?}>
+<?php //print render($page['userprofile_onpagemenu']); ?>
 
 <div class="region region-userprofile-onpagemenu">
     <div id="block-nice-menus-1" class="block block-nice-menus">
