@@ -96,7 +96,7 @@ $beta =  "/sites/all/themes/lifeecho/beta.png";
 ?>
         
 
-<div class="logo"> lifeecho<?php if ($logo): ?>
+<div class="logo"> <?php if ($logo): ?>
       <a href="<?php print $front_page; ?>" title="<?php print t('Home'); ?>" rel="home" id="logo">
         <img src="<?php print $logo; ?>" alt="<?php print t('Home'); ?>" />
       </a>
@@ -250,6 +250,14 @@ if(count($community_array) > 0) {
     </div>
 </div>
 
+  <div class="lifefooter">
+    <div class="qdisc">
+      <?php print render($page['footer']); ?>
+    </div>
+
+
+  </div>
+  
 </div>
 
 </div>
