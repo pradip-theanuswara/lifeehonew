@@ -173,12 +173,12 @@ if(arg(2) != 'edit') { ?>
 <?php } ?>
     <div class="clear">
     </div>
-	<script type="text/javascript">
-	  $('.communityBtn').click(function() {
-	    alert('hi');
-	  });
-	</script>
-    <div class="communityBtn"><?php print drupal_render($form['actions']['submit']); ?></div>
+	<script>
+function test() {
+    alert('ji');
+}
+</script>
+    <div class="communityBtn" onclick="test()"><?php print drupal_render($form['actions']['submit']); ?></div>
     <div class="clear">
     </div>
     <div style="display:none"><?php print drupal_render_children($form); ?></div>
