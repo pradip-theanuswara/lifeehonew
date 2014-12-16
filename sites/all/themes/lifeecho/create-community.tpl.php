@@ -180,7 +180,7 @@ function test() {
     document.getElementById('clientsidevalidation-community-lifeecho-node-form-errors').innerHTML = str2;
 }
 </script>
-    <div class="communityBtn" onclick="test()"><?php print drupal_render($form['actions']['submit']); ?></div>
+    <div class="communityBtn"><?php print drupal_render($form['actions']['submit']); ?></div>
     <div class="clear">
     </div>
     <div style="display:none"><?php print drupal_render_children($form); ?></div>
