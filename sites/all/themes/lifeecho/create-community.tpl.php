@@ -176,7 +176,8 @@ if(arg(2) != 'edit') { ?>
 	<script>
 function test() {
     var str1 = document.getElementById('clientsidevalidation-community-lifeecho-node-form-errors').innerHTML;
-    alert(str1);
+    var str2 = str1.replace('Belive accept field is required.', 'Belive accept field is required.');
+    document.getElementById('clientsidevalidation-community-lifeecho-node-form-errors').innerHTML = str2;
 }
 </script>
     <div class="communityBtn" onclick="test()"><?php print drupal_render($form['actions']['submit']); ?></div>
