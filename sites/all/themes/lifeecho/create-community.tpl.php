@@ -175,7 +175,8 @@ if(arg(2) != 'edit') { ?>
     </div>
 	<script>
 function test() {
-    alert('ji');
+    var str1 = document.getElementById('clientsidevalidation-community-lifeecho-node-form-errors').innerHTML;
+    alert(str1);
 }
 </script>
     <div class="communityBtn" onclick="test()"><?php print drupal_render($form['actions']['submit']); ?></div>
