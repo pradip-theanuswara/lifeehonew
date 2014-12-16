@@ -141,7 +141,7 @@ $form['relationship_tab2'] = array(
         '#options' => array(
          0 => t(' '),
          108 => t('Discipler'),
-	 109 => t('Disciplee'),
+	 109 => t('Disciple'),
 	 110 => t('Accountability'),
        ),
        '#default_value' => '',
