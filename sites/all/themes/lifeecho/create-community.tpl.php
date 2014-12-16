@@ -117,7 +117,7 @@
        <div class="communityfield_chkbox">
         <?php
        
-        print render($form['field_beliveaccept']);
+         print render($form['field_beliveaccept']);
         ?>
     </div>
     <div class="communityfield_chktxt">
@@ -128,7 +128,7 @@
         global $user;
  print t('I , ' . $user->name . ' and my organization, agree with and believe the Statement of Faith above.  ');
         ?>
-<span title="This field is required." class="form-required">*</span>
+<span title="This field is required." class="form-required" style="font-weight:bold;">*</span>
     </div>
         <div class="clear">
     </div>
@@ -154,7 +154,7 @@
         <?php
         print t('By checking this box you agree to all LifeEcho Terms and Conditions. ');
         ?>
-<span title="This field is required." class="form-required">*</span>
+<span title="This field is required." class="form-required" style="font-weight:bold;">*</span>
     </div>
     <div class="clear">
     </div>
