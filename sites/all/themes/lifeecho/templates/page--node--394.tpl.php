@@ -124,6 +124,7 @@ $beta =  "/sites/all/themes/lifeecho/beta.png";
    
 </ul>
 </div>
+<div class="second">
 <div class="inner1communitybanner">              
      <div class="thumb-container">
 <?php print render($page['userprofilemybio']); ?>
@@ -244,16 +245,18 @@ if(count($community_array) > 0) {
     </div>
 </div>
 
+<div class="lifefooter">
+    <div class="qdisc">
+      <?php print render($page['footer']); ?>
+</div>
+</div>	
 <div id="video">
     <div class="footerlist">
      <?php  print render($page['videofooter']); ?>
     </div>
 </div>
 
-  <div class="lifefooter">
-    <div class="qdisc">
-      <?php print render($page['footer']); ?>
-    </div>
+  
 
 
   </div>
