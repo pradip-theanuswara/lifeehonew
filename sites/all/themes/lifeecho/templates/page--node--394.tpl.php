@@ -201,7 +201,7 @@ if(count($community_array) > 0) {
 		
 
             </div>
-<div class="innerPagecontentdiv">
+<div class="innerPagecontentdiv" style="width:963px;">
       <?php if ($messages): ?>
     <div id="messages"><div class="section clearfix">
       <?php print $messages; ?>
