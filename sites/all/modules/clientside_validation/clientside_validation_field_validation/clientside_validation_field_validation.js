@@ -22,6 +22,7 @@
     attach: function () {
       $(document).bind('clientsideValidationInitialized', function(){
         for (var formid in Drupal.myClientsideValidation.validators) {
+          alert('hi');  /*vijay*/
           if (Drupal.myClientsideValidation.validators.hasOwnProperty(formid)) {
             Drupal.myClientsideValidation.validators[formid].settings.showErrors = function (errorMap, errorList) {
               this.defaultShowErrors();
