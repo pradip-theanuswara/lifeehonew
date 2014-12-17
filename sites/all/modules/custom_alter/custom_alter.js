@@ -75,10 +75,10 @@ $('#post_video_wrapper').show();
 $('#belief_container').scroll(function() {
 buffer = 30 // # of pixels from bottom of scroll to fire your function. Can be 0
 if (belief_container.offsetHeight + belief_container.scrollTop >= belief_container.scrollHeight) {
-	
-$('#edit-field-beliveaccept-und').text().replace('Belive','Believe'); // Vijay 
+$('#edit-field-beliveaccept-und').attr("disabled", false);
 
-$('#edit-field-beliveaccept-und').attr("disabled", true); // true should be false
+
+$('#edit-field-beliveaccept-und').text().replace('Belive','Vijay'); // Vijay 
   }
 });
 
@@ -99,7 +99,7 @@ $('#edit-field-accept-und').attr("disabled", false);
   }
 });
 
-$('#edit-field-accept-und').attr("disabled", true);
+//$('#edit-field-accept-und').attr("disabled", true);
 
 if($('#edit-field-accept-und').attr('checked')) {
 $('#edit-field-accept-und').attr("disabled", false);
