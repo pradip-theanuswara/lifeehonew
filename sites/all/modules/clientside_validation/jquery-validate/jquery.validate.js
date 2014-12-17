@@ -126,10 +126,8 @@ $.extend($.fn, {
 			case "add":
 				$.extend(existingRules, $.validator.normalizeRule(argument));
 				staticRules[element.name] = existingRules;
-				if (argument.messages) {
-					settings.messages[element.name] = $.extend( settings.messages[element.name], argument.messages );
-					  alert(argument.messages);
-					}
+				if (argument.messages) 
+					settings.messages[element.name] = $.extend( settings.messages[element.name], argument.messages );				
 				break;
 			case "remove":
 				if (!argument) {
