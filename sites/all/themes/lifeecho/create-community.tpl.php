@@ -78,6 +78,12 @@
         ?>
     </div>
             </div>
+	<div class="communityfield_chkbox">
+        <?php
+       
+         print render($form['field_accept']);
+        ?>
+    </div>
     <div class="clear">
     </div>
              
@@ -173,13 +179,7 @@ if(arg(2) != 'edit') { ?>
 <?php } ?>
     <div class="clear">
     </div>
-	<script>
-function test() {
-    var str1 = document.getElementById('clientsidevalidation-community-lifeecho-node-form-errors').innerHTML;
-    var str2 = str1.replace('Belive accept field is required.', 'Belive accept field is required.');
-    document.getElementById('clientsidevalidation-community-lifeecho-node-form-errors').innerHTML = str2;
-}
-</script>
+	
     <div class="communityBtn"><?php print drupal_render($form['actions']['submit']); ?></div>
     <div class="clear">
     </div>
