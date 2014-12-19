@@ -261,7 +261,7 @@ print l(t('ADMIN DASHBOARD'),'community/dashboard');
   <?php print $messages; ?>
   <?php endif; ?>
                  <div class="Userdashboard">
-<?php //print render($page['content']); ?>
+<?php print render($page['content']); ?>
 <div id="tabs" class="discipleship_101_container">
 <ul>
 <li><a href="#tabs-1"><?php print t('COMMUNITY POSTS'); ?></a></li>
