@@ -232,18 +232,18 @@ if(arg(0) == 'user' || arg(0) == 'users'|| arg(0) == 'discipleship-101') {
 
                             print l(t('USER DASHBOARD'),'user', array('attributes' => array('class' => 'dashboard-link'))).'</br>';
 
-if($community_count !='' || $community_count_admin > 0) {  // check logged user has a community
+//if($community_count !='' || $community_count_admin > 0) {  // check logged user has a community
 print l(t('ADMIN DASHBOARD'),'community/dashboard');
-}
+//}
 
 }
 else {
 
 print l(t('USER DASHBOARD'),'user').'</br>';
 
-if($community_count !='' || $community_count_admin > 0) {  // check logged user has a community
+//if($community_count !='' || $community_count_admin > 0) {  // check logged user has a community
 print l(t('ADMIN DASHBOARD'),'community/dashboard');
-}
+//}
 
 }
                                 ?>
