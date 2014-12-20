@@ -274,7 +274,7 @@ print render($page['content']);
 </div>
 <div id="tabs-2">
 <?php
-//print render($page['discipleship_share_video']);
+//print render($page['discipleship_share_video']); // testing 
 print render($page['content']);
 ?>
 </div>
