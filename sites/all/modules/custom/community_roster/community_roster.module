@@ -165,7 +165,7 @@ if($select_one_of_followin_value == 5 || $select_one_of_followin_value == 6 || $
 $check_status = 'disabled="disabled"';
 }
 if(get_adminrole_bycommunity($node->gid,$node->etid)){
-	$admin_ischeck='';
+	$admin_ischeck='checked="checked"';
 }
 $id=$node->gid;
 		$rows[] = array(
