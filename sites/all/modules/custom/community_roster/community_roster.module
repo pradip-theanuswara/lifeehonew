@@ -42,7 +42,10 @@ function community_members() {
 	$block = module_invoke('community_roster', 'block_view', 'roster_community_info');
 	return ('<div>'.render($block['content']).'</div><div id="table-container" class="community_list_div"></div>');
 }
-
+function get_user_joined_community_ID_by_userID($eid,$gid)
+{
+	return 'ok';
+}
 function _community_members_callback () {	
 	header("Content-type: text/html");
 	header("Expires: Wed, 29 Jan 1975 04:15:00 GMT");
