@@ -107,7 +107,7 @@ $rows[] =
       
     );
 }
-print_r($results);
+print_r($rows);
 die(); //vijay
 	foreach ($results as $node) {
 	$check_status = '';
