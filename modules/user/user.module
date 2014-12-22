@@ -1218,7 +1218,7 @@ function user_account_form_validate($form, &$form_state) {
     $account = $form['#user'];
     //echo '<pre>';
     //print_r($form_state['input']);die();
-    
+    print_r($account);die();
     if($form_state['input']['roles']['7']=='7')
     {
         if($form_state['input']['field_how_do_want_to_use_lif']['und']['108']!='108' || $form_state['input']['field_how_closely_do_belief']['und']!='7' || $form_state['input']['field_select_one_of_followin']['und']!='4')
