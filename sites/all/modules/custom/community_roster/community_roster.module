@@ -107,8 +107,8 @@ $rows[] =
       
     );
 }
-echo "<pre>";
-print_r($rows);
+//echo "<pre>";
+//print_r($rows);
 	foreach ($results as $node) {
 	$check_status = '';
 	$community_name = $node->gid;
