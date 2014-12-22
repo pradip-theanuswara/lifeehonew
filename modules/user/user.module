@@ -1216,8 +1216,17 @@ function user_validate_current_pass(&$form, &$form_state) {
 function user_account_form_validate($form, &$form_state) {
   if ($form['#user_category'] == 'account' || $form['#user_category'] == 'register') {
     $account = $form['#user'];
-    echo '<pre>';
-    print_r($form_state['input']);die();
+    //echo '<pre>';
+    //print_r($form_state['input']);die();
+    
+    if($form_state['input']['roles']['7']=='7')
+    {
+        if($form_state['input']['field_how_do_want_to_use_lif']['und']['108']!='108' || $form_state['input']['field_how_closely_do_belief']['und']!='7' || $form_state['input']['field_how_closely_do_belief']['und']!='4')
+        {
+          form_set_error('roles', t('User Not Fullfill the condition for Role %roles ', array('%roles' => 'discipler')));
+        }
+    }
+    
     // Validate new or changing username.
     if (isset($form_state['values']['name'])) {
       if ($error = user_validate_name($form_state['values']['name'])) {
