@@ -107,7 +107,8 @@ $rows[] =
       
     );
 }
-
+print_r($results);
+die(); //vijay
 	foreach ($results as $node) {
 	$check_status = '';
 	$community_name = $node->gid;
