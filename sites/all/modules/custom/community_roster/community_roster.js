@@ -100,7 +100,7 @@ function change_stat(groupId,userId,changeType){
 		success: function(data, status, request) {
 			var html = data;
 			jQuery('#cg_check'+userId).next('.save_gif_outer').hide();
-	
+	               alert(url);
 
 		}
 	});	
