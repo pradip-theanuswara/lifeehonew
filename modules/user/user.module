@@ -1217,7 +1217,7 @@ function user_account_form_validate($form, &$form_state) {
   if ($form['#user_category'] == 'account' || $form['#user_category'] == 'register') {
     $account = $form['#user'];
     echo '<pre>';
-    print_r($form_state);die();
+    print_r($form_state['input']);die();
     // Validate new or changing username.
     if (isset($form_state['values']['name'])) {
       if ($error = user_validate_name($form_state['values']['name'])) {
