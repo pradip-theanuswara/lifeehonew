@@ -1218,7 +1218,7 @@ function user_account_form_validate($form, &$form_state) {
     $account = $form['#user'];
     //echo '<pre>';
     //print_r($form_state['input']);die();
-    print_r($account);die();
+    //print_r($account);die();
     if($form_state['input']['roles']['7']=='7')
     {
         
