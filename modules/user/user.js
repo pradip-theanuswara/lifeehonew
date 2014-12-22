@@ -5,11 +5,6 @@
  * that its confirmation is correct.
  */
  
- $('#edit-submit').click(function(){
-
-      alert();
-});
- 
 Drupal.behaviors.password = {
   attach: function (context, settings) {
     var translate = settings.password;
