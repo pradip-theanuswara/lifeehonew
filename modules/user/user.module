@@ -1221,8 +1221,8 @@ function user_account_form_validate($form, &$form_state) {
     //print_r($account);die();
     if($form_state['input']['roles']['7']=='7')
     {
-        /*print_r(db_select('lifeecho_og_discipler')->fields('lifeecho_og_discipler', array('uid'))->condition('uid', $account->uid, '<>')->range(0, 1)->execute()->fetchField());die();
-        if ((bool) db_select('lifeecho_og_discipler')->fields('lifeecho_og_discipler', array('uid'))->condition('uid', $account->uid, '<>')->range(0, 1)->execute()->fetchField()) {
+        print_r(db_select('lifeecho_og_discipler')->fields('lifeecho_og_discipler', array('uid'))->condition('uid', $account->uid, '=')->execute()->fetchField());die();
+       /* if ((bool) db_select('lifeecho_og_discipler')->fields('lifeecho_og_discipler', array('uid'))->condition('uid', $account->uid, '=')->execute()->fetchField()) {
         //form_set_error('name', t('The name %name is already taken.', array('%name' => $form_state['values']['name'])));
       }
       else{
