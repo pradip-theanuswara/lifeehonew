@@ -1221,13 +1221,13 @@ function user_account_form_validate($form, &$form_state) {
     //print_r($account);die();
     if($form_state['input']['roles']['7']=='7')
     {
-        print_r(db_select('lifeecho_og_discipler')->fields('lifeecho_og_discipler', array('uid'))->condition('uid', $account->uid, '=')->execute()->fetchField());die();
-       /* if ((bool) db_select('lifeecho_og_discipler')->fields('lifeecho_og_discipler', array('uid'))->condition('uid', $account->uid, '=')->execute()->fetchField()) {
+        //print_r(db_select('lifeecho_og_discipler')->fields('lifeecho_og_discipler', array('uid'))->condition('uid', $account->uid, '=')->execute()->fetchField());die();
+        if ((bool) db_select('lifeecho_og_discipler')->fields('lifeecho_og_discipler', array('gid'))->condition('uid', $account->uid, '=')->execute()->fetchField()) {
         //form_set_error('name', t('The name %name is already taken.', array('%name' => $form_state['values']['name'])));
       }
       else{
         form_set_error('roles', t('User Not Fullfill the condition for Role %roles ', array('%roles' => 'discipler')));
-      }*/
+      }
         
         if($form_state['input']['field_how_do_want_to_use_lif']['und']['108']!='108' || $form_state['input']['field_how_closely_do_belief']['und']!='7' || $form_state['input']['field_select_one_of_followin']['und']!='4')
         {
