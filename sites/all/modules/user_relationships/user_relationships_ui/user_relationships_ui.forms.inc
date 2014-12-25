@@ -13,6 +13,7 @@ module_load_include('inc', 'user_relationships_ui', 'user_relationships_ui.actio
  * @param $form_values array $form['values'] when called from form_alter()
  */
 function user_relationships_ui_request_form($requester, $requestee, $form_values = NULL) {
+echo 'ok';die();
   $relationships = user_relationships_get_requestable_rtypes($requester, $requestee);
   // Try to find out desired relationship type.
   $default_relationship = NULL;
@@ -82,7 +83,7 @@ function user_relationships_ui_request_ajax($requestee) {
 function user_relationships_ui_request($form, &$form_state, $requestee) {
   global $user;
   $requester = $user;
-
+echo 'ok1';die();
   drupal_set_title(t('Request relationship'));
 
   $script = '<script type="text/javascript">setTimeout(\'Drupal.user_relationships_ui.hidePopup()\', 10000);</script>';
