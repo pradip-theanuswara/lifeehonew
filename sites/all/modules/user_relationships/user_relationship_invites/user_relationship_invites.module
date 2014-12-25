@@ -32,6 +32,7 @@ function user_relationship_invites_get_invite($code) {
  */
 function user_relationship_invites_form_invite_form_alter(&$form, $form_state) {
   global $user;
+  print_r($form_state);die();
   $new_user = drupal_anonymous_user();
   // Allow all user relationships for this user. Permission checks will be done
   // later.
