@@ -90,6 +90,7 @@ function user_relationship_invites_invite_form_validate($form, &$form_state) {
  */
 function user_relationship_invites_invite_send($invite) {
   global $user;
+  print_r($invite);die();
   if (!empty($user->rtid)) {
     db_insert('user_relationship_invites')
       ->fields(array(
