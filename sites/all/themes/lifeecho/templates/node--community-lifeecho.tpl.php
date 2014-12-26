@@ -143,11 +143,25 @@ if($node->uid == $user->uid) { ?>
 
 </div>
           </div>
-          <div class="clear"></div>
-          <div class="community_aboutus"><b><?php  print t('ABOUT US: '); ?></b><?php if(isset($node->field_tell_us_about_your_communi['und'][0])) { echo $node->field_tell_us_about_your_communi[''.$node->language.''][$node->tnid]['value']; } ?></div>
-          <div class="clear"></div>
-          <div class="community_faith"><b><?php print t('STATEMENT OF FAITH: '); ?></b><?php if(isset($node->field_what_is_your_statement_of_[''.$node->language.''][$node->tnid])) { echo $node->field_what_is_your_statement_of_[''.$node->language.''][$node->tnid]['value']; } ?></div>         
+          
       </div>
   </div>
 
-  
+  <?php
+    // Remove the "Add new comment" link on the teaser page or if the comment
+    // form is being displayed on the same page.
+    if ($teaser || !empty($content['comments']['comment_form'])) {
+      unset($content['links']['comment']['#links']['comment-add']);
+    }
+    // Only display the wrapper div if there are links.
+    $links = render($content['links']);
+    if ($links):
+  ?>
+    <div class="link-wrapper">
+      <?php print $links; ?>
+    </div>
+  <?php endif; ?>
+
+  <?php print render($content['comments']); ?>
+
+</div>
