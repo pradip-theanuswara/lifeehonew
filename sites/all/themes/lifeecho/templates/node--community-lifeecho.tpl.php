@@ -166,5 +166,5 @@ if($node->uid == $user->uid) { ?>
   <?php endif; ?>
 
   <?php print render($content['comments']); ?>
-
+<?php echo 'ok'; ?>
 </div>
