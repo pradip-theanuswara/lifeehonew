@@ -143,7 +143,10 @@ if($node->uid == $user->uid) { ?>
 
 </div>
           </div>
-          
+         <div class="clear"></div>
+          <div class="community_aboutus"><b><?php  print t('ABOUT US: '); ?></b><?php if(isset($node->field_tell_us_about_your_communi['und'][0])) { echo $node->field_tell_us_about_your_communi[''.$node->language.''][$node->tnid]['value']; } ?></div>
+          <div class="clear"></div>
+          <div class="community_faith"><b><?php print t('STATEMENT OF FAITH: '); ?></b><?php if(isset($node->field_what_is_your_statement_of_[''.$node->language.''][$node->tnid])) { echo $node->field_what_is_your_statement_of_[''.$node->language.''][$node->tnid]['value']; } ?></div>          
       </div>
   </div>
 
