@@ -1486,14 +1486,14 @@ if($rtid == 1 || $rtid ==2) {
 //print lifeecho_og_users_roles(); // user roles
 //die;
 
-//comment by kishan patel
-/*if(lifeecho_og_users_roles() == 0) {
+
+if(lifeecho_og_users_roles() == 0) {
 
 $message = t("You must ").l(t('join'),'joincommunity')."/".l(t('start'),'node/add/community-lifeecho').t(" a community and be approved as a discipler by a community administrator before you can offer to disciple someone.");
 drupal_set_message($message,'warning');
 drupal_goto('user/'.$requestee_id);
 
-}*/
+}
 
 }
 
@@ -1511,11 +1511,12 @@ $key_value = array_keys($res);
 if($existing == 0) {
 
 if($rtid == 1) { // request is type of 'discipler'
-
+//comment by kishan patel
+/*
 if(count($res) == 0) {
 // redirect user to a comunity request form.
 drupal_goto('community/joindiscipler/'.$requestee_id);
-}
+}*/
 
 } // rtid check end
 
