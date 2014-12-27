@@ -1385,7 +1385,7 @@ if($ct>=1) {
 if(count($role_string) > 0 && $user->uid <> 0) {
 
 	if (in_array('108-109', $role_string , true)) {
-	$options[1] = t('Offer to Disciple '.$user_info->name);
+	$options[1] = t('Offer to Disciple kishan'.$user_info->name);
 	}
 
 	if (in_array('109-108', $role_string , true)) {
