@@ -1465,7 +1465,7 @@ $a3 = array();
 $a4 = array();
 $key_value = '';
 $res = array();
-print_r($form_state['values']['invite_select_opt']);die();
+
 $rtid = $form_state['values']['invite_select_opt'];
  $requester_id = $form_state['values']['requester_id'];
 //echo "<br/>";
@@ -1486,13 +1486,14 @@ if($rtid == 1 || $rtid ==2) {
 //print lifeecho_og_users_roles(); // user roles
 //die;
 
-if(lifeecho_og_users_roles() == 0) {
+//comment by kishan patel
+/*if(lifeecho_og_users_roles() == 0) {
 
 $message = t("You must ").l(t('join'),'joincommunity')."/".l(t('start'),'node/add/community-lifeecho').t(" a community and be approved as a discipler by a community administrator before you can offer to disciple someone.");
 drupal_set_message($message,'warning');
 drupal_goto('user/'.$requestee_id);
 
-}
+}*/
 
 }
 
