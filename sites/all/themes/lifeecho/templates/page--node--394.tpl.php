@@ -128,7 +128,7 @@ $beta =  "/sites/all/themes/lifeecho/beta.png";
      <div class="thumb-container">
 
 </div>    
-        <?php if($user->uid != 0 && arg(2) != 'edit') { ?>
+        <?php if($user->uid != 0 && arg(2) != 'edit' && arg(0)!='donate') { ?>
 		<ul id="main-nav">
 
 <?php //print render($page['userprofile_onpagemenu']); ?>
