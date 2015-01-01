@@ -128,75 +128,7 @@ $beta =  "/sites/all/themes/lifeecho/beta.png";
      <div class="thumb-container">
 
 </div>    
-        <?php echo arg(2);die(); if($user->uid != 0 && arg(2) != 'edit' && arg(0)!='donate') { ?>
-		<ul id="main-nav">
 
-<?php //print render($page['userprofile_onpagemenu']); ?>
-
-<div class="region region-userprofile-onpagemenu">
-    <div id="block-nice-menus-1" class="block block-nice-menus">
-<div class="content">
-    <ul class="nice-menu nice-menu-down" id="nice-menu-1">
-
-<li class="menu-2767 menuparent  menu-path-front   even  home"><a  title="Create" <?php if(check_miniprofile_status() == FALSE ) { ?>style="background-position: center top;" <?php } ?>><?php print t('Create'); ?></a><ul><li class="menu-2771 menu-path-user  first   odd  "><a href="<?php echo url('user/'.$user->uid.'/edit'); ?>" title="Complete profile"><?php print t('Complete Profile'); ?></a></li>
-<li class="menu-2772 menu-path-front   even   last "><a href="<?php echo url('user/'.$user->uid.'/edit'); ?>" title="Edit Profile"><?php print t('Edit Profile'); ?></a></li>
-</ul></li>
-
-<li class="menu-2768 menuparent  menu-path-front  first   odd  "><a href="<?php echo base_path(); ?>" title="Connect" <?php if(count(get_logged_user_joined_community_ID()) == 0) { ?>style="background-position: center top;" <?php } ?>><?php print t('Connect'); ?></a><ul>
-<?php if($community_count > 0) { // check logged user has a community */ ?>
-<li class="menu-2773 menu-path-community-dashboard  first odd"><a href="#" title="My Community"><?php print t('My Community'); ?></a></li>
-<ul id="child-community-display" style="display: block; visibility:visible">
-<?php $community_array = get_logged_user_joined_community_ID();
-if(count($community_array) > 0) {
-for($i=0;$i<count($community_array);$i++) {
-$pieces = explode('/',$community_array[$i]);
-?>
-<li><a href="<?php echo url('node/'.$pieces[0]).'?sparam=1'; ?>" title="My Community"><?php 
-if(get_logged_user_community_ID() == $pieces[0])
-echo $pieces[1].' (created) ';
-else
-echo $pieces[1]; 
-?></a></li>
-<?php
-} } ?>
-</ul>
-<?php
-} // END community count check
-?>
-<li class="menu-2774 menu-path-user-matches   even  "><a href="<?php echo url('userlist/matches'); ?>" title="My Matches"><?php print t('My Matches'); ?></a></li>
-<li class="menu-2775 menu-path-searches   odd  ">
-<?php
-if(count($community_array) > 0) {
-?>
-<a href="<?php echo url('searches'); ?>" title="Search"><?php print t('Search'); ?></a>
-<?php
-}else{
-?>
-<a href="<?php echo url('searches').'#tabs-2'; ?>" title="Search"><?php print t('Search'); ?></a>
-<?php
-}
-?>
-</li>
-<li class="menu-2776 menu-path-joincommunity   even  "><a href="<?php echo url('joincommunity'); ?>" title="Join a Community"><?php print t('Join a Community'); ?></a></li>
-<li class="menu-2777 menu-path-node-add-community-lifeecho   odd   last "><a href="<?php echo url('node/add/community-lifeecho'); ?>" title="Create a Community"><?php print t('Create a Community'); ?></a></li>
-</ul></li>
-
-<li class="menu-2769 menuparent  menu-path-front   even   last "><a href="<?php echo base_path(); ?>" title="Equip" <?php if(count(get_logged_user_joined_community_ID()) == 1) { ?>style="background-position: center top;" <?php } ?>><?php print t('Equip'); ?></a><ul><li class="menu-2778 menu-path-user  first   odd  "><a href="<?php echo url('discipleship-101'); ?>" title="Discipleship Training Center"><?php print t('Discipleship Training Center'); ?></a></li>
-<li class="menu-2779 menu-path-user even last "><a target="_blank" href="https://www.youversion.com/" title="Bible"><?php print t('Bible'); ?></a></li>
-</ul></li>
-
-<li class="menu-2770 menuparent  menu-path-front odd"><a title="Disciple"><?php print t('Disciple'); ?></a><ul><li class="menu-2780 menu-path-user  first   even   ">
-<a href="https://biblestudy.lifeecho.com" target="_blank" title="Goes to Curriculum by Downline"><?php print t('Curriculum by Downline'); ?></a>
-</li>
-<li class="menu-2780 menu-path-user  first   odd   last "><a href="<?php echo url('calendar'); ?>" title="Goes to main calendar"><?php print t('Goes to main calendar'); ?></a></li>
-</ul></li>
-
-</ul>
-  </div>
-</div>
-  </div>
-		</ul>
-	<?php } ?>	
 		
 
             </div>
