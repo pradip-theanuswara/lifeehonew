@@ -7,7 +7,7 @@
  * The doctype, html, head and body tags are not in this template. Instead they
  * 
 
-can be found in the html.tpl.php template normally located in the
+*can be found in the html.tpl.php template normally located in the
  * modules/system directory.
  *
  * Available variables:
