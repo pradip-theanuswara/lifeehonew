@@ -137,7 +137,7 @@
 <li class="menu-2776 menu-path-joincommunity   even  "><a href="<?php echo base_path(); ?>joincommunity" title="Join a Community">Join a Community</a></li>
 <li class="menu-2777 menu-path-node-add-community-lifeecho   odd   last "><a href="<?php echo base_path(); ?>node/add/community-lifeecho" title="Create a Community">Create a Community</a></li>
 </ul></li>
-<li class="menu-2767 menuparent  menu-path-front   even  ">Create<ul><li class="menu-2771 menu-path-user  first   odd  "><a href="<?php echo base_path(); ?>user" title="Complete profile">Complete Profile</a></li>
+<li class="menu-2767 menuparent  menu-path-front   even  ">Createe<ul><li class="menu-2771 menu-path-user  first   odd  "><a href="<?php echo base_path(); ?>user" title="Complete profile">Complete Profile</a></li>
 <li class="menu-2772 menu-path-front   even   last "><a href="<?php echo base_path(); ?>user/<?php echo $user->uid; ?>/edit" title="Edit Profile">Edit Profile</a></li>
 </ul></li>
 <li class="menu-2770 menuparent  menu-path-front   odd  "><a>Disciple</a><ul><li class="menu-2780 menu-path-user  first   odd   last "><a href="<?php echo base_path(); ?>user" title="Goes to main calendar">Goes to main calendar</a></li>
