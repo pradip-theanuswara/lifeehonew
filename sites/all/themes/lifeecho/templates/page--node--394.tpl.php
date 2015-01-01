@@ -126,7 +126,7 @@ $beta =  "/sites/all/themes/lifeecho/beta.png";
 </div>
 <div class="inner1communitybanner">              
      <div class="thumb-container">
-<?php print render($page['userprofilemybio']); ?>
+
 </div>    
         <?php if($user->uid != 0 && arg(2) != 'edit') { ?>
 		<ul id="main-nav">
