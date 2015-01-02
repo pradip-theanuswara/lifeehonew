@@ -79,10 +79,7 @@
     </div>
             </div>
 	<div class="communityfield_chkbox">
-        <?php
-       
-         print render($form['field_accept']);
-        ?>
+        
     </div>
     <div class="clear">
     </div>
