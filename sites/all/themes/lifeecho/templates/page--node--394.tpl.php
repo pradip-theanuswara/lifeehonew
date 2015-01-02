@@ -131,7 +131,7 @@ $beta =  "/sites/all/themes/lifeecho/beta.png";
 </div>    
   </div>
 
-<div class="innerPagecontentdiv">
+<div class="innerPagecontentdiv" style="width:962px;">
       <?php if ($messages): ?>
     <div id="messages"><div class="section clearfix">
       <?php print $messages; ?>
