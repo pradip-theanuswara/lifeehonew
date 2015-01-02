@@ -170,13 +170,11 @@ if(get_adminrole_bycommunity($node->gid,$node->etid)){
 $id=$node->gid;
 
 //code by kishan for created community list
-$created_community = db_select('node', 'n')
-    ->fields('n')
+$created_community = db_select('node', 'cr')
+    ->fields('cr')
     ->condition('uid', $node->uid,'=')
-    
-    ->execute()
-    ->fetchAssoc();
-    echo $created_community->rowCount();die();
+    ->execute();
+   // print_r($created_community);die();
 if($created_community->rowCount()>0)
 {
 $created_commun_list='<ul>';
