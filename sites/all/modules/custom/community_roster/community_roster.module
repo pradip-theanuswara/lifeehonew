@@ -180,7 +180,7 @@ if($created_community->rowCount()>0)
 $created_commun_list='<ul>';
 	foreach($created_community as $c_community)
 	{
-		$created_commun_list.='<li>'.l($c_community->title,'content/'.$c_community->nid).'</li>';
+		$created_commun_list.='<li>'.l($c_community->title,'content/'.$c_community->vid).'</li>';
 	}
 	$created_commun_list.='</ul>';
 }
