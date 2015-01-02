@@ -79,7 +79,11 @@
     </div>
             </div>
 	<div class="communityfield_chkbox">
-        
+	<!--comment by kishan-->
+       <--?php
+       
+         print render($form['field_accept']);
+        ?> 
     </div>
     <div class="clear">
     </div>
