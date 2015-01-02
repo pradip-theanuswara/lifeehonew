@@ -183,7 +183,7 @@ $created_commun_list='<ul>';
 	{
 		$created_commun_list.='<li><a href="content/.$c_community->title.">'.$c_community->title.'</a></li>';
 	}
-	$created_commun_list='</ul>';
+	$created_commun_list.='</ul>';
 }
 		$rows[] = array(
 					'data' => array(
