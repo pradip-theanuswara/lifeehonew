@@ -66,7 +66,7 @@ function _community_members_callback () {
 	$query = db_select('og_membership', 'm')
 	->groupBy('u.uid');
 				$query->join('users', 'u', 'm.etid = u.uid'); //JOIN node with users
-				$query->join('node', 'g', 'g.nid = m.gid OR g.uid=u.uid'); //JOIN group with users
+				//$query->join('node', 'g', 'g.nid = m.gid OR g.uid=u.uid'); //JOIN group with users
 				$query->leftJoin('fbconnect_users','fb','fb.uid = u.uid');
 				$query->leftJoin('lifeecho_og_discipler','lod','lod.uid = u.uid');
 				$query->leftjoin('og_users_roles','og','og.uid = u.uid');
