@@ -124,14 +124,13 @@ $beta =  "/sites/all/themes/lifeecho/beta.png";
    
 </ul>
 </div>
+<div class="second">
 <div class="inner1communitybanner">              
      <div class="thumb-container">
 
 </div>    
+  </div>
 
-		
-
-            </div>
 <div class="innerPagecontentdiv">
       <?php if ($messages): ?>
     <div id="messages"><div class="section clearfix">
@@ -175,20 +174,22 @@ $beta =  "/sites/all/themes/lifeecho/beta.png";
     </div><!-- /.section, /#content -->
     </div>
 </div>
-
-<div id="video">
-    <div class="footerlist">
-     <?php  print render($page['videofooter']); ?>
-    </div>
-</div>
-
-  <div class="lifefooter">
+<div class="lifefooter">
     <div class="qdisc">
       <?php print render($page['footer']); ?>
     </div>
 
 
   </div>
+  
+</div>  
+<div id="video">
+    <div class="footerlist">
+     <?php  print render($page['videofooter']); ?>
+    </div>
+</div>
+
+  
   
 </div>
 
