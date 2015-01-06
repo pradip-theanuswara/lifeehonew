@@ -168,7 +168,7 @@ if(get_adminrole_bycommunity($node->gid,$node->etid)){
 	$admin_ischeck='checked="checked"';
 }
 $id=$node->gid;
-
+print_r($user->uid);die();
 //code by kishan for created community list
 $created_community = db_select('node', 'cr')
     ->fields('cr')
