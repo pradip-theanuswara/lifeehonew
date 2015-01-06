@@ -179,7 +179,7 @@ if($created_community->rowCount()>0)
 {
 $created_commun_list='<ul>';
 while($record = $created_community->fetchAssoc()) {
-if($user->uid==$node->uid)
+if($user->uid!=$node->uid)
 {
 	continue;
 }
