@@ -168,7 +168,7 @@ if(get_adminrole_bycommunity($node->gid,$node->etid)){
 	$admin_ischeck='checked="checked"';
 }
 $id=$node->gid;
-print_r($user->uid);die();
+
 //code by kishan for created community list
 $created_community = db_select('node', 'cr')
     ->fields('cr')
@@ -179,6 +179,10 @@ if($created_community->rowCount()>0)
 {
 $created_commun_list='<ul>';
 while($record = $created_community->fetchAssoc()) {
+if($user->uid==$node->uid)
+{
+	continue;
+}
 $created_commun_list.= '<li>'.l($record['title'],'node/'.$record['nid']).'</li>';
 }
 	/*foreach($created_community as $c_community)
