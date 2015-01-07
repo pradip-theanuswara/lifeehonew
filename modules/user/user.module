@@ -1217,8 +1217,8 @@ function user_account_form_validate($form, &$form_state) {
   if ($form['#user_category'] == 'account' || $form['#user_category'] == 'register') {
     $account = $form['#user'];
     //echo '<pre>';
-    print_r($form_state['input']);die();
-    print_r($account);die();
+    //print_r($form_state['input']);die();
+    //print_r($account);die();
     if($form_state['input']['roles']['7']=='7')
     {
         //print_r(db_select('lifeecho_og_discipler')->fields('lifeecho_og_discipler', array('uid'))->condition('uid', $account->uid, '=')->execute()->fetchField());die();
