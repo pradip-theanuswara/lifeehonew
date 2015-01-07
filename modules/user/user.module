@@ -1235,6 +1235,14 @@ function user_account_form_validate($form, &$form_state) {
           form_set_error('roles', t('User Not Fullfill the condition for Role %roles ', array('%roles' => 'discipler')));
         }
     }
+    else
+    {
+      if($form_state['input']['field_how_do_want_to_use_lif']['und']['108']!='108' || $form_state['input']['field_how_closely_do_belief']['und']!='7' || $form_state['input']['field_select_one_of_followin']['und']!='4')
+        {
+          
+          form_set_error('roles', t('User Not Fullfill the condition for Role %roles ', array('%roles' => 'discipler')));
+        }
+    }
     
     // Validate new or changing username.
     if (isset($form_state['values']['name'])) {
