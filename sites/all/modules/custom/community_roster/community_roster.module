@@ -173,9 +173,10 @@ $id=$node->gid;
 $created_community = db_select('node', 'cr')
     ->fields('cr')
     ->condition('uid', $node->uid,'=')
+    ->condition('type','community_lifeecho','=')
     ->execute();
    // print_r($created_community);die();
-/*if($created_community->rowCount()>0)
+if($created_community->rowCount()>0)
 {
 $created_commun_list='<ul>';
 while($record = $created_community->fetchAssoc()) {
@@ -187,7 +188,7 @@ $created_commun_list.= '<li>'.l($record['title'],'node/'.$record['nid']).'</li>'
 }
 	
 	$created_commun_list.='</ul>';
-}*/
+}
 		$rows[] = array(
 					'data' => array(
 							 '<img src="http://graph.facebook.com/'.$node->fbuid.'/picture?type=large&amp;width=75&amp;height=75">',
