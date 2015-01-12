@@ -185,10 +185,7 @@ if($user->uid!=$node->uid)
 }
 $created_commun_list.= '<li>'.l($record['title'],'node/'.$record['nid']).'</li>';
 }
-	/*foreach($created_community as $c_community)
-	{l($record['title'],'node/'.$record['nid'])
-		$created_commun_list.='<li>'.l($c_community->title,'content/'.$c_community->title).'</li>';
-	}*/
+	
 	$created_commun_list.='</ul>';
 }*/
 		$rows[] = array(
