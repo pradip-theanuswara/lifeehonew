@@ -205,7 +205,7 @@ if($joined_community->rowCount()>0)
 {
 $joined_commun_list='<ul>';
 while($record = $joined_community->fetchAssoc()) {
-echo $record['gid'];die();
+
 if($user->uid!=$node->uid)
 {
 	continue;
@@ -214,8 +214,9 @@ $j_c_name=db_select('node','n')
 	->condition('nid',$record['gid'])
 	->fields('n')
 	->execute();
-	
-$joined_commun_list.= '<li>'.l($j_c_name['title'],'node/'.$j_c_name['nid']).'</li>';
+	while($record1 = $j_c_name->fetchAssoc()) {
+$joined_commun_list.= '<li>'.l($record1['title'],'node/'.$record1['nid']).'</li>';
+}
 }
 	
 	$joined_commun_list.='</ul>';
