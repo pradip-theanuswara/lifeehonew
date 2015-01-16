@@ -215,6 +215,10 @@ $j_c_name=db_select('node','n')
 	->fields('n')
 	->execute();
 	while($record1 = $j_c_name->fetchAssoc()) {
+	if($user->uid!=$node->uid)
+{
+	continue;
+}
 $joined_commun_list.= '<li>'.l($record1['title'],'node/'.$record1['nid']).'</li>';
 }
 }
