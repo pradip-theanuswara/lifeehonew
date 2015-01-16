@@ -170,10 +170,14 @@ if(get_adminrole_bycommunity($node->gid,$node->etid)){
 $id=$node->gid;
 
 //code by kishan for created community list
+$or = db_or();
+$or->condition('cr.uid', $node->uid,'=');
+$or->condition('m.etid',$node->uid,'=');
+
 $created_community = db_select('node', 'cr')
     ->leftJoin('og_membership', 'm', 'cr.nid = m.gid')
     ->fields('cr')
-    ->condition(db_or()->condition('cr.uid', $node->uid,'=')->condition('m.etid',$node->uid,'='))
+    ->condition($or)
     
     ->condition('cr.type','community_lifeecho','=')
     ->execute();
@@ -196,7 +200,7 @@ $created_commun_list.= '<li>'.l($record['title'],'node/'.$record['nid']).'</li>'
 							 '<img src="http://graph.facebook.com/'.$node->fbuid.'/picture?type=large&amp;width=75&amp;height=75">',
 						  l($node->name, 'user/'. $node->etid),
 						  '<input name="cgm_check_dicipler'.$id.'" type="checkbox" '.$dicipler_ischeck.' onclick="change_stat_first(this,'.$status.','.$a.','.$node->gid.','.$node->etid.',\'dicipler\')"'.$check_status.' class="cg_check_dicipler12" id="cg_check_dicipler'.$id.'" />'.t('Discipler').'',
-						   '<input type="checkbox" '.$admin_ischeck.' onclick="change_stat('.$node->gid.','.$node->etid.',\'admin\')"'.$check_status.' class="cg_check_admin" id="cg_check'.$node->etid.'" />'.t('Admin').'<span class="save_gif_outer"><img  class="save_gif" src="'.base_path().drupal_get_path('module', 'community_roster').'/saving.gif" /></span>',''.get_user_joined_community_ID_by_userID($node->etid,$node->gid).'')
+						   '<input type="checkbox" '.$admin_ischeck.' onclick="change_stat('.$node->gid.','.$node->etid.',\'admin\')"'.$check_status.' class="cg_check_admin" id="cg_check'.$node->etid.'" />'.t('Admin').'<span class="save_gif_outer"><img  class="save_gif" src="'.base_path().drupal_get_path('module', 'community_roster').'/saving.gif" /></span>',''.get_user_joined_community_ID_by_userID($node->etid,$node->gid).$created_commun_list.'')
  // '.l(t("Joined Communities"),"node/11",array("attributes" => array("class" => "showdialog"))).'<div id="terms_dialog"></div>
 		);
 	}
