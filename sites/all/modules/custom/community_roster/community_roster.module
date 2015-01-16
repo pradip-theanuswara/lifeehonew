@@ -177,7 +177,7 @@ $or->condition('m.etid',$node->uid,'=');
 $created_community = db_select('node', 'cr')
     ->leftJoin('og_membership', 'm', 'cr.nid = m.gid')
     ->fields('cr')
-    //->condition($or)
+    ->condition('cr.uid', $node->uid,'=')
     
     ->condition('cr.type','community_lifeecho','=')
     ->execute();
