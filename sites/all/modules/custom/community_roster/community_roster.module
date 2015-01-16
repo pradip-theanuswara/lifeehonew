@@ -172,12 +172,13 @@ $id=$node->gid;
 //code by kishan for created community list
 
 $created_community = db_select('node', 'cr')
-    ->leftJoin('og_membership', 'm', 'cr.nid = m.gid')
-    ->condition('cr.uid', $node->uid,'=')
-    ->condition('cr.type','community_lifeecho','=')
+    //->leftJoin('og_membership', 'm', 'cr.nid = m.gid')
+    ->condition('uid', $node->uid,'=')
+    ->condition('type','community_lifeecho','=')
     ->fields('cr')
     ->execute();
    // print_r($created_community);die();
+   $created_commun_list='';
 if($created_community->rowCount()>0)
 {
 $created_commun_list='<ul>';
