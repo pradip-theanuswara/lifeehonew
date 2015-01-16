@@ -210,7 +210,7 @@ while($record = $joined_community->fetchAssoc()) {
 {
 	continue;
 }*/
-if($node->gid==$record['gid'])
+if($node->gid!=$record['gid'])
 {
 	continue;
 }
