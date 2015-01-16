@@ -213,7 +213,7 @@ $j_c_name=db_select('node','n')
 	->condition('nid',$record['gid'])
 	->fields('n')
 	->execute();
-	print_r($j_c_name);die();
+	print_r($record);die();
 $joined_commun_list.= '<li>'.l($j_c_name['title'],'node/'.$j_c_name['nid']).'</li>';
 }
 	
