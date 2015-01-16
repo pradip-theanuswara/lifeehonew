@@ -171,12 +171,15 @@ $id=$node->gid;
 
 //code by kishan for created community list
 $created_community = db_select('node', 'cr')
+    $query->join('og_membership', 'm', 'cr.nid = m.gid');
     ->fields('cr')
-    ->condition('uid', $node->uid,'=')
-    ->condition('type','community_lifeecho','=')
+    ->condition(db_or()->condition('cr.uid', $node->uid,'=')
+    ->condition('m.etid',$node->uid,'='))
+    
+    ->condition('cr.type','community_lifeecho','=')
     ->execute();
    // print_r($created_community);die();
-/*if($created_community->rowCount()>0)
+if($created_community->rowCount()>0)
 {
 $created_commun_list='<ul>';
 while($record = $created_community->fetchAssoc()) {
@@ -188,7 +191,7 @@ $created_commun_list.= '<li>'.l($record['title'],'node/'.$record['nid']).'</li>'
 }
 	
 	$created_commun_list.='</ul>';
-}*/
+}
 		$rows[] = array(
 					'data' => array(
 							 '<img src="http://graph.facebook.com/'.$node->fbuid.'/picture?type=large&amp;width=75&amp;height=75">',
