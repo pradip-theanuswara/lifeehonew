@@ -227,6 +227,21 @@ $joined_commun_list.= '<li>'.l($record1['title'],'node/'.$record1['nid']).'</li>
 	$joined_commun_list.='</ul>';
 }
 
+//code for disipler check box --by kishan
+$check_status = 'disabled="disabled"';
+$role_result = db_select('users_roles', 'ur')
+    ->condition('rid','7','=')
+    ->condition('uid', $node->uid,'=')
+    ->fields('ur')
+    ->execute();
+if($role_result->rowCount()>0)
+{
+	$dicipler_ischeck='checked="checked"';
+}
+else
+{
+	$dicipler_ischeck='';
+}
 		$rows[] = array(
 					'data' => array(
 							 '<img src="http://graph.facebook.com/'.$node->fbuid.'/picture?type=large&amp;width=75&amp;height=75">',
