@@ -56,7 +56,7 @@ function change_stat_first(b,a,groupId,userId,changeType){
 		data: {group_id: groupId,user_id: userId,change_type:changeType},
 		dataType: 'text',
 		error: function(request, status, error) {
-			//alert(status);
+			alert(status);
 		},
 		success: function(data, status, request) {
 			var html = data;
