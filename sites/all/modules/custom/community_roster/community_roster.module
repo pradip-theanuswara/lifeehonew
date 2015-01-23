@@ -25,7 +25,12 @@ function community_roster_menu() {
 	  'page callback' => 'change_role',
 	  'access arguments' => array('access content')
 	); 
-
+	$items['community/change_disipler']=array(
+		'title'=>'community member disipler role change',
+		'type'=>MENU_CALLBACK,
+		'page callback'=>'change_disipler',
+		'access arguments'=>array('access content')
+	);
 	  return $items;
 }
 
@@ -170,7 +175,10 @@ if(get_adminrole_bycommunity($node->gid,$node->etid)){
 $id=$node->gid;
 
 //code by kishan for created community list
-
+if($select_one_of_followin_value!=4 || $how_closely_do_belief_tid!=7 || $a!=108)
+{
+$disipler_disable='disabled="disabled"';
+}
 /*$created_community = db_select('node', 'cr')
     //->leftJoin('og_membership', 'm', 'cr.nid = m.gid')
     ->condition('uid', $node->uid,'=')
@@ -246,7 +254,7 @@ else
 					'data' => array(
 							 '<img src="http://graph.facebook.com/'.$node->fbuid.'/picture?type=large&amp;width=75&amp;height=75">',
 						  l($node->name, 'user/'. $node->etid),
-						  '<input name="cgm_check_dicipler'.$id.'" type="checkbox" '.$dicipler_ischeck.$node->rid.' onclick="change_stat_first(this,'.$status.','.$a.','.$node->gid.','.$node->etid.',\'dicipler\')"'.$check_status.' class="cg_check_dicipler12" id="cg_check_dicipler'.$id.'" />'.t('Discipler').'',
+						  '<input name="cgm_check_dicipler'.$id.'" type="checkbox" '.$dicipler_ischeck.$node->rid.' onclick="change_stat_first(this,'.$status.','.$a.','.$node->gid.','.$node->etid.',\'dicipler\')"'.$dicipler_ischeck.' class="cg_check_dicipler12" id="cg_check_dicipler'.$id.'" />'.t('Discipler').'',
 						   '<input type="checkbox" '.$admin_ischeck.' onclick="change_stat('.$node->gid.','.$node->etid.',\'admin\')"'.$check_status.' class="cg_check_admin" id="cg_check'.'" />'.t('Admin').'<span class="save_gif_outer"><img  class="save_gif" src="'.base_path().drupal_get_path('module', 'community_roster').'/saving.gif" /></span>',''.get_user_joined_community_ID_by_userID($node->etid,$node->gid).$joined_commun_list.'')
  // '.l(t("Joined Communities"),"node/11",array("attributes" => array("class" => "showdialog"))).'<div id="terms_dialog"></div>
 		);
@@ -383,6 +391,14 @@ $query = db_insert('og_users_roles')
 		
 		}  
 	
+	}
+	
+	//change disipler --by kishan
+	function change_disipler()
+	{
+		if (!isset($_POST['change_type']) || !isset($_POST['user_id']) ) {
+    die('fghjfh'.$_POST['user_id']);
+   }
 	}
 
 /*
