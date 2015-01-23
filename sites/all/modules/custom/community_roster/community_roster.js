@@ -47,7 +47,7 @@ function initializeTable() {
 //passing a from first check.
 
 function change_stat_first(b,a,groupId,userId,changeType){
-	
+	alert(userId);
  jQuery('#cg_check'+userId).next('.save_gif_outer').show();
 	jQuery.ajax({
 		cache: false,
