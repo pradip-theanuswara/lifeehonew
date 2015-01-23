@@ -423,7 +423,7 @@ $query = db_insert('og_users_roles')
 		->fields(array(
   			'rid' => '7',
   			'uid' => $user_id,
-  		'gid' => $_POST['group_id']
+  		
 			))
 		->execute();
     }
