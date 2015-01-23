@@ -400,9 +400,33 @@ $query = db_insert('og_users_roles')
 	//change disipler --by kishan
 	function change_disipler()
 	{
-		if (!isset($_POST['change_type']) || !isset($_POST['user_id']) ) {
+		if (!isset($_POST['change_type']) || !isset($_POST['user_id']) || !isset($_POST['group_id']) ) {
     die('fghjfh'.$_POST['user_id']);
    }
+   $user_id=$_POST['user_id'];
+   $role_result = db_select('users_roles', 'ur')
+    ->condition('rid','7','=')
+    ->condition('uid', $user_id,'=')
+    ->fields('ur')
+    ->execute();
+    if($role_result->rowCount()>0)
+    {
+    	$num_deleted = db_delete('users_roles')
+  ->condition('rid','7','=')
+    ->condition('uid',$user_id,'=')
+  ->execute();
+    }
+    else
+    {
+    	$nid = db_insert('users_roles') 
+		->fields(array(
+  			'rid' => '7',
+  			'uid' => $user_id,
+  		'gid' => $_POST['group_id']
+			))
+		->execute();
+    }
+    die(a1);
 	}
 
 /*
