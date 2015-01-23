@@ -228,7 +228,7 @@ $joined_commun_list.= '<li>'.l($record1['title'],'node/'.$record1['nid']).'</li>
 }
 
 //code for disipler check box --by kishan
-$check_status = 'disabled="disabled"';
+//$check_status = 'disabled="disabled"';
 $role_result = db_select('users_roles', 'ur')
     ->condition('rid','7','=')
     ->condition('uid', $node->uid,'=')
