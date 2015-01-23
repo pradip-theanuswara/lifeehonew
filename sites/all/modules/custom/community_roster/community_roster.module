@@ -179,6 +179,10 @@ if($select_one_of_followin_value!=4 || $how_closely_do_belief_tid!=7 || $a!=108)
 {
 $disipler_disable='disabled="disabled"';
 }
+else
+{
+$disipler_disable='';
+}
 /*$created_community = db_select('node', 'cr')
     //->leftJoin('og_membership', 'm', 'cr.nid = m.gid')
     ->condition('uid', $node->uid,'=')
