@@ -404,6 +404,7 @@ $query = db_insert('og_users_roles')
     die('fghjfh'.$_POST['user_id']);
    }
    $user_id=$_POST['user_id'];
+   echo $user_id;die();
    $role_result = db_select('users_roles', 'ur')
     ->condition('rid','7','=')
     ->condition('uid', $user_id,'=')
